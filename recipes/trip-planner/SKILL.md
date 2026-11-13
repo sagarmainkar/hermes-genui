@@ -36,8 +36,9 @@ Ooty cold in December?") just answer; no board needed.
 4. **Lay it out** with one `show_blocks` call, in this order:
    - a `heading` with the place and dates;
    - the photo strip via `{"type": "include", "id": "<find_photos id>"}`;
-   - `tiles` of 4-8 places to pick, each with an `ask` like "Add Gion to day 2" (an `icon`, and an `image` only if
-     find_photos returned that URL);
+   - `tiles` of 4-8 places or activities: use passive tiles (title and optional subtitle/icon) for
+     informational cards; add `ask` or `run` only when selecting the tile should perform a genuine action.
+     An `image` is allowed only if find_photos returned that URL;
    - the plan: one `timeline` with a group per day for trips up to 4 days; for longer trips, `tabs` with one tab per
      day (up to 6), each holding that day's `timeline`;
    - a budget `calculator`: travel, stay per night, food per day, activities, nights and people → total and per
@@ -113,5 +114,5 @@ The include id is a placeholder; use the one find_photos returned. Numbers come 
   `show_blocks` refuses any other. With no photos, use tiles with icons.
 - Tabs need 2-6 tabs and go at the top level; for more than 6 days, split by part of the trip ("Days 1-3").
 - Money: set `"unit": "₹"` (or the currency) on every money chart, kpi and calculator output; table cells "₹44,500".
-- `tiles` take 2-8 items; `actions` up to 3. Button and tile texts never start with `/`, `@` or `!`.
+- `tiles` take 2-8 items, each requiring a title. Without `ask` or `run`, a tile is a noninteractive colorful card. `actions` take up to 3 items. Button and tile texts never start with `/`, `@` or `!`.
 - Keep words short around the tag; don't repeat the plan in text.

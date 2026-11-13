@@ -33,8 +33,8 @@ layers: Slabs in light 3D, bottom first; Next pulls one out with its note. Use f
 Example: {"type":"layers","title":"Network stack","layers":[{"id":"ip","label":"Internet","tone":"blue","note":"Routes packets."},{"id":"app","label":"Application","tone":"green"}]}
 actions: Up to 3 buttons that send a message. Use for: An obvious next step. Fields: items: [{label, run: the message}].
 Example: {"type":"actions","items":[{"label":"Analyze","run":"Analyze TCS: last 4 quarters"}]}
-tiles: 2-8 cover cards. Use for: Choices to explore. Fields: items: [{title, subtitle, image, icon, ask: fills the composer | run: sends}].
-Example: {"type":"tiles","items":[{"title":"Arashiyama","icon":"leaf","ask":"Add Arashiyama"},{"title":"Gion","icon":"moon","run":"Add a Gion walk"}]}
+tiles: 2-8 colorful cover cards. Use for: Activities or choices. Fields: items: [{title, subtitle?, icon?, image?, ask?: fills composer | run?: sends}]. No action = static card.
+Example: {"type":"tiles","items":[{"title":"Scenic drive","subtitle":"Valley views"},{"title":"Gion","ask":"Add Gion"}]}
 checklist: Items to tick; ticks are saved. Use for: Packing lists, to-dos, steps. Fields: title. items: [text | {text, group}], ≤40. numbered: true for steps.
 Example: {"type":"checklist","title":"Packing","items":["Jacket",{"text":"ID card","group":"Papers"}]}
 calculator: Sliders; results update live. Use for: EMI, SIP, what-ifs; never do this maths in text. Fields: inputs ≤6: [{id, label, min, max, step, value, unit}]. outputs ≤6: [{label, formula, unit}]. formula: ids, numbers, + - * / ^ ( ) < > ==, min, max, round(x, n), abs, if(c, a, b), emi(p, rate%, years), sip(monthly, rate%, years), pct(part, whole), prepay_years|prepay_interest(p, rate%, years, yearly_extra), balance|principal_paid|interest_paid(p, rate%, years, after_years), sip_value(monthly, rate%, after_years). chart (live): {kind: line|area|bar, title, unit, x: {name, from, to, step: numbers or formulas, label: "Year {<x name>}"}, series ≤3: [{name, formula using x's name}]}.

@@ -417,21 +417,19 @@
   },
   {
    "kind": "tiles",
-   "for": "2-8 cover cards.",
-   "use_when": "Choices to explore.",
-   "fields": "items: [{title, subtitle, image, icon, ask: fills the composer | run: sends}].",
+   "for": "2-8 colorful cover cards.",
+   "use_when": "Activities or choices.",
+   "fields": "items: [{title, subtitle?, icon?, image?, ask?: fills composer | run?: sends}]. No action = static card.",
    "example": {
     "type": "tiles",
     "items": [
      {
-      "title": "Arashiyama",
-      "icon": "leaf",
-      "ask": "Add Arashiyama"
+      "title": "Scenic drive",
+      "subtitle": "Valley views"
      },
      {
       "title": "Gion",
-      "icon": "moon",
-      "run": "Add a Gion walk"
+      "ask": "Add Gion"
      }
     ]
    }
