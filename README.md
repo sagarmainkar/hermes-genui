@@ -8,7 +8,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-4f7cff"></a>
   <img alt="Hermes 0.22.5 or later" src="https://img.shields.io/badge/hermes-%E2%89%A5%200.22.5-8b5cf6">
-  <img alt="Hermes Desktop" src="https://img.shields.io/badge/draws%20in-Hermes%20Desktop-10b981">
+  <img alt="Hermes Desktop and Webapp" src="https://img.shields.io/badge/draws%20in-Hermes%20Desktop%20%C2%B7%20Webapp-10b981">
   <img alt="Text fallback for Telegram and CLI" src="https://img.shields.io/badge/text%20fallback-Telegram%20%C2%B7%20CLI-f59e0b">
   <a href="https://github.com/sagarmainkar/hermes-genui/actions"><img alt="Checks" src="https://github.com/sagarmainkar/hermes-genui/actions/workflows/checks.yml/badge.svg"></a>
 </p>
@@ -118,6 +118,32 @@ commands above on the machine that runs Hermes. Then, on each computer whose Des
 Git** with `sagarmainkar/hermes-genui` and switch **Desktop** on. The drawing half lives in each Desktop app, not on
 the server.
 
+**Using Hermes in a browser (the Webapp, `hermes webapp`)?** It draws boards too, but each browser keeps its own
+plugin switches, and the plugin starts off. So switch **Desktop** on again in the Webapp's **Capabilities → Plugins**,
+once in every browser and device you use, even if it's already on in the Desktop app.
+
+> [!WARNING]
+> **Safari, and every browser on iPhone or iPad (Chrome included):** Hermes's Capabilities page crashes there with
+> *"workspace failed to render: Can't find variable: requestIdleCallback"*, so you can't reach the switch. It's a
+> Hermes bug ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)). Until it's fixed,
+> turn the plugin on another way:
+>
+> - **Mac Safari:** open the Webapp, press **⌥⌘C** for the Console (turn on *Show
+>   features for web developers* in Safari's Advanced settings first), paste this line and press Return:
+>
+>   ```js
+>   localStorage.setItem('hermes.desktop.pluginDecisions.v2', JSON.stringify({...JSON.parse(localStorage.getItem('hermes.desktop.pluginDecisions.v2') || '{}'), 'hermes-genui': true})); location.reload()
+>   ```
+>
+> - **iPhone or iPad:** bookmark any page, edit the bookmark and replace its address with the line below, then open
+>   the Webapp and tap the bookmark once:
+>
+>   ```
+>   javascript:localStorage.setItem('hermes.desktop.pluginDecisions.v2',JSON.stringify({...JSON.parse(localStorage.getItem('hermes.desktop.pluginDecisions.v2')||'{}'),'hermes-genui':true}));location.reload()
+>   ```
+>
+> It saves the same setting the switch saves and leaves your other plugins as they are.
+
 Start a new chat and try:
 
 > *Compare NVDA, AAPL and MSFT over the past year* · *Plan a 4-day Yosemite trip for two* · *Explain how transformers
@@ -153,7 +179,9 @@ flowchart LR
 - **Every block is validated** before it's stored, and the model gets exact errors to fix. Desktop's readers also
   skip anything malformed, so a bad block never breaks the rest of the board.
 - **Outside Desktop** (Telegram, the CLI and other chat apps), the same board is sent as readable Markdown.
-- **One surface falls through both paths:** a browser surface of the Hermes **web UI** is served as a *local*
+- **The Webapp** (`hermes webapp`) is Hermes Desktop in a browser. It loads the same drawing half, so boards draw
+  there once its **Desktop** switch is on.
+- **One surface falls through both paths:** the Hermes **dashboard** (`hermes dashboard`) is served as a *local*
   session, so it reports `local` — the same value Hermes Desktop reports. The drawing rule therefore still applies,
   `show_blocks` is still offered, and the text fallback is skipped for the same reason — yet that surface has no
   block renderer, so the tag arrives literally.
@@ -196,7 +224,9 @@ Found a security issue? Please see [SECURITY.md](SECURITY.md).
 | The plugin isn't in **Capabilities → Plugins** | Switch the profile selector at the top to the profile you installed it in. |
 | "Couldn't load this block" | Run `hermes gateway restart` after installing or updating. |
 | A board arrives as text | You're outside Hermes Desktop (Telegram, the CLI), which is by design. In Desktop, check the plugin's **Desktop** switch. |
-| A literal `::blocks{id="…"}` line, in the Hermes web UI | That surface draws nothing and reports itself as `local`, like Desktop, so the Markdown fallback is skipped too. Open the chat in Hermes Desktop, or ask for a Markdown table. |
+| A literal `::blocks{id="…"}` line, in the Webapp | The plugin is off in this browser. Switch **Desktop** on in **Capabilities → Plugins**; each browser keeps its own switches. |
+| "workspace failed to render: Can't find variable: requestIdleCallback", in Safari or on iPhone/iPad | A Hermes bug ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)) breaks the Capabilities page there. Turn the plugin on with the workaround under Install. |
+| A literal `::blocks{id="…"}` line, in the Hermes dashboard | The dashboard draws nothing and reports itself as `local`, like Desktop, so the Markdown fallback is skipped too. Open the chat in Hermes Desktop or the Webapp, or ask for a Markdown table. |
 | Red "Unnamed call" rows, or `tool_call 'calls' is not valid JSON` | Tool search is on. Run `hermes config set tools.tool_search.enabled off` (add `-p <profile>`), then start a new chat. |
 | The model built an HTML widget instead | Start a new chat, or ask "draw it with blocks". Tool search being on can also cause this; see Install. |
 | Few or slow photos | Add a photo key above. A source that fails is skipped automatically and retried after 10 minutes. |
