@@ -92,3 +92,16 @@ def test_state_body_without_a_length_is_cut_off_at_32kb(client, tmp_path):
     assert response.status_code == 413
     assert http.get(f"/blocks/{block_id}/state").json() == {}
 
+
+
+def test_a_board_from_another_profile_draws_and_keeps_its_ticks_there(client, tmp_path, monkeypatch):
+    """Desktop asks the active profile for every board, so a session from another profile must still find its own."""
+    http, api = client
+    other = tmp_path / "profiles" / "claude" / "blocks"
+    monkeypatch.setattr(api.store, "profile_stores", lambda: [other])
+    block_id = api.store.save([{"type": "checklist", "items": ["Passport"]}], root=other)
+    assert http.get(f"/blocks/{block_id}").json() == {"blocks": [{"type": "checklist", "items": ["Passport"]}]}
+    assert http.put(f"/blocks/{block_id}/state", json={"state": {"0": [0]}}).status_code == 200
+    assert (other / f"{block_id}.state.json").is_file()
+    assert not (tmp_path / f"{block_id}.state.json").exists()
+    assert http.get(f"/blocks/{block_id}/state").json() == {"state": {"0": [0]}}

@@ -103,3 +103,27 @@ def test_the_photo_list_keeps_only_the_last_500(tmp_path):
     assert len(known) == 500
     assert "https://a.example/49.jpg" not in known and "https://a.example/50.jpg" in known
     assert "https://b.example/99.jpg" in known
+
+
+def test_a_board_is_found_in_the_first_store_that_holds_it(tmp_path):
+    active, other = tmp_path / "active", tmp_path / "other"
+    mine = store.save([{"type": "text", "text": "mine"}], root=active)
+    theirs = store.save([{"type": "text", "text": "theirs"}], root=other)
+    assert store.find_root(mine, roots=[active, other]) == active
+    assert store.find_root(theirs, roots=[active, other]) == other
+    assert store.find_root("0badc0de", roots=[active, other]) is None
+    assert store.find_root("../etc/passwd", roots=[active, tmp_path]) is None
+
+
+def test_every_profile_store_is_listed_root_first(tmp_path):
+    for name in ("work", "alpha", ".deleted"):
+        (tmp_path / "profiles" / name).mkdir(parents=True)
+    (tmp_path / "profiles" / "notes.txt").write_text("not a profile", encoding="utf-8")
+    tail = store.STORE_DIR
+    assert store.profile_stores(tmp_path) == [
+        tmp_path / tail, tmp_path / "profiles" / "alpha" / tail, tmp_path / "profiles" / "work" / tail,
+    ]
+
+
+def test_without_a_profiles_folder_only_the_root_store_is_listed(tmp_path):
+    assert store.profile_stores(tmp_path) == [tmp_path / store.STORE_DIR]
