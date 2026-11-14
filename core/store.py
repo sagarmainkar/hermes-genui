@@ -13,11 +13,50 @@ from pathlib import Path
 ID_PATTERN = r"^[0-9a-f]{8}$"
 
 
+# Where a profile keeps its blocks, under its Hermes home.
+STORE_DIR = Path("plugin-data") / "hermes-genui" / "blocks"
+
+
 def default_root() -> Path:
     """Where this profile keeps its blocks: <hermes home>/plugin-data/hermes-genui/blocks."""
     from hermes_constants import get_hermes_home  # only importable inside Hermes
 
-    return get_hermes_home() / "plugin-data" / "hermes-genui" / "blocks"
+    return get_hermes_home() / STORE_DIR
+
+
+def profile_stores(hermes_root: Path | None = None) -> list[Path]:
+    """Every profile's block store on this machine: the root profile's, then each named profile's, by name. Folders
+    starting with "." (such as the profiles/.deleted tombstone) are not profiles. Outside Hermes, with no root given,
+    there are none.
+
+    profile_stores(~/.hermes) → [~/.hermes/plugin-data/hermes-genui/blocks,
+                                 ~/.hermes/profiles/claude/plugin-data/hermes-genui/blocks, ...]
+    """
+    if hermes_root is None:
+        try:
+            from hermes_constants import get_default_hermes_root
+        except ImportError:
+            return []
+        hermes_root = get_default_hermes_root()
+    profiles = hermes_root / "profiles"
+    found = profiles.iterdir() if profiles.is_dir() else []
+    named = sorted(p for p in found if p.is_dir() and not p.name.startswith("."))
+    return [home / STORE_DIR for home in [hermes_root, *named]]
+
+
+def find_root(block_id: str, roots: list[Path] | None = None) -> Path | None:
+    """The store that holds a board: the active profile's first, then every other profile's. Hermes Desktop lists
+    sessions from all profiles but asks the active profile for a board, so a board drawn in profile A and viewed while
+    profile B is active is only in A's store (issue #6). None when the id is malformed or no store has it.
+
+    find_root("7f3a09bc") → ~/.hermes/profiles/claude/plugin-data/hermes-genui/blocks;  find_root("../x") → None
+    """
+    if not re.fullmatch(ID_PATTERN, block_id or ""):
+        return None
+    for folder in roots if roots is not None else [default_root(), *profile_stores()]:
+        if (folder / f"{block_id}.json").is_file():
+            return folder
+    return None
 
 
 # The most a stored board may take on disk. show_blocks refuses a bigger one with a note to the model first; this is
@@ -35,15 +74,31 @@ def board_size(blocks: list) -> int:
 
 
 def save(blocks: list[dict], root: Path | None = None) -> str:
-    """Store a list of blocks and return its new id. Refused (BoardTooBig, nothing written) over BOARD_LIMIT."""
+    """Store a list of blocks and return its new id. Refused (BoardTooBig, nothing written) over BOARD_LIMIT.
+
+    The id is one no store on this machine uses yet (with root given, no board in root), so a new board never
+    overwrites an old one and find_root never finds another profile's board under the same id.
+    """
     text = json.dumps(blocks, ensure_ascii=False)
     if len(text.encode("utf-8")) > BOARD_LIMIT:
         raise BoardTooBig(f"{len(text.encode('utf-8'))} bytes")
     folder = root or default_root()
     folder.mkdir(parents=True, exist_ok=True)
-    block_id = secrets.token_hex(4)
+    block_id = _unused_id([root] if root else [folder, *profile_stores()])
     _write_whole(folder / f"{block_id}.json", text)
     return block_id
+
+
+def _unused_id(stores: list[Path]) -> str:
+    """A random id with no board under it in any of these stores. With 4.3 billion ids and a few thousand boards, the
+    first pick is almost always free; a taken one is simply drawn again.
+
+    _unused_id([active, other]) where other holds a6600503.json → never "a6600503"
+    """
+    while True:
+        block_id = secrets.token_hex(4)
+        if not any((folder / f"{block_id}.json").exists() for folder in stores):
+            return block_id
 
 
 def _write_whole(path: Path, text: str) -> None:

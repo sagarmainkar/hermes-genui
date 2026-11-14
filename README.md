@@ -197,6 +197,8 @@ flowchart LR
 
 **What stays local:**
 - Boards are saved as JSON in your profile, under `plugin-data/hermes-genui/`, with checklist ticks next to them.
+- Desktop lists sessions from every profile, so a board that isn't in the active profile is looked up in your other
+  profiles' folders on the same machine. Any profile can then load another profile's board by its id.
 - There's no telemetry and no account.
 
 **What the plugin adds to the model's context:**

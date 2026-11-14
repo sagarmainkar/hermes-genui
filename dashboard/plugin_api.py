@@ -1,5 +1,7 @@
 """Serves stored blocks to the Desktop half: GET /api/plugins/hermes-genui/blocks/<id>, plus what the user did to
-them (a checklist's ticks): GET and PUT /blocks/<id>/state.
+them (a checklist's ticks): GET and PUT /blocks/<id>/state. Desktop asks the active profile for every board, so a board
+missing from this profile's store is looked up in the other profiles' stores (store.find_root), and its ticks are kept
+beside it there.
 
 Hermes imports this file on its own (not as part of the plugin package), so core/store.py is loaded by path
 (it imports nothing from the package).
@@ -27,7 +29,7 @@ router = APIRouter()
 
 @router.get("/blocks/{block_id}")
 async def get_block(block_id: str):
-    blocks = store.load(block_id)
+    blocks = store.load(block_id, store.find_root(block_id))
     if blocks is None:
         return JSONResponse({"error": "not found"}, status_code=404)
     return {"blocks": blocks}
@@ -39,9 +41,10 @@ NOT_FOUND = {"error": "not found"}
 @router.get("/blocks/{block_id}/state")
 async def get_state(block_id: str):
     """{"state": {...}} once something is saved, {} before; 404 when no board has this id."""
-    if store.load(block_id) is None:
+    root = store.find_root(block_id)
+    if root is None or store.load(block_id, root) is None:
         return JSONResponse(NOT_FOUND, status_code=404)
-    state = store.load_state(block_id)
+    state = store.load_state(block_id, root)
     return {"state": state} if state else {}
 
 
@@ -75,7 +78,8 @@ async def put_state(block_id: str, request: Request):
     {"state": {"0": [1]}} → 200;  unknown id → 404;  state over 20 KB or body over 32 KB → 413;
     {"state": [1]} or not JSON → 400
     """
-    if store.load(block_id) is None:
+    root = store.find_root(block_id)
+    if root is None or store.load(block_id, root) is None:
         return JSONResponse(NOT_FOUND, status_code=404)
     raw = await _body(request)
     if raw is None:
@@ -88,7 +92,7 @@ async def put_state(block_id: str, request: Request):
     if not isinstance(state, dict):
         return JSONResponse({"error": "body must be {\"state\": {...}}"}, status_code=400)
     try:
-        store.save_state(block_id, state)
+        store.save_state(block_id, state, root)
     except store.NoSuchBlock:
         return JSONResponse(NOT_FOUND, status_code=404)
     except store.StateTooBig:
