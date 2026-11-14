@@ -127,3 +127,32 @@ def test_every_profile_store_is_listed_root_first(tmp_path):
 
 def test_without_a_profiles_folder_only_the_root_store_is_listed(tmp_path):
     assert store.profile_stores(tmp_path) == [tmp_path / store.STORE_DIR]
+
+
+class FakeSecrets:
+    """Hands out the given ids in order, so a test can make the first pick one that is already taken."""
+
+    def __init__(self, *ids):
+        self.ids = list(ids)
+
+    def token_hex(self, _nbytes):
+        return self.ids.pop(0)
+
+
+def test_a_new_board_never_takes_an_id_already_in_its_store(tmp_path, monkeypatch):
+    old = [{"type": "text", "text": "old"}]
+    (tmp_path / "aaaaaaaa.json").write_text('[{"type": "text", "text": "old"}]', encoding="utf-8")
+    monkeypatch.setattr(store, "secrets", FakeSecrets("aaaaaaaa", "bbbbbbbb"))
+    assert store.save([{"type": "text", "text": "new"}], root=tmp_path) == "bbbbbbbb"
+    assert store.load("aaaaaaaa", root=tmp_path) == old
+
+
+def test_a_new_board_never_takes_an_id_used_in_another_profile(tmp_path, monkeypatch):
+    active, other = tmp_path / "active", tmp_path / "other"
+    store.save([{"type": "text", "text": "theirs"}], root=other)
+    taken = next(other.glob("*.json")).stem
+    monkeypatch.setattr(store, "default_root", lambda: active)
+    monkeypatch.setattr(store, "profile_stores", lambda: [active, other])
+    monkeypatch.setattr(store, "secrets", FakeSecrets(taken, "bbbbbbbb"))
+    assert store.save([{"type": "text", "text": "mine"}]) == "bbbbbbbb"
+    assert not (active / f"{taken}.json").exists()
