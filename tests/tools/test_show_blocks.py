@@ -30,7 +30,8 @@ def test_tag_for():
 
 def test_valid_list_is_stored_and_tagged(store_dir):
     result = tools.show_blocks({"blocks": [TIMELINE]})
-    assert result.startswith("Put this on its own line in your reply, exactly as it is:\n")
+    assert result.startswith(
+        "Drawn. Now write your reply, with this line on its own, exactly as it is (don't draw it again):\n")
     assert plugin_store.load(stored_id(result), root=store_dir) == [TIMELINE]
 
 

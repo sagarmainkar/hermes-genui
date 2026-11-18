@@ -26,7 +26,9 @@ def tag_for(block_id: str) -> str:
 def paste_instruction(block_id: str, includable: bool = False) -> str:
     """The line telling the model to paste the tag. A tool-made board also says how to place it inside a bigger
     layout (a dashboard), via an include block."""
-    paste = f"Put this on its own line in your reply, exactly as it is:\n{tag_for(block_id)}"
+    # "Drawn" and "don't draw it again": some models kept redrawing a board that had already been drawn.
+    paste = ("Drawn. Now write your reply, with this line on its own, exactly as it is (don't draw it again):\n"
+             + tag_for(block_id))
     if not includable:
         return paste
     include = f'{{"type": "include", "id": "{block_id}"}}'
