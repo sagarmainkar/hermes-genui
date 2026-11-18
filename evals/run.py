@@ -32,6 +32,13 @@ PROMPTS = ROOT / "evals" / "prompts" / "blocks.toml"
 RESULTS = ROOT / "evals" / "results"
 
 # Stands in for Hermes's own system prompt, which is much longer. --system-file replaces it with a real one.
+# What Hermes says when a model stops oddly after tool calls (agent/conversation_loop.py), so the runner is no harsher
+# than a real chat.
+EMPTY_AFTER_TOOLS = ("You just executed tool calls but returned an empty response. Please process the tool "
+                     "results above and continue with the task.")
+DROPPED_CALL = ("Your previous turn indicated a tool call but none was included. Do not narrate a plan or "
+                "restate intent — issue the actual tool call now to continue the task.")
+
 BASE_SYSTEM = "You are Hermes, a helpful assistant. Answer the user's request."
 SESSION = "eval-session"
 
@@ -135,7 +142,10 @@ class Plugin:
 
         self._tmp = tempfile.TemporaryDirectory(prefix="genui-eval-")
         store.default_root = lambda: Path(self._tmp.name)
+        from hermes_genui.hooks import text_fallback
+
         self.section = prompt_section.drawing_rule({"platform": "local"})
+        self.transform = text_fallback.text_only  # Hermes runs it on the final reply (transform_llm_output)
         self.nudge = visual_nudge.visual_nudge
         from hermes_genui.core.guide import GUIDE
         from hermes_genui.tools import block_guide
@@ -157,6 +167,21 @@ class Plugin:
         return f"{text}\n\n{reminder}" if reminder else text
 
 
+def hermes_stand_in(name: str, arguments: str) -> str:
+    """Answers for two real Hermes tools the runner doesn't have. skill_view gets the plugin's own recipe, as Hermes
+    would load it; find_photos has no network here, so it says so."""
+    if name == "find_photos":
+        return "find_photos isn't available in this test. Draw the answer without photos."
+    try:
+        wanted = str(json.loads(arguments).get("name") or "")
+    except (json.JSONDecodeError, AttributeError):
+        wanted = ""
+    recipe = ROOT / "recipes" / wanted.split(":")[-1] / "SKILL.md"
+    if wanted and recipe.is_file():
+        return recipe.read_text(encoding="utf-8")
+    return f"No skill named {wanted!r} here."
+
+
 def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) -> dict:
     """One prompt, start to finish: model turns until it answers in text or runs out of turns."""
     messages = [
@@ -167,6 +192,8 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
     boards: list[list] = []
     usage = {"prompt_tokens": 0, "completion_tokens": 0}
     reply, error = "", ""
+    ending: dict = {}
+    nudges = 0
     started = time.monotonic()
     for _ in range(args.max_turns):
         body = {"model": args.model, "messages": messages, "tools": plugin.tools, "max_tokens": args.max_tokens}
@@ -182,8 +209,18 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
         message = response["choices"][0]["message"]
         tool_calls = message.get("tool_calls") or []
         messages.append({k: v for k, v in message.items() if k in ("role", "content", "tool_calls")})
+        finish = response["choices"][0].get("finish_reason")
+        if not tool_calls and not (message.get("content") or "").strip() and (calls or finish == "tool_calls"):
+            # Hermes re-prompts an empty answer after tool calls, or a tool call that went missing
+            nudges += 1
+            messages.append({"role": "user", "content": DROPPED_CALL if finish == "tool_calls" else EMPTY_AFTER_TOOLS})
+            continue
         if not tool_calls:
             reply = message.get("content") or ""
+            # How the last turn ended, to tell an empty reply's causes apart (a stop, a length cut, text in reasoning).
+            ending = {"finish": response["choices"][0].get("finish_reason"),
+                      "reasoning_chars": len(str(message.get("reasoning_content") or message.get("reasoning") or "")),
+                      "completion_tokens": int((response.get("usage") or {}).get("completion_tokens") or 0)}
             break
         for call in tool_calls:
             name = call["function"]["name"]
@@ -195,6 +232,9 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
                 result = plugin.handlers[name](params if isinstance(params, dict) else {})
                 calls.append({"tool": name, "drawn": False, "result": result[:200],
                               "asked": params.get("blocks") if isinstance(params, dict) else None})
+            elif name in ("skill_view", "find_photos"):
+                result = hermes_stand_in(name, call["function"].get("arguments") or "{}")
+                calls.append({"tool": name, "drawn": False, "result": result[:200]})
             elif name != "show_blocks":
                 result = f"Unknown tool {name}. The tools here are {', '.join(plugin.handlers)}."
                 calls.append({"tool": name, "drawn": False, "result": result})
@@ -211,6 +251,9 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
                 calls.append({"tool": name, "drawn": drawn, "result": result[:600],
                               "types": block_types(params.get("blocks") or []) if isinstance(params, dict) else []})
             messages.append({"role": "tool", "tool_call_id": call.get("id", ""), "content": result})
+    raw_reply = reply
+    if reply.strip():  # Hermes skips the hook for an empty reply
+        reply = plugin.transform(response_text=reply, platform="local", session_id=SESSION) or reply
     passed, why = score(case, boards) if not error else (False, error)
     if not boards and "::blocks{" in reply:
         why = (why + "; " if why else "") + "made up a tag without calling show_blocks"
@@ -225,7 +268,8 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
         "made_up_tag": "::blocks{" in reply and not boards,
         "prompt_tokens": usage["prompt_tokens"], "completion_tokens": usage["completion_tokens"],
         "seconds": round(time.monotonic() - started, 1),
-        "calls": calls, "reply": reply[:1500], "error": error,
+        "calls": calls, "reply": reply[:1500], "error": error, "ending": ending, "nudges": nudges,
+        "tag_added_by_plugin": reply != raw_reply,
     }
 
 
@@ -297,7 +341,7 @@ def main() -> None:
     parser.add_argument("--system-file", type=Path, help="a real Hermes system prompt to use instead of the stand-in")
     parser.add_argument("--max-turns", type=int, default=4, help="model calls per prompt (retries included)")
     parser.add_argument("--temperature", type=float, help="default: the server's setting for the model")
-    parser.add_argument("--max-tokens", type=int, default=6000, help="per model call, thinking included")
+    parser.add_argument("--max-tokens", type=int, default=12000, help="per model call, thinking included")
     parser.add_argument("--timeout", type=float, default=600)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--guide", choices=("full", "menu"), default="full",

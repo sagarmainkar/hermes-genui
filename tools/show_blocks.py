@@ -4,8 +4,8 @@ import json
 import math
 
 from ..blocks.chart import CHART_KINDS
-from ..core import store, surface
-from ..core.catalog_text import describe, spec
+from ..core import drawn, store, surface
+from ..core.catalog_text import describe, icons_line, spec
 from ..core.catalog_text import menu as core_menu
 from ..core.guide import GUIDE
 from ..core.check import IMAGE_URL_FIELDS, MAX_NESTING, check_blocks, child_lists, guess_kinds, too_deep
@@ -40,9 +40,11 @@ MAX_GUIDES = 3
 def _not_drawn(problems: list[str], blocks: list | None = None) -> str:
     text = "Not drawn. Fix these and call show_blocks again:\n" + "\n".join(f"- {p}" for p in problems)
     guides = [g for kind in _refused_kinds(problems, blocks or []) if (g := spec(kind))][:MAX_GUIDES]
-    if not guides:
-        return text
-    return text + f"\n\nHow to write {'it' if len(guides) == 1 else 'them'}:\n" + "\n".join(guides)
+    if guides:
+        text += f"\n\nHow to write {'it' if len(guides) == 1 else 'them'}:\n" + "\n".join(guides)
+    if any("catalog icons" in p for p in problems):  # a made-up icon: say which ones there are
+        text += "\n" + icons_line()
+    return text
 
 
 def _refused_kinds(problems: list[str], blocks: list) -> list[str]:
@@ -226,7 +228,9 @@ def show_blocks(params: dict, **kwargs) -> str:
     problems = unknown_photos(blocks, store.known_photo_urls())
     if problems:
         return _not_drawn(problems)
-    return paste_instruction(store.save(blocks))
+    block_id = store.save(blocks)
+    drawn.note(str(kwargs.get("session_id") or ""), block_id)  # so a reply that loses the tag gets it back
+    return paste_instruction(block_id)
 
 
 def schema(guide: str = "full") -> dict:

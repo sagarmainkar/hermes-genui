@@ -3,7 +3,7 @@
 block_guide({"blocks": ["table", "chart"]}) → table's spec, a blank line, chart's spec (core.catalog_text.spec).
 """
 
-from ..core.catalog_text import spec
+from ..core.catalog_text import icons_line, spec
 
 
 def block_guide(params: dict, **kwargs) -> str:
@@ -22,7 +22,10 @@ def block_guide(params: dict, **kwargs) -> str:
         seen.add(name)
         found = spec(name)
         parts.append(found or f'No block named "{name}". Pick names from the show_blocks menu.')
-    return "\n\n".join(parts)
+    text = "\n\n".join(parts)
+    if "icon" in text:  # the allowed icons, once, for any block that takes one
+        text += "\n" + icons_line()
+    return text + "\n\nNow call show_blocks once, with all your blocks in order."
 
 
 BLOCK_GUIDE_SCHEMA = {

@@ -26,20 +26,34 @@ def test_the_menu_is_a_fraction_of_the_full_guide():
     assert len(catalog_text.menu()) * 4 < len(catalog_text.describe())
 
 
-def test_block_guide_returns_each_blocks_spec_in_order():
+NEXT = "\n\nNow call show_blocks once, with all your blocks in order."
+
+
+def test_block_guide_returns_each_blocks_spec_in_order_then_the_next_step():
     out = block_guide.block_guide({"blocks": ["table", "chart"]})
-    assert out == catalog_text.spec("table") + "\n\n" + catalog_text.spec("chart")
+    assert out == catalog_text.spec("table") + "\n\n" + catalog_text.spec("chart") + NEXT
+
+
+def test_a_spec_starts_with_the_blocks_exact_shape():
+    # Models that read only "Fields: ..." left "type" out; the spec says how a block starts.
+    assert catalog_text.spec("chart").startswith('chart: write {"type": "chart", ...}. Fields: kind')
+
+
+def test_block_guide_lists_the_icons_once_when_a_block_takes_one():
+    out = block_guide.block_guide({"blocks": ["timeline", "flow"]})
+    assert out.count("\nIcons (only these): mail, rupee, ") == 1
+    assert "Icons (only these)" not in block_guide.block_guide({"blocks": ["table"]})
 
 
 def test_block_guide_takes_a_single_name_and_skips_repeats():
-    assert block_guide.block_guide({"blocks": "chart"}) == catalog_text.spec("chart")
-    assert block_guide.block_guide({"blocks": ["chart", "chart"]}) == catalog_text.spec("chart")
+    assert block_guide.block_guide({"blocks": "chart"}) == catalog_text.spec("chart") + NEXT
+    assert block_guide.block_guide({"blocks": ["chart", "chart"]}) == catalog_text.spec("chart") + NEXT
 
 
 def test_block_guide_names_what_it_doesnt_know():
     out = block_guide.block_guide({"blocks": ["chart", "sundial"]})
     assert out.startswith(catalog_text.spec("chart"))
-    assert out.endswith('No block named "sundial". Pick names from the show_blocks menu.')
+    assert 'No block named "sundial". Pick names from the show_blocks menu.' in out
     assert block_guide.block_guide({}) == "Give the block names from the show_blocks menu, e.g. [\"chart\", \"table\"]."
 
 

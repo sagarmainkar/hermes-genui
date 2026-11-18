@@ -17,6 +17,12 @@ For each prompt in `prompts/blocks.toml`, the runner (`run.py`):
    first was valid, whether the tag reached the reply, any tag the model made up without calling the tool, tokens and
    time.
 
+It also does what Hermes does around the model, so a run is no harsher than a real chat:
+
+- It re-prompts an empty answer after tool calls, and a tool call that went missing, with Hermes's own words.
+- It runs the plugin's reply hook on the final answer, which puts back a board's tag if the model left it out.
+- It answers `skill_view` with the plugin's own recipe, and says photos aren't available to `find_photos`.
+
 It needs no Hermes, only the plugin's folder and a model behind any OpenAI-compatible API.
 
 ## Running it
@@ -43,7 +49,9 @@ Options:
 
 - `--max-turns`: model calls per prompt, retries included (default 4).
 - `--temperature`: default: the server's own setting for the model. Some models loop at 0.
-- `--max-tokens`: per model call, thinking included (default 6000), so a model that loops still stops.
+- `--max-tokens`: per model call, thinking included (default 12000), so a model that loops still stops.
+- `--guide`: `full` (today's guide in the `show_blocks` description) or `menu` (a short menu, plus `block_guide`
+  for the fields; #42). Give `menu` one more `--max-turns`, since the `block_guide` call takes a turn.
 - `--system-file`: use a real Hermes system prompt instead of the one-line stand-in.
 - `--out`: the results file.
 

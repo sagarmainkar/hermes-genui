@@ -225,7 +225,7 @@ def test_a_refused_block_comes_back_with_how_to_write_it(store_dir):
     problems, _, guide = result.partition("\n\nHow to write it:\n")
     assert problems.startswith("Not drawn. Fix these and call show_blocks again:\n- 0.series.0")
     assert guide == _spec("chart")
-    assert guide.startswith("chart: Fields: ") and '\nExample: {"type":"chart"' in guide
+    assert guide.startswith('chart: write {"type": "chart", ...}.') and '\nExample: {"type":"chart"' in guide
     assert list(store_dir.glob("*.json")) == []
 
 
@@ -256,3 +256,11 @@ def test_the_guide_stops_at_three_kinds(store_dir):
            {"type": "kpis", "items": []}]
     guide = tools.show_blocks({"blocks": bad}).partition("\n\nHow to write them:\n")[2]
     assert guide == "\n".join(_spec(k) for k in ("chart", "table", "timeline"))
+
+
+def test_a_made_up_icon_comes_back_with_the_icons_to_choose_from(store_dir):
+    flow = {"type": "flow", "id": "upi", "nodes": [{"id": "app", "label": "App", "icon": "phone"},
+                                                   {"id": "bank", "label": "Bank", "icon": "bank"}]}
+    result = tools.show_blocks({"blocks": [flow]})
+    assert "isn't one of the catalog icons" in result
+    assert result.endswith(importlib.import_module("hermes_genui.core.catalog_text").icons_line())

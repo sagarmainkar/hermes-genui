@@ -6,7 +6,7 @@ request, this reminder outweighs that general advice and keeps the answer in blo
 
 import re
 
-from ..core import surface
+from ..core import drawn, surface
 from ..core.guide import GUIDE
 
 # Surfaces that draw blocks: the Desktop app's local chat. Telegram, the CLI and the rest show tags as text.
@@ -74,6 +74,7 @@ def visual_nudge(user_message: object = "", platform: str = "", **kwargs) -> str
     ("make me a dashboard", "telegram") → None;  ("put NVDA on my Today page", "local") → KEEP_REMINDER
     """
     surface.note_platform(str(kwargs.get("session_id") or ""), platform)  # so tools know this session's surface
+    drawn.forget(str(kwargs.get("session_id") or ""))  # a new message: last turn's boards are settled
     if platform not in DRAWING_PLATFORMS:
         return None
     text = _text_of(user_message)
