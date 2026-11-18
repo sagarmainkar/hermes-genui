@@ -1,0 +1,71 @@
+"""The menu design (#42): show_blocks carries a short menu, and block_guide returns the fields and example of the blocks
+the model is about to use. Switched on with HERMES_GENUI_GUIDE=menu while it is measured against the full guide."""
+
+import importlib
+import json
+import re
+
+from conftest import ROOT, load_plugin_package
+
+load_plugin_package()
+catalog_text = importlib.import_module("hermes_genui.core.catalog_text")
+block_guide = importlib.import_module("hermes_genui.tools.block_guide")
+show_blocks = importlib.import_module("hermes_genui.tools.show_blocks")
+
+CATALOG = json.loads((ROOT / "core" / "catalog.json").read_text(encoding="utf-8"))
+
+
+def test_the_menu_names_every_block_in_the_catalog():
+    menu = catalog_text.menu()
+    missing = [b["kind"] for b in CATALOG["blocks"] if not re.search(rf"\b{b['kind']}\b", menu)]
+    assert missing == []
+
+
+def test_the_menu_is_a_fraction_of_the_full_guide():
+    assert len(catalog_text.menu()) <= 3000
+    assert len(catalog_text.menu()) * 4 < len(catalog_text.describe())
+
+
+def test_block_guide_returns_each_blocks_spec_in_order():
+    out = block_guide.block_guide({"blocks": ["table", "chart"]})
+    assert out == catalog_text.spec("table") + "\n\n" + catalog_text.spec("chart")
+
+
+def test_block_guide_takes_a_single_name_and_skips_repeats():
+    assert block_guide.block_guide({"blocks": "chart"}) == catalog_text.spec("chart")
+    assert block_guide.block_guide({"blocks": ["chart", "chart"]}) == catalog_text.spec("chart")
+
+
+def test_block_guide_names_what_it_doesnt_know():
+    out = block_guide.block_guide({"blocks": ["chart", "sundial"]})
+    assert out.startswith(catalog_text.spec("chart"))
+    assert out.endswith('No block named "sundial". Pick names from the show_blocks menu.')
+    assert block_guide.block_guide({}) == "Give the block names from the show_blocks menu, e.g. [\"chart\", \"table\"]."
+
+
+def test_the_menu_schema_carries_the_menu_and_the_full_one_the_guide():
+    menu = show_blocks.schema("menu")["description"]
+    full = show_blocks.schema("full")["description"]
+    assert catalog_text.menu() in menu and catalog_text.describe() not in menu
+    assert catalog_text.describe() in full
+    assert show_blocks.schema("full") == show_blocks.SHOW_BLOCKS_SCHEMA  # the default is unchanged
+
+
+def test_the_menu_guide_adds_one_hint_to_the_system_section_within_its_cap():
+    prompt = importlib.import_module("hermes_genui.hooks.prompt_section")
+    recipes = importlib.import_module("hermes_genui.core.recipes").shipped()
+    menu_rule = prompt.draw_rule(recipes, guide="menu")
+    assert "block_guide" in menu_rule and len(menu_rule) <= prompt.MAX_CHARS
+    assert "block_guide" not in prompt.draw_rule(recipes)  # the full guide is unchanged
+
+
+def test_the_menu_guide_reminder_asks_for_fields_first():
+    nudge = importlib.import_module("hermes_genui.hooks.visual_nudge")
+    assert "block_guide" in nudge.MENU_REMINDER and "block_guide" not in nudge.REMINDER
+
+
+def test_block_guide_is_registered_only_with_the_menu_guide():
+    tools = importlib.import_module("hermes_genui.tools")
+    assert [t.name for t in tools.tools_for("menu")][:2] == ["show_blocks", "block_guide"]
+    assert "block_guide" not in [t.name for t in tools.tools_for("full")]
+    assert tools.tools_for("full") == tools.TOOLS

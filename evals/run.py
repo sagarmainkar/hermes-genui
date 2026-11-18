@@ -137,10 +137,19 @@ class Plugin:
         store.default_root = lambda: Path(self._tmp.name)
         self.section = prompt_section.drawing_rule({"platform": "local"})
         self.nudge = visual_nudge.visual_nudge
+        from hermes_genui.core.guide import GUIDE
+        from hermes_genui.tools import block_guide
+
+        self.guide = GUIDE
         self.handler = show_blocks.show_blocks
-        schema = show_blocks.SHOW_BLOCKS_SCHEMA
-        self.tool = {"type": "function", "function": {
-            "name": schema["name"], "description": schema["description"], "parameters": schema["parameters"]}}
+        self.handlers = {"show_blocks": show_blocks.show_blocks}
+        schemas = [show_blocks.SHOW_BLOCKS_SCHEMA]
+        if GUIDE == "menu":  # the menu guide (#42): fields come from block_guide
+            self.handlers["block_guide"] = block_guide.block_guide
+            schemas.append(block_guide.BLOCK_GUIDE_SCHEMA)
+        self.tools = [{"type": "function", "function": {
+            "name": s["name"], "description": s["description"], "parameters": s["parameters"]}} for s in schemas]
+        self.tool = self.tools[0]
 
     def user_message(self, text: str) -> str:
         """The user's words, with the reminder Hermes adds beside a visual request in the Desktop app."""
@@ -160,7 +169,7 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
     reply, error = "", ""
     started = time.monotonic()
     for _ in range(args.max_turns):
-        body = {"model": args.model, "messages": messages, "tools": [plugin.tool], "max_tokens": args.max_tokens}
+        body = {"model": args.model, "messages": messages, "tools": plugin.tools, "max_tokens": args.max_tokens}
         if args.temperature is not None:
             body["temperature"] = args.temperature
         try:
@@ -178,8 +187,16 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
             break
         for call in tool_calls:
             name = call["function"]["name"]
-            if name != "show_blocks":
-                result = f"Unknown tool {name}. The only tool here is show_blocks."
+            if name == "block_guide" and name in plugin.handlers:
+                try:
+                    params = json.loads(call["function"].get("arguments") or "{}")
+                except json.JSONDecodeError:
+                    params = {}
+                result = plugin.handlers[name](params if isinstance(params, dict) else {})
+                calls.append({"tool": name, "drawn": False, "result": result[:200],
+                              "asked": params.get("blocks") if isinstance(params, dict) else None})
+            elif name != "show_blocks":
+                result = f"Unknown tool {name}. The tools here are {', '.join(plugin.handlers)}."
                 calls.append({"tool": name, "drawn": False, "result": result})
             else:
                 try:
@@ -202,6 +219,7 @@ def run_case(case: dict, plugin: Plugin, args: argparse.Namespace, system: str) 
         "id": case["id"], "expect": case["expect"], "passed": passed, "why": why,
         "drawn_types": [t for board in boards for t in block_types(board)],
         "show_blocks_calls": len(tries),
+        "guide_calls": sum(c["tool"] == "block_guide" for c in calls),
         "first_try_valid": bool(tries) and tries[0]["drawn"],
         "tag_in_reply": ("::blocks{" in reply) if boards else None,
         "made_up_tag": "::blocks{" in reply and not boards,
@@ -282,6 +300,8 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=6000, help="per model call, thinking included")
     parser.add_argument("--timeout", type=float, default=600)
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--guide", choices=("full", "menu"), default="full",
+                        help="the block guide: full (today's) or menu + block_guide (#42)")
     args = parser.parse_args()
 
     cases = load_prompts(args.prompts)
@@ -294,7 +314,10 @@ def main() -> None:
     if not cases:
         sys.exit("no prompts match --only / --block")
     system = args.system_file.read_text(encoding="utf-8") if args.system_file else BASE_SYSTEM
+    os.environ["HERMES_GENUI_GUIDE"] = args.guide  # read when the plugin loads
     plugin = Plugin()
+    described = sum(len(tool["function"]["description"]) for tool in plugin.tools)
+    print(f"guide: {plugin.guide}, tool descriptions: {described:,} characters", flush=True)
     out = args.out or RESULTS / f"{args.model.replace('/', '_')}-{time.strftime('%Y%m%d-%H%M%S')}.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
 

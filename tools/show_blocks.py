@@ -6,6 +6,8 @@ import math
 from ..blocks.chart import CHART_KINDS
 from ..core import store, surface
 from ..core.catalog_text import describe, spec
+from ..core.catalog_text import menu as core_menu
+from ..core.guide import GUIDE
 from ..core.check import IMAGE_URL_FIELDS, MAX_NESTING, check_blocks, child_lists, guess_kinds, too_deep
 
 __all__ = ["SHOW_BLOCKS_SCHEMA", "child_lists", "paste_instruction", "resolve_includes", "show_blocks",
@@ -227,23 +229,33 @@ def show_blocks(params: dict, **kwargs) -> str:
     return paste_instruction(store.save(blocks))
 
 
-SHOW_BLOCKS_SCHEMA = {
-    "name": "show_blocks",
-    "description": (
-        "Draw visual blocks in the reply (Hermes Desktop): itineraries, trends, comparisons, headline numbers, "
-        "photos. Use it when the answer reads better drawn than written. "
-        "Paste the returned tag on its own line exactly as returned. "
-        "Use only numbers and image URLs a tool returned.\n\n" + describe()
-    ),
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "blocks": {
-                "type": "array",
-                "items": {"type": "object"},
-                "description": "The blocks to draw, in order. Each has a `type`.",
-            }
+def schema(guide: str = "full") -> dict:
+    """show_blocks's schema. "full" carries every block's fields and example; "menu" (#42) carries the short menu,
+    and the model gets fields from block_guide."""
+    if guide == "menu":
+        description = core_menu()
+    else:
+        description = (
+            "Draw visual blocks in the reply (Hermes Desktop): itineraries, trends, comparisons, headline numbers, "
+            "photos. Use it when the answer reads better drawn than written. "
+            "Paste the returned tag on its own line exactly as returned. "
+            "Use only numbers and image URLs a tool returned.\n\n" + describe()
+        )
+    return {
+        "name": "show_blocks",
+        "description": description,
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "blocks": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "The blocks to draw, in order. Each has a `type`.",
+                }
+            },
+            "required": ["blocks"],
         },
-        "required": ["blocks"],
-    },
-}
+    }
+
+
+SHOW_BLOCKS_SCHEMA = schema(GUIDE)
