@@ -47,11 +47,11 @@ includes the model's calls, the handler's answers and the reply. `evals/results/
 
 Options:
 
-- `--max-turns`: model calls per prompt, retries included (default 4).
+- `--max-turns`: model calls per prompt, the `block_guide` call and retries included (default 5).
 - `--temperature`: default: the server's own setting for the model. Some models loop at 0.
 - `--max-tokens`: per model call, thinking included (default 12000), so a model that loops still stops.
-- `--guide`: `full` (today's guide in the `show_blocks` description) or `menu` (a short menu, plus `block_guide`
-  for the fields; #42). Give `menu` one more `--max-turns`, since the `block_guide` call takes a turn.
+- `--guide`: `menu` (the default: a short menu in the `show_blocks` description, plus `block_guide` for the fields)
+  or `full` (every block's fields in the description, as before 0.4).
 - `--system-file`: use a real Hermes system prompt instead of the one-line stand-in.
 - `--out`: the results file.
 

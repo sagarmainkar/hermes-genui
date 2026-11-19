@@ -7,4 +7,4 @@ Set HERMES_GENUI_GUIDE=menu before the plugin loads to switch.
 
 import os
 
-GUIDE = "menu" if os.environ.get("HERMES_GENUI_GUIDE", "").strip().lower() == "menu" else "full"
+GUIDE = "full" if os.environ.get("HERMES_GENUI_GUIDE", "").strip().lower() == "full" else "menu"

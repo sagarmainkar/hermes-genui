@@ -21,6 +21,14 @@ def test_the_menu_names_every_block_in_the_catalog():
     assert missing == []
 
 
+def test_each_blocks_spec_stays_readable():
+    # A spec is sent only when its block is drawn, so a field costs only its own block; this keeps each one short
+    # enough to read in one go (the calculator, the longest, is about 1,150).
+    long = [(b["kind"], len(catalog_text.spec(b["kind"]))) for b in CATALOG["blocks"]
+            if len(catalog_text.spec(b["kind"])) > 1500]
+    assert long == []
+
+
 def test_the_menu_is_a_fraction_of_the_full_guide():
     assert len(catalog_text.menu()) <= 3000
     assert len(catalog_text.menu()) * 4 < len(catalog_text.describe())
@@ -62,7 +70,7 @@ def test_the_menu_schema_carries_the_menu_and_the_full_one_the_guide():
     full = show_blocks.schema("full")["description"]
     assert catalog_text.menu() in menu and catalog_text.describe() not in menu
     assert catalog_text.describe() in full
-    assert show_blocks.schema("full") == show_blocks.SHOW_BLOCKS_SCHEMA  # the default is unchanged
+    assert show_blocks.schema("menu") == show_blocks.SHOW_BLOCKS_SCHEMA  # the menu is the default
 
 
 def test_the_menu_guide_adds_one_hint_to_the_system_section_within_its_cap():
@@ -70,7 +78,7 @@ def test_the_menu_guide_adds_one_hint_to_the_system_section_within_its_cap():
     recipes = importlib.import_module("hermes_genui.core.recipes").shipped()
     menu_rule = prompt.draw_rule(recipes, guide="menu")
     assert "block_guide" in menu_rule and len(menu_rule) <= prompt.MAX_CHARS
-    assert "block_guide" not in prompt.draw_rule(recipes)  # the full guide is unchanged
+    assert "block_guide" not in prompt.draw_rule(recipes, guide="full")  # the full guide is unchanged
 
 
 def test_the_menu_guide_reminder_asks_for_fields_first():

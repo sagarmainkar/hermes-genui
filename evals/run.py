@@ -339,13 +339,14 @@ def main() -> None:
     parser.add_argument("--block", default="", help="comma-separated block types: only the prompts about them")
     parser.add_argument("--markdown", action="store_true", help="also print the summary as a Markdown table")
     parser.add_argument("--system-file", type=Path, help="a real Hermes system prompt to use instead of the stand-in")
-    parser.add_argument("--max-turns", type=int, default=4, help="model calls per prompt (retries included)")
+    parser.add_argument("--max-turns", type=int, default=5,
+                        help="model calls per prompt (block_guide and retries included)")
     parser.add_argument("--temperature", type=float, help="default: the server's setting for the model")
     parser.add_argument("--max-tokens", type=int, default=12000, help="per model call, thinking included")
     parser.add_argument("--timeout", type=float, default=600)
     parser.add_argument("--out", type=Path)
-    parser.add_argument("--guide", choices=("full", "menu"), default="full",
-                        help="the block guide: full (today's) or menu + block_guide (#42)")
+    parser.add_argument("--guide", choices=("menu", "full"), default="menu",
+                        help="the block guide: menu + block_guide (the default), or the full guide")
     args = parser.parse_args()
 
     cases = load_prompts(args.prompts)
