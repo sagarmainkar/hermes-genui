@@ -1,6 +1,6 @@
 manifest_version: 2
 name: hermes-genui
-version: "0.3.0"
+version: "0.3.1"
 description: >-
   Visual, interactive blocks drawn right inside Hermes Desktop and Webapp replies: charts, tables, timelines, photo
   strips, calculators with live sliders, forms, checklists that remember their ticks, flash cards and step-by-step
