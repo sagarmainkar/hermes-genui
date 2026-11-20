@@ -4,6 +4,25 @@ All notable changes to this plugin. Versions follow [Semantic Versioning](https:
 
 ## Unreleased
 
+### A board can say where its blocks sit
+
+- **`align`: left | center | right — per block, and as a board default.** `show_blocks` takes `align` and
+  `text_align` beside `blocks`; any block can also ask for its own place. A block that didn't ask takes the
+  board's word; a board that said nothing draws exactly as it did before, byte for byte. A placed block is
+  drawn inside a `.hb-place` box whose auto margin shares out only the space the block left over, so a capped
+  card keeps its cap centered, a hugging table keeps hugging, and a full-width line does not move.
+- **`text_align` moves the words, not the box:** inside heading, text, stat and callout only — a drawing that
+  owns a layout (a chart, a table, photos, any container) is never re-typed by the board.
+- **Charts center like everything else.** `.hb-chart` resets its root margin (the host's prose styles give a
+  figure one), and at equal class specificity that reset vetoed the placement ask purely on load order — a
+  chart asked to center sat flush left while a calculator centered fine. The placement rule compounds its two
+  classes, so the ask outranks every block root reset; real Chrome measures the centered chart at symmetric
+  margins (190/190 on the 1100px column).
+- **Nested blocks are placed inside their cells** by the same cascade — row, grid, columns, section, tabs — and
+  a placed block in a cell fills exactly like its unplaced twin (pinned by Chrome twins in
+  `tests/test_layout_alignment.py`). Includes and kept pages take a board's blocks; its words stay with it.
+- The text-only half ignores both words: on Telegram and the CLI the same boards read the same.
+
 ### The block guide stops growing (#42)
 
 - **The model reads a short menu instead of every block's fields.** The `show_blocks` description is now one line per

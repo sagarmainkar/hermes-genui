@@ -266,3 +266,48 @@ def test_a_made_up_icon_comes_back_with_the_icons_to_choose_from(store_dir):
     result = tools.show_blocks({"blocks": [flow]})
     assert "isn't one of the catalog icons" in result
     assert result.endswith(importlib.import_module("hermes_genui.core.catalog_text").icons_line())
+
+
+# --- the placement words --------------------------------------------------------------------------------------------
+
+
+def test_a_board_align_comes_back_as_an_envelope(store_dir):
+    result = tools.show_blocks({"blocks": [TIMELINE], "align": " Center "})
+    board = plugin_store.load(stored_id(result), root=store_dir)
+    assert board == {"align": "center", "blocks": [TIMELINE]}
+
+
+def test_a_board_text_align_rides_the_same_envelope(store_dir):
+    result = tools.show_blocks({"blocks": [TIMELINE], "text_align": "right"})
+    board = plugin_store.load(stored_id(result), root=store_dir)
+    assert board == {"text_align": "right", "blocks": [TIMELINE]}
+
+
+def test_both_words_share_the_one_envelope(store_dir):
+    result = tools.show_blocks({"blocks": [TIMELINE], "align": "center", "text_align": "center"})
+    board = plugin_store.load(stored_id(result), root=store_dir)
+    assert board == {"align": "center", "text_align": "center", "blocks": [TIMELINE]}
+
+
+def test_no_word_or_a_junk_word_stores_the_plain_list(store_dir):
+    for params in ({"blocks": [TIMELINE]}, {"blocks": [TIMELINE], "align": "middle"},
+                   {"blocks": [TIMELINE], "text_align": 7}):
+        result = tools.show_blocks(dict(params))
+        assert plugin_store.load(stored_id(result), root=store_dir) == [TIMELINE]
+
+
+def test_an_included_envelope_board_lends_only_its_blocks(store_dir):
+    board_id = plugin_store.save({"align": "center", "blocks": [TIMELINE]}, root=store_dir)
+    layout = [{"type": "row", "children": [{"type": "include", "id": board_id}]}]
+    result = tools.show_blocks({"blocks": layout})
+    stored = plugin_store.load(stored_id(result), root=store_dir)
+    assert stored == [{"type": "row", "children": [TIMELINE]}]  # the kept board's own words stay on its board
+
+
+def test_the_envelope_words_count_in_the_boards_size(store_dir, monkeypatch):
+    import json as _json
+    monkeypatch.setattr(plugin_store, "BOARD_LIMIT", len(_json.dumps([TIMELINE])) + 20)
+    plain = tools.show_blocks({"blocks": [TIMELINE]})
+    assert plain.startswith("Drawn.")
+    big = tools.show_blocks({"blocks": [TIMELINE], "align": "center", "text_align": "center"})
+    assert big.startswith("Not drawn: board too big (")

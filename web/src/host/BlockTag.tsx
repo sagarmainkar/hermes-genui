@@ -1,14 +1,18 @@
 // What `::blocks{id="..."}` turns into inside a reply: a placeholder while the reply streams in, then the stored
-// blocks fetched by id and drawn, or nothing at all when that isn't possible. Never raw JSON.
+// blocks fetched by id and drawn, or nothing at all when that isn't possible. Never raw JSON. The stored answer may
+// carry the board's own placement words (align, text_align) beside its blocks; they ride through to the drawing,
+// which resolves them for every block that didn't ask for itself.
 import { useContext, useEffect, useState } from "react";
 import { Blocks } from "../core/Blocks";
-import { readBlocks } from "../core/readBlocks";
+import { readBlocksNoted } from "../core/readBlocks";
+import type { Align } from "../core/fields";
 import type { Block } from "../registry";
 import { BlockActions } from "./actions";
 
 const ID_PATTERN = /^[0-9a-f]{8}$/;
 
-type State = { kind: "loading" } | { kind: "drawn"; blocks: Block[] } | { kind: "failed" };
+type State = { kind: "loading" } | { kind: "drawn"; blocks: Block[]; align?: Align; textAlign?: Align }
+  | { kind: "failed" };
 
 /**
  * load fetches the stored JSON for an id (in the app: the plugin's REST route).
@@ -28,8 +32,12 @@ export function BlockTag({ id, streaming, load }: { id: string | undefined; stre
     let live = true;
     load(id)
       .then((data) => {
-        const blocks = readBlocks(data);
-        if (live) setState(blocks.length ? { kind: "drawn", blocks } : { kind: "failed" });
+        const noted = readBlocksNoted(data);
+        if (live) {
+          setState(noted.blocks.length
+            ? { kind: "drawn", blocks: noted.blocks, align: noted.align, textAlign: noted.textAlign }
+            : { kind: "failed" });
+        }
       })
       .catch(() => {
         if (live) setState({ kind: "failed" });
@@ -42,7 +50,11 @@ export function BlockTag({ id, streaming, load }: { id: string | undefined; stre
   if (!validId && !streaming) return null;
   if (streaming || state.kind === "loading") return <Note text="drawing…" pulse />;
   if (state.kind === "failed") return null;
-  return <BlockActions.Provider value={{ ...actions, blockId: id }}><Blocks blocks={state.blocks} /></BlockActions.Provider>;
+  return (
+    <BlockActions.Provider value={{ ...actions, blockId: id }}>
+      <Blocks blocks={state.blocks} boardAlign={state.align} boardTextAlign={state.textAlign} />
+    </BlockActions.Provider>
+  );
 }
 
 function Note({ text, pulse = false }: { text: string; pulse?: boolean }) {

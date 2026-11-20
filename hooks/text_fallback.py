@@ -128,10 +128,10 @@ def _board_text(block_id: str, load) -> str:
     if not re.fullmatch(store.ID_PATTERN, block_id):
         return NOT_SHOWN
     try:
-        blocks = load(block_id)
+        board = load(block_id)
     except Exception:  # an unreadable file must not stop the reply
         return NOT_SHOWN
-    return blocks_as_text(blocks) or NOT_SHOWN
+    return blocks_as_text(store.blocks_of(board)) or NOT_SHOWN  # placement is a drawing concern; text is just blocks
 
 
 def replace_tags(text: str, load=store.load) -> str:

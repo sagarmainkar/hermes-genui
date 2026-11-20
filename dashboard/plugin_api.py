@@ -227,10 +227,15 @@ async def post_assistant_item(item_id: str, request: Request):
 
 @router.get("/blocks/{block_id}")
 async def get_block(block_id: str):
-    blocks = store.load(block_id, store.find_root(block_id))
-    if blocks is None:
+    board = store.load(block_id, store.find_root(block_id))
+    if board is None:
         return JSONResponse({"error": "not found"}, status_code=404)
-    return {"blocks": blocks}
+    answer = {"blocks": store.blocks_of(board)}
+    if (word := store.align_of(board)) is not None:  # the board's placement words, when it carries them
+        answer["align"] = word
+    if (word := store.text_align_of(board)) is not None:
+        answer["text_align"] = word
+    return answer
 
 
 NOT_FOUND = {"error": "not found"}

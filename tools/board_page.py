@@ -176,9 +176,11 @@ def _keep(params: dict, home: Path, root: Path, now: datetime) -> str:
         blocks = params["blocks"]
     else:
         board_id = str(params.get("board_id") or "")
-        blocks = store.load(board_id, root)  # None for a malformed or unknown id
-        if blocks is None:
+        board = store.load(board_id, root)  # None for a malformed or unknown id
+        if board is None:
             problems.append("board_id: the id from the dashboard's ::blocks tag in this chat")
+        # an envelope board lends the page its blocks; its placement words stay on the board
+        blocks = None if board is None else store.blocks_of(board)
     if blocks is not None:
         if not isinstance(blocks, list) or not blocks:
             problems.append("blocks: a list of blocks")

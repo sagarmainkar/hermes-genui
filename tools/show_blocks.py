@@ -4,6 +4,7 @@ import json
 import math
 
 from ..blocks.chart import CHART_KINDS
+from ..blocks.common import align_word
 from ..core import drawn, store, surface
 from ..core.catalog_text import describe, icons_line, spec
 from ..core.catalog_text import menu as core_menu
@@ -194,7 +195,7 @@ def _included(block_id: str, here: str, problems: list[str]) -> list:
         problems.append(f"{here}: board {block_id} is too big to include (max {INCLUDE_LIMIT // 1024} KB)")
     elif board is None:
         problems.append(f"{here}: no stored board with id {block_id}")
-    return board or []
+    return store.blocks_of(board)  # its own placement words stay with the board; includes take just the blocks
 
 
 def too_big(blocks: list) -> str | None:
@@ -225,13 +226,23 @@ def show_blocks(params: dict, **kwargs) -> str:
         problems = [deep] if (deep := too_deep(blocks)) else []
     if problems:
         return _not_drawn(problems)
-    refusal = too_big(blocks)
+    # The board's own placement words ride beside its blocks; said or not, a block can override either one.
+    board: list | dict = blocks
+    word, text_word = align_word(params.get("align")), align_word(params.get("text_align"))
+    if word is not None or text_word is not None:
+        envelope: dict = {}
+        if word is not None:
+            envelope["align"] = word
+        if text_word is not None:
+            envelope["text_align"] = text_word
+        board = {**envelope, "blocks": blocks}
+    refusal = too_big(board)
     if refusal:
         return refusal
     problems = unknown_photos(blocks, store.known_photo_urls())
     if problems:
         return _not_drawn(problems)
-    block_id = store.save(blocks)
+    block_id = store.save(board)
     drawn.note(str(kwargs.get("session_id") or ""), block_id)  # so a reply that loses the tag gets it back
     return paste_instruction(block_id)
 
@@ -257,8 +268,19 @@ def schema(guide: str = "full") -> dict:
                 "blocks": {
                     "type": "array",
                     "items": {"type": "object"},
-                    "description": "The blocks to draw, in order. Each has a `type`.",
-                }
+                    "description": "The blocks to draw, in order. Each has a `type`, and may ask for its place "
+                    "with `align`: left | center | right (its words with `text_align`).",
+                },
+                "align": {
+                    "type": "string",
+                    "description": "Optional. Where the blocks of this whole board sit across the reply when a "
+                    "block doesn't ask for itself: left (the default) | center | right.",
+                },
+                "text_align": {
+                    "type": "string",
+                    "description": "Optional. How the words inside the board's text blocks read when a block "
+                    "doesn't ask for itself: left (the default) | center | right.",
+                },
             },
             "required": ["blocks"],
         },
