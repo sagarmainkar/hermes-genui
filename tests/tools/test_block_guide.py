@@ -93,6 +93,23 @@ def test_block_guide_is_registered_only_with_the_menu_guide():
     assert tools.tools_for("full") == tools.TOOLS
 
 
+def test_the_widget_spec_carries_the_shapes_a_widget_needs():
+    """A widget nests its own elements, so its spec is the only place the model reads the caps, the three actions and
+    the binding shape (#62)."""
+    spec = catalog_text.spec("widget")
+    for words in ('"type": "widget"', "version 1", "state ≤16", "computed ≤32", "view ≤200", "{op: set",
+                  "{op: reset}", "{op: fill", "bindings"):
+        assert words in spec, words
+    assert '"bindings":{"/value":{"get":"computed.planned"}}' in spec  # the example binds an embedded block
+
+
+def test_the_widget_menu_line_says_what_the_reader_can_try():
+    line = next(one for one in catalog_text.menu().splitlines() if one.startswith("- widget: "))
+    for words in ("controls change numbers", "reset restores", "fill hands state back",
+                  "Not static"):
+        assert words in line, words
+
+
 def test_the_menu_leads_with_three_judgment_lines():
     """The recipe the model opens can't carry cross-cutting judgment (it may not open it at all), so the strongest
     tips live at the top of the menu, which show_blocks carries into every draw (PR #53 feedback)."""
@@ -101,3 +118,74 @@ def test_the_menu_leads_with_three_judgment_lines():
     assert blocks, "the menu still lists the blocks after the head"
     for tip in ("Lead with the answer", "A plain board is a fine answer", "Never decorate just to decorate"):
         assert tip in head, f"the menu head is missing: {tip}"
+
+
+# --- topics (#62): the widget's longer references -------------------------------------------------------------
+
+TOPIC_NAMES = ("widget.layout", "widget.state", "widget.collections", "widget.blocks")
+
+
+def test_each_widget_topic_is_a_bounded_reference_file():
+    for name in TOPIC_NAMES:
+        path = ROOT / "core" / "widget_guide" / f"{name}.md"
+        assert path.is_file(), f"missing {path}"
+        body = path.read_text(encoding="utf-8")
+        assert 200 <= len(body) <= block_guide.MAX_TOPIC_CHARS, name
+
+
+def test_topics_alone_return_the_reference_then_the_next_step():
+    body = (ROOT / "core" / "widget_guide" / "widget.state.md").read_text(encoding="utf-8").strip()
+    assert block_guide.block_guide({"topics": ["widget.state"]}) == f"widget.state:\n{body}" + NEXT
+
+
+def test_a_topic_can_be_asked_for_by_its_bare_name():
+    assert block_guide.block_guide({"topics": ["state"]}) == block_guide.block_guide({"topics": ["widget.state"]})
+
+
+def test_topics_follow_the_block_specs_and_come_each_once():
+    out = block_guide.block_guide({"blocks": ["table"], "topics": ["widget.blocks", "widget.blocks"]})
+    assert out.startswith(catalog_text.spec("table") + "\n\nwidget.blocks:\n")
+    assert out.count("widget.blocks:\n") == 1
+    assert out.endswith(NEXT)
+
+
+def test_all_four_topics_can_be_read_at_once():
+    out = block_guide.block_guide({"topics": list(TOPIC_NAMES)})
+    for name in TOPIC_NAMES:
+        assert out.count(f"{name}:\n") == 1
+    assert out.endswith(NEXT)
+
+
+def test_an_unknown_topic_is_named_with_the_ones_there_are():
+    out = block_guide.block_guide({"topics": ["widget.colours"]})
+    assert out.startswith('No topic named "widget.colours". Topics are widget.layout, widget.state, '
+                          'widget.collections, widget.blocks.')
+    assert out.endswith(NEXT)
+
+
+def test_the_schema_offers_topics_without_making_blocks_required():
+    parameters = block_guide.BLOCK_GUIDE_SCHEMA["parameters"]
+    assert parameters["properties"]["topics"]["items"]["type"] == "string"
+    assert "blocks" not in parameters.get("required", [])
+
+
+def test_the_guide_tool_still_takes_the_models_argument_object():
+    assert block_guide.block_guide({"topics": "widget.layout"}).startswith("widget.layout:\n")
+    assert block_guide.block_guide({}) == 'Give the block names from the show_blocks menu, e.g. ["chart", "table"].'
+
+
+def test_off_returns_the_switch_off_text_instead_of_widget_references(monkeypatch):
+    advanced = importlib.import_module("hermes_genui.core.advanced")
+    monkeypatch.setattr(advanced, "_CONFIG",
+                        [lambda key, default=None: "off" if key == "advanced_rendering" else default])
+    out = block_guide.block_guide({"topics": ["widget.state"]})
+    assert out == advanced.SWITCH_OFF_PLAIN
+    assert "computed maps a name" not in out
+    assert block_guide.block_guide({"blocks": ["widget"]}) == advanced.SWITCH_OFF_PLAIN
+
+
+def test_off_leaves_other_blocks_alone(monkeypatch):
+    advanced = importlib.import_module("hermes_genui.core.advanced")
+    monkeypatch.setattr(advanced, "_CONFIG",
+                        [lambda key, default=None: "off" if key == "advanced_rendering" else default])
+    assert block_guide.block_guide({"blocks": ["chart"]}) == catalog_text.spec("chart") + NEXT

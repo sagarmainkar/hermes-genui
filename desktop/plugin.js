@@ -166,10 +166,10 @@ function composerActions(composer) {
 }
 
 // src/host/BlockTag.tsx
-import { useContext as useContext13, useEffect as useEffect10, useLayoutEffect as useLayoutEffect4, useReducer, useRef as useRef15, useState as useState27 } from "react";
+import { useContext as useContext14, useEffect as useEffect10, useLayoutEffect as useLayoutEffect4, useReducer, useRef as useRef15, useState as useState28 } from "react";
 
 // src/core/Blocks.tsx
-import { Component as ReactComponent, useContext as useContext11 } from "react";
+import { Component as ReactComponent, useContext as useContext12 } from "react";
 
 // src/blocks/flow/highlight.tsx
 import { createContext as createContext2, useCallback, useContext, useMemo, useState } from "react";
@@ -391,8 +391,8 @@ function Text({ text }) {
 function Divider() {
   return /* @__PURE__ */ jsx5("div", { className: "hb-divider", role: "separator" });
 }
-function Badge({ text, tone }) {
-  return /* @__PURE__ */ jsx5("div", { className: "hb-badge", children: /* @__PURE__ */ jsx5("span", { className: `hb-chip hb-chip-${tone ?? "plain"}`, children: text }) });
+function Badge({ text, tone: tone2 }) {
+  return /* @__PURE__ */ jsx5("div", { className: "hb-badge", children: /* @__PURE__ */ jsx5("span", { className: `hb-chip hb-chip-${tone2 ?? "plain"}`, children: text }) });
 }
 function LinkLine({ text, url }) {
   return /* @__PURE__ */ jsx5("div", { className: "hb-link", children: /* @__PURE__ */ jsxs2("a", { href: url, target: "_blank", rel: "noreferrer", children: [
@@ -1107,14 +1107,14 @@ function kindToDraw(spec) {
   return lieDown ? "hbar" : "bar";
 }
 function chartLabel(spec) {
-  const drawn = kindToDraw(spec);
-  const parts2 = [spec.title?.trim() || spec.series[0].name || "Chart", `${drawn} chart`];
-  const axis = drawn !== "pie" && drawn !== "donut" && drawn !== "hbar";
-  if (spec.xLabel && (axis || drawn === "hbar")) parts2.push(`${spec.xLabel}${axis ? " along the bottom" : " along the bars"}`);
+  const drawn2 = kindToDraw(spec);
+  const parts2 = [spec.title?.trim() || spec.series[0].name || "Chart", `${drawn2} chart`];
+  const axis = drawn2 !== "pie" && drawn2 !== "donut" && drawn2 !== "hbar";
+  if (spec.xLabel && (axis || drawn2 === "hbar")) parts2.push(`${spec.xLabel}${axis ? " along the bottom" : " along the bars"}`);
   if (spec.yLabel && axis) parts2.push(`${spec.yLabel} up the side`);
   const unit = spec.series[0].unit ?? spec.unit;
   const values = spec.series[0].data.filter((v) => v !== null);
-  if (values.length && drawn !== "pie" && drawn !== "donut") {
+  if (values.length && drawn2 !== "pie" && drawn2 !== "donut") {
     const pct = changePct(spec.series[0].data);
     const direction = pct === null ? "" : `, ${pct >= 0 ? "up" : "down"} ${Math.abs(pct).toFixed(1)}%`;
     parts2.push(`${fmt(values[0], unit)} to ${fmt(values[values.length - 1], unit)}${direction}`);
@@ -1172,14 +1172,14 @@ function totalAt(series, i) {
   return total;
 }
 function scatterPoints(series) {
-  const drawn = [];
+  const drawn2 = [];
   series.forEach((s, k) => {
     for (const point of s.points ?? []) {
       if (numOrNull(point.x) === null || numOrNull(point.y) === null) continue;
-      drawn.push({ series: k, point, x: point.x, y: point.y });
+      drawn2.push({ series: k, point, x: point.x, y: point.y });
     }
   });
-  return drawn.sort((a, b) => a.x - b.x || a.y - b.y || a.series - b.series);
+  return drawn2.sort((a, b) => a.x - b.x || a.y - b.y || a.series - b.series);
 }
 var numOrNull = (v) => typeof v === "number" && isFinite(v) ? v : null;
 function waterfallBars(points) {
@@ -1246,11 +1246,11 @@ function missingLabels(spec) {
 }
 function chartScales(spec, bands) {
   if (spec.type === "scatter") {
-    const drawn = scatterPoints(spec.series);
+    const drawn2 = scatterPoints(spec.series);
     return {
-      left: scaleFor(drawn.map((p) => p.y), false),
+      left: scaleFor(drawn2.map((p) => p.y), false),
       right: null,
-      x: scaleFor(drawn.map((p) => p.x), false)
+      x: scaleFor(drawn2.map((p) => p.x), false)
     };
   }
   if (bands) {
@@ -1708,13 +1708,13 @@ function smoothPath(pts) {
   }
   return d;
 }
-function spreadLabels(ys, gap = 14, bottom = Infinity) {
+function spreadLabels(ys, gap2 = 14, bottom = Infinity) {
   const order = ys.map((_, i) => i).sort((a, b) => ys[a] - ys[b]);
   const placed = order.map((i) => ys[i]);
-  for (let k = 1; k < placed.length; k++) placed[k] = Math.max(placed[k], placed[k - 1] + gap);
+  for (let k = 1; k < placed.length; k++) placed[k] = Math.max(placed[k], placed[k - 1] + gap2);
   if (placed.length && placed[placed.length - 1] > bottom) {
     placed[placed.length - 1] = bottom;
-    for (let k = placed.length - 2; k >= 0; k--) placed[k] = Math.min(placed[k], placed[k + 1] - gap);
+    for (let k = placed.length - 2; k >= 0; k--) placed[k] = Math.min(placed[k], placed[k + 1] - gap2);
   }
   const out = new Array(ys.length);
   order.forEach((i, k) => out[i] = placed[k]);
@@ -1761,8 +1761,8 @@ var unitOf = (spec, s) => s.unit ?? spec.unit;
 function xyLayout(spec, width, scales) {
   const n = spec.x.length;
   const slotted = spec.type === "bar" || spec.type === "stacked" || spec.type === "combo";
-  const drawn = kindToDraw(spec);
-  const hasAxis = drawn !== "hbar" && drawn !== "pie" && drawn !== "donut";
+  const drawn2 = kindToDraw(spec);
+  const hasAxis = drawn2 !== "hbar" && drawn2 !== "pie" && drawn2 !== "donut";
   const xRoom = hasAxis && spec.xLabel ? X_TITLE_ROOM : 0;
   const yRoom = hasAxis && spec.yLabel ? Y_TITLE_ROOM : 0;
   const H = (spec.height ?? (slotted ? COLUMNS_H : LINES_H)) + xRoom + yRoom;
@@ -1928,9 +1928,9 @@ function waterfallLayout(spec, width) {
   const right = width - 4;
   const columns = columnLayout(right - left, n, 1);
   const xAt = (i) => left + columns.start + columns.slot * (i + 0.5);
-  const drawn = bars.filter((b) => b !== null);
-  const values = drawn.map((b) => waterfallValue(b, spec.unit));
-  const valueLabels = drawn.length <= WATERFALL_VALUE_LABELS && values.every((v) => textWidth(v, 11.5) <= columns.slot - 4);
+  const drawn2 = bars.filter((b) => b !== null);
+  const values = drawn2.map((b) => waterfallValue(b, spec.unit));
+  const valueLabels = drawn2.length <= WATERFALL_VALUE_LABELS && values.every((v) => textWidth(v, 11.5) <= columns.slot - 4);
   const top = TOP + (valueLabels ? VALUE_ROOM : 0);
   const yAt = (v) => base - (base - top) * (v - ticks[0]) / (ticks[ticks.length - 1] - ticks[0] || 1);
   const labels2 = spec.x.map((label) => cutAtWord(String(label), Math.max(6, Math.floor((columns.slot - 6) / (11 * 0.6)))));
@@ -2313,8 +2313,8 @@ function HBarChart({ spec }) {
             }) }),
             /* @__PURE__ */ jsx11("div", { className: "hb-hbar-values", ...rowEvents(i), children: spec.series.map((s, k) => {
               const v = s.data[i] ?? null;
-              const tone = single && signed && v !== null ? v >= 0 ? " hb-hbar-up" : " hb-hbar-down" : "";
-              return /* @__PURE__ */ jsx11("span", { className: `hb-hbar-value${tone}`, children: v === null ? "\u2013" : fmt(v, unitOf2(k)) }, k);
+              const tone2 = single && signed && v !== null ? v >= 0 ? " hb-hbar-up" : " hb-hbar-down" : "";
+              return /* @__PURE__ */ jsx11("span", { className: `hb-hbar-value${tone2}`, children: v === null ? "\u2013" : fmt(v, unitOf2(k)) }, k);
             }) })
           ] }, i))
         }
@@ -2661,11 +2661,11 @@ function barText(bar, label, unit) {
   return `${label}, ${step < 0 ? "minus" : "plus"} ${fmt(Math.abs(step), unit)}, balance ${fmt(bar.to, unit)}`;
 }
 function nameOf2(spec, layout) {
-  const drawn = layout.bars.filter((b) => b !== null);
+  const drawn2 = layout.bars.filter((b) => b !== null);
   const title = spec.title ?? "Waterfall";
-  if (!drawn.length) return `${title}: no point with a value`;
+  if (!drawn2.length) return `${title}: no point with a value`;
   const unit = spec.series[0]?.unit ?? spec.unit;
-  return `${title}: ${drawn.length} of ${spec.x.length} bars, balance ${fmt(drawn[drawn.length - 1].to, unit)}`;
+  return `${title}: ${drawn2.length} of ${spec.x.length} bars, balance ${fmt(drawn2[drawn2.length - 1].to, unit)}`;
 }
 
 // src/blocks/chart/Chart.tsx
@@ -3032,9 +3032,9 @@ function readCalendar(raw, here) {
 // src/blocks/callout/Callout.tsx
 import { jsx as jsx18, jsxs as jsxs15 } from "react/jsx-runtime";
 var TONE_ICON = { info: "info", tip: "spark", warn: "alert" };
-function Callout({ tone, title, text }) {
-  return /* @__PURE__ */ jsxs15("div", { className: `hb-callout hb-callout-${tone}`, children: [
-    /* @__PURE__ */ jsx18("span", { className: "hb-callout-icon", children: /* @__PURE__ */ jsx18(Icon, { name: TONE_ICON[tone], size: 17, stroke: 2.2 }) }),
+function Callout({ tone: tone2, title, text }) {
+  return /* @__PURE__ */ jsxs15("div", { className: `hb-callout hb-callout-${tone2}`, children: [
+    /* @__PURE__ */ jsx18("span", { className: "hb-callout-icon", children: /* @__PURE__ */ jsx18(Icon, { name: TONE_ICON[tone2], size: 17, stroke: 2.2 }) }),
     /* @__PURE__ */ jsxs15("div", { className: "hb-callout-body", children: [
       title && /* @__PURE__ */ jsx18("div", { className: "hb-callout-title", children: /* @__PURE__ */ jsx18(InlineText, { text: title }) }),
       /* @__PURE__ */ jsx18("div", { children: /* @__PURE__ */ jsx18(InlineText, { text }) })
@@ -3395,33 +3395,519 @@ function readWeather(raw, here) {
   });
 }
 
-// src/blocks/callout/read.ts
-var TONES = {
-  info: "info",
-  note: "info",
-  neutral: "info",
-  tip: "tip",
-  success: "tip",
-  good: "tip",
-  idea: "tip",
-  warn: "warn",
-  warning: "warn",
-  caution: "warn",
-  danger: "warn",
-  alert: "warn",
-  error: "warn"
-};
-function readCallout(raw, here) {
-  const toneWord = firstText([raw.tone, raw.variant], 20)?.toLowerCase() ?? "info";
-  const tone = TONES[toneWord] ?? "info";
-  let title = firstText([raw.title], 80);
-  let text = firstWords([raw.text, raw.body, raw.message, raw.content], 400);
-  if (!text && title) {
-    text = title;
-    title = void 0;
+// src/blocks/widget/Widget.tsx
+import { Fragment as Fragment5, useContext as useContext6, useId as useId3, useMemo as useMemo7, useState as useState13 } from "react";
+
+// src/blocks/kpis/Kpis.tsx
+import { jsx as jsx22, jsxs as jsxs19 } from "react/jsx-runtime";
+function isYear(k) {
+  return typeof k.value === "number" && !k.unit && Number.isInteger(k.value) && k.value >= 1800 && k.value <= 2100;
+}
+var CURRENCY = /^[$₹€£¥]$/;
+function kpiValue(k, { full = false } = {}) {
+  if (k.value === null) return "no data";
+  if (typeof k.value === "string") return k.value;
+  if (isYear(k)) return String(k.value);
+  const short2 = !full && Math.abs(k.value) >= SHORT_FROM;
+  if (short2 && k.unit && CURRENCY.test(k.unit)) return fmt(k.value, k.unit);
+  const money = formatAmount(k.value, k.unit);
+  if (money !== null) return money;
+  const plain2 = short2 ? fmt(k.value) : formatNumber(k.value, { digits: Math.abs(k.value) >= 1e3 ? 0 : 1 });
+  const attached = k.unit === "%" || k.unit?.startsWith("/");
+  return attached ? `${plain2}${k.unit}` : k.unit ? `${plain2} ${k.unit}` : plain2;
+}
+function KpiCard({ item, trendColour }) {
+  const shown2 = kpiValue(item);
+  const full = kpiValue(item, { full: true });
+  const change = formatChange(item.change, item.change_unit);
+  const isText = typeof item.value === "string";
+  const empty = item.value === null;
+  const valueClass = ["hb-kpi-value", isText ? "hb-kpi-value-text" : "", empty ? "hb-kpi-value-empty" : ""].filter(Boolean).join(" ");
+  return /* @__PURE__ */ jsxs19("div", { className: "hb-card hb-kpi", children: [
+    /* @__PURE__ */ jsx22("div", { className: "hb-kpi-label", children: item.label }),
+    /* @__PURE__ */ jsx22("div", { className: valueClass, title: full !== shown2 ? full : void 0, children: shown2 }),
+    change && /* @__PURE__ */ jsx22("div", { className: changeClass(item), children: change }),
+    item.trend && /* @__PURE__ */ jsx22(Sparkline, { values: item.trend, colour: trendColour })
+  ] });
+}
+function Kpis({ items }) {
+  const several = items.filter((k) => k.trend).length >= 2;
+  return /* @__PURE__ */ jsx22("div", { className: "hb-kpis", children: items.map((k, i) => /* @__PURE__ */ jsx22(KpiCard, { item: k, trendColour: several ? partColour(i) : void 0 }, i)) });
+}
+function changeClass(item) {
+  const change = item.change ?? 0;
+  const direction = change > 0 ? "hb-kpi-up" : change < 0 ? "hb-kpi-down" : "hb-kpi-flat";
+  return `hb-kpi-change ${direction}${item.invert_tone ? " hb-kpi-invert" : ""}`;
+}
+var SPARK_W = 120;
+var SPARK_H = 28;
+var SPARK_PAD = 2;
+function Sparkline({ values, colour }) {
+  return /* @__PURE__ */ jsx22("svg", { className: "hb-kpi-spark", viewBox: `0 0 ${SPARK_W} ${SPARK_H}`, preserveAspectRatio: "none", "aria-hidden": "true", children: /* @__PURE__ */ jsx22("path", { d: sparkPath(values), style: colour ? { stroke: colour } : void 0 }) });
+}
+function sparkPath(values) {
+  const known = values.filter((v) => v !== null);
+  if (!known.length) return "";
+  const lo = Math.min(...known);
+  const hi = Math.max(...known);
+  const span = SPARK_H - 2 * SPARK_PAD;
+  const y = (v) => hi === lo ? SPARK_H / 2 : SPARK_PAD + (1 - (v - lo) / (hi - lo)) * span;
+  const x = (i) => i / (values.length - 1) * SPARK_W;
+  let d = "";
+  let pen = false;
+  values.forEach((v, i) => {
+    if (v === null) {
+      pen = false;
+      return;
+    }
+    d += `${pen ? "L" : "M"}${round(x(i))} ${round(y(v))}`;
+    pen = true;
+  });
+  return d;
+}
+function round(n) {
+  return Math.round(n * 10) / 10;
+}
+
+// src/blocks/source/Source.tsx
+import { jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
+function Row({ item, index }) {
+  const name = item.url ? /* @__PURE__ */ jsx23("a", { href: item.url, target: "_blank", rel: "noreferrer", children: item.label }) : /* @__PURE__ */ jsx23("span", { children: item.label });
+  return /* @__PURE__ */ jsxs20("li", { className: "hb-source-row", children: [
+    /* @__PURE__ */ jsx23("span", { className: "hb-source-n", "aria-hidden": "true", children: index + 1 }),
+    name,
+    item.kind && /* @__PURE__ */ jsx23("span", { className: `hb-source-kind hb-source-kind-${item.kind}`, children: item.kind }),
+    item.accessed && /* @__PURE__ */ jsxs20("span", { className: "hb-source-accessed", children: [
+      "accessed ",
+      item.accessed
+    ] }),
+    item.note && /* @__PURE__ */ jsx23("span", { className: "hb-source-note", children: item.note })
+  ] });
+}
+function Source({ text, url, title, items }) {
+  if (items?.length) {
+    return /* @__PURE__ */ jsxs20("div", { className: "hb-source hb-source-list", children: [
+      title && /* @__PURE__ */ jsx23("div", { className: "hb-source-head", children: title }),
+      /* @__PURE__ */ jsx23("ol", { className: "hb-source-rows", children: items.map((item, i) => /* @__PURE__ */ jsx23(Row, { item, index: i }, `${item.label}-${i}`)) })
+    ] });
   }
-  if (!text) return here.drop("callout needs text");
-  return clean({ type: "callout", tone, title, text });
+  if (!text) return null;
+  if (!url) return /* @__PURE__ */ jsx23("div", { className: "hb-source", children: text });
+  return /* @__PURE__ */ jsx23("div", { className: "hb-source", children: /* @__PURE__ */ jsx23("a", { href: url, target: "_blank", rel: "noreferrer", children: text }) });
+}
+
+// src/blocks/table/Table.tsx
+import { useState as useState12 } from "react";
+
+// src/blocks/table/StructuredTable.tsx
+import { useMemo as useMemo6, useState as useState11 } from "react";
+import { jsx as jsx24, jsxs as jsxs21 } from "react/jsx-runtime";
+var PAGE = 10;
+function shown(cell, column) {
+  if (!cell) return "\u2013";
+  if (cell.value === void 0) return cell.text;
+  if (column.kind === "currency") return formatAmount(cell.value, column.unit) ?? formatNumber(cell.value);
+  if (column.kind === "percent") return formatPercent(cell.value);
+  if (column.kind === "number" || column.kind === "bar") return formatNumber(cell.value);
+  return cell.text;
+}
+function aggregateValue(rows, a) {
+  const values = rows.map((r) => r.cells[a.column]?.value).filter((v) => v !== void 0);
+  if (a.op === "count") return values.length;
+  if (!values.length) return null;
+  if (a.op === "sum") return values.reduce((s, v) => s + v, 0);
+  if (a.op === "avg") return values.reduce((s, v) => s + v, 0) / values.length;
+  if (a.op === "min") return Math.min(...values);
+  return Math.max(...values);
+}
+function aggregateLabel(op) {
+  return { sum: "Total", avg: "Average", min: "Lowest", max: "Highest", count: "Count" }[op];
+}
+function StructuredTable({ caption: caption2, columns, rows, filterable, page, aggregates }) {
+  const [query, setQuery] = useState11("");
+  const [at2, setAt] = useState11(page);
+  const needle = query.trim().toLowerCase();
+  const filtered = useMemo6(() => {
+    if (!needle) return rows;
+    return rows.filter((row) => columns.some((c) => {
+      const cell = row.cells[c.id];
+      return `${cell?.text ?? ""} ${row.sources.map((s) => s.label).join(" ")}`.toLowerCase().includes(needle);
+    }));
+  }, [rows, columns, needle]);
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
+  const current = Math.min(at2, pages);
+  const slice = filtered.slice((current - 1) * PAGE, current * PAGE);
+  return /* @__PURE__ */ jsxs21("div", { className: "hb-card hb-table-card hb-table hb-table-structured", children: [
+    /* @__PURE__ */ jsxs21("table", { className: "hb-table-grid", children: [
+      caption2 && /* @__PURE__ */ jsx24("caption", { className: "hb-table-caption", children: caption2 }),
+      /* @__PURE__ */ jsx24("thead", { children: /* @__PURE__ */ jsx24("tr", { children: columns.map((c) => /* @__PURE__ */ jsx24("th", { scope: "col", className: c.align ? `hb-align-${c.align}` : void 0, children: c.label }, c.id)) }) }),
+      /* @__PURE__ */ jsxs21("tbody", { children: [
+        slice.map((row, i) => /* @__PURE__ */ jsx24("tr", { children: columns.map((column, ci) => /* @__PURE__ */ jsxs21("td", { className: column.align ? `hb-align-${column.align}` : void 0, children: [
+          column.kind === "sources" ? /* @__PURE__ */ jsx24("span", { className: "hb-table-sources", children: row.sources.length ? row.sources.map(
+            (s, si) => s.url ? /* @__PURE__ */ jsx24("a", { href: s.url, target: "_blank", rel: "noreferrer", children: s.label }, si) : /* @__PURE__ */ jsx24("span", { children: s.label }, si)
+          ) : /* @__PURE__ */ jsx24("span", { className: "hb-table-empty", children: "\u2013" }) }) : column.kind === "bar" ? /* @__PURE__ */ jsxs21("span", { className: "hb-table-bar", children: [
+            /* @__PURE__ */ jsx24(
+              "span",
+              {
+                className: "hb-table-bar-fill",
+                style: { width: `${Math.min(100, Math.max(0, (row.cells[column.id]?.value ?? 0) / (column.max ?? Math.max(1, ...rows.map((r) => r.cells[column.id]?.value ?? 0))) * 100))}%` }
+              }
+            ),
+            /* @__PURE__ */ jsx24("span", { className: "hb-table-bar-value", children: shown(row.cells[column.id], column) })
+          ] }) : column.kind === "badge" ? /* @__PURE__ */ jsx24("span", { className: `hb-chip hb-chip-${row.cells[column.id]?.tone ?? column.tone ?? "plain"}`, children: shown(row.cells[column.id], column) }) : column.kind === "link" && row.cells[column.id]?.url ? /* @__PURE__ */ jsx24("a", { href: row.cells[column.id].url, target: "_blank", rel: "noreferrer", children: shown(row.cells[column.id], column) }) : /* @__PURE__ */ jsx24("span", { children: shown(row.cells[column.id], column) }),
+          ci === 0 && row.sources.length > 0 && column.kind !== "sources" && /* @__PURE__ */ jsx24("span", { className: "hb-table-source-hint", "aria-label": `Sources: ${row.sources.map((s) => s.label).join(", ")}`, children: "\u2022" })
+        ] }, column.id)) }, `${(current - 1) * PAGE + i}`)),
+        !slice.length && /* @__PURE__ */ jsx24("tr", { children: /* @__PURE__ */ jsx24("td", { colSpan: columns.length, className: "hb-table-empty-cell", children: "No rows match." }) })
+      ] }),
+      aggregates.length > 0 && /* @__PURE__ */ jsx24("tfoot", { children: /* @__PURE__ */ jsx24("tr", { children: columns.map((column, ci) => {
+        const a = aggregates.find((item) => item.column === column.id);
+        if (!a) return /* @__PURE__ */ jsx24("td", {}, column.id);
+        const value = aggregateValue(filtered, a);
+        return /* @__PURE__ */ jsxs21("td", { children: [
+          /* @__PURE__ */ jsx24("span", { className: "hb-table-aggregate-label", children: ci === 0 ? a.label : aggregateLabel(a.op) }),
+          value !== null ? ` ${formatNumber(value)}` : " \u2013"
+        ] }, column.id);
+      }) }) })
+    ] }),
+    (filterable || pages > 1) && /* @__PURE__ */ jsxs21("div", { className: "hb-table-tools", children: [
+      filterable && /* @__PURE__ */ jsx24(
+        "input",
+        {
+          type: "search",
+          value: query,
+          placeholder: "Filter rows",
+          "aria-label": "Filter rows",
+          onChange: (e) => {
+            setQuery(e.target.value);
+            setAt(1);
+          }
+        }
+      ),
+      pages > 1 && /* @__PURE__ */ jsxs21("div", { className: "hb-table-pages", children: [
+        /* @__PURE__ */ jsx24("button", { type: "button", disabled: current === 1, onClick: () => setAt(Math.max(1, current - 1)), "aria-label": "Previous page", children: "\u2039" }),
+        /* @__PURE__ */ jsxs21("span", { children: [
+          "Page ",
+          current,
+          " of ",
+          pages
+        ] }),
+        /* @__PURE__ */ jsx24("button", { type: "button", disabled: current === pages, onClick: () => setAt(Math.min(pages, current + 1)), "aria-label": "Next page", children: "\u203A" })
+      ] })
+    ] })
+  ] });
+}
+
+// src/blocks/table/sort.ts
+var GAP2 = "\u2013";
+function isBlank(cell) {
+  return !cell || cell === GAP2;
+}
+function cellNumber(cell) {
+  const plain2 = cell.replace(/,/g, "").replace(/^−/, "-");
+  const m = /^([-+]?)[^\d\-+]{0,3}([-+]?\d+(?:\.\d+)?)/.exec(plain2);
+  if (!m) return null;
+  const n = Number(m[2]);
+  return m[1] === "-" ? -n : n;
+}
+function sortedOrder(rows, sort) {
+  const order = rows.map((_, i) => i);
+  if (!sort) return order;
+  const sign = sort.direction === "up" ? 1 : -1;
+  return order.sort((a, b) => {
+    const left = rows[a][sort.column] ?? "";
+    const right = rows[b][sort.column] ?? "";
+    if (isBlank(left) || isBlank(right)) return blanksLast(left, right);
+    return sign * compareCells(left, right);
+  });
+}
+function blanksLast(left, right) {
+  const leftBlank = isBlank(left), rightBlank = isBlank(right);
+  if (leftBlank && rightBlank) return 0;
+  if (leftBlank) return 1;
+  return -1;
+}
+function compareCells(left, right) {
+  const a = cellNumber(left);
+  const b = cellNumber(right);
+  if (a !== null && b !== null) return a - b;
+  return left.localeCompare(right, void 0, { numeric: true, sensitivity: "base" });
+}
+function nextSort(sort, column) {
+  if (!sort || sort.column !== column) return { column, direction: "up" };
+  if (sort.direction === "up") return { column, direction: "down" };
+  return null;
+}
+function isNumberColumn(rows, column) {
+  const filled = rows.map((r) => r[column] ?? "").filter((cell) => !isBlank(cell));
+  return filled.length > 0 && filled.every((cell) => cellNumber(cell) !== null);
+}
+
+// src/blocks/table/cells.ts
+function isChangeColumn(rows, column) {
+  if (!isNumberColumn(rows, column) || !rows.some((r) => /^[-+−]/.test(r[column] ?? ""))) return false;
+  const filled = rows.map((r) => (r[column] ?? "").trim()).filter((cell) => !isBlank(cell));
+  const allPercent = filled.every((cell) => cell.endsWith("%"));
+  const allSigned = filled.every((cell) => /^[-+−]/.test(cell) || cellNumber(cell) === 0);
+  return allPercent || allSigned;
+}
+function changeOf(cell) {
+  const n = cellNumber(cell);
+  if (n === null || n === 0) return null;
+  return n > 0 ? "up" : "down";
+}
+function miniBar(value, largest) {
+  const width = largest > 0 ? Math.abs(value) / largest * 50 : 0;
+  return { left: value < 0 ? 50 - width : 50, width };
+}
+var AMOUNT = /^([-+−]?)([$₹€£¥]?)(\d{1,3}(?:,\d{2,3})+|\d+)(\.\d+)?$/;
+function bigNumber(cell) {
+  const m = AMOUNT.exec(cell.trim());
+  if (!m) return null;
+  const [, sign, currency, digits, decimals2 = ""] = m;
+  if (!currency && !digits.includes(",")) return null;
+  const magnitude = Number(digits.replace(/,/g, "") + decimals2);
+  if (magnitude < SHORT_FROM) return null;
+  const v = sign === "-" || sign === "\u2212" ? -magnitude : magnitude;
+  const unit = currency || void 0;
+  const plus = sign === "+" ? "+" : "";
+  return { short: plus + fmt(v, unit), full: plus + fmt(v, unit, { full: true }) };
+}
+
+// src/blocks/table/Table.tsx
+import { jsx as jsx25, jsxs as jsxs22 } from "react/jsx-runtime";
+var MINI_BARS_FROM = 3;
+function Table(props) {
+  if ("structured" in props && props.structured) return /* @__PURE__ */ jsx25(StructuredTable, { ...props });
+  const { columns, rows, highlight, caption: caption2 } = props;
+  const [sort, setSort] = useState12(null);
+  const order = sortedOrder(rows, sort);
+  const bestRow = highlight && "row" in highlight ? highlight.row : -1;
+  const bestColumn = highlight && "column" in highlight ? highlight.column : -1;
+  const numeric = columns.map((_, c) => isNumberColumn(rows, c));
+  const change = columns.map((_, c) => isChangeColumn(rows, c));
+  const largest = columns.map((_, c) => change[c] ? largestChange(rows, c) : 0);
+  const withBars = rows.length >= MINI_BARS_FROM;
+  const cellClass = (c, text, extra = "") => [
+    numeric[c] ? "hb-num" : "",
+    c === 0 ? "hb-first" : "",
+    c === bestColumn ? "hb-best-col" : "",
+    text.length > 28 ? "hb-wrap" : "",
+    extra
+  ].filter(Boolean).join(" ");
+  return /* @__PURE__ */ jsxs22("div", { className: "hb-card hb-table-card", children: [
+    caption2 && /* @__PURE__ */ jsx25("div", { className: "hb-chart-title hb-table-caption", children: /* @__PURE__ */ jsx25(InlineText, { text: caption2 }) }),
+    /* @__PURE__ */ jsx25("div", { className: "hb-table-scroll", children: /* @__PURE__ */ jsxs22("table", { className: columns.length >= 3 ? "hb-table hb-table-wide" : "hb-table", children: [
+      /* @__PURE__ */ jsx25("thead", { children: /* @__PURE__ */ jsx25("tr", { children: columns.map((name, c) => /* @__PURE__ */ jsx25("th", { "aria-sort": ariaSort(sort, c), className: cellClass(c, name, sort?.column === c ? "hb-sorted" : ""), children: /* @__PURE__ */ jsxs22("button", { type: "button", onClick: () => setSort(nextSort(sort, c)), children: [
+        /* @__PURE__ */ jsx25("span", { children: name }),
+        /* @__PURE__ */ jsx25("span", { className: "hb-sort", "aria-hidden": "true", children: sortMark(sort, c) }),
+        c === bestColumn && /* @__PURE__ */ jsx25("span", { className: "hb-chip hb-chip-soft", children: "Best" })
+      ] }) }, c)) }) }),
+      /* @__PURE__ */ jsxs22("tbody", { children: [
+        !rows.length && /* @__PURE__ */ jsx25("tr", { children: /* @__PURE__ */ jsx25("td", { className: "hb-table-empty", colSpan: columns.length, children: "No rows to show." }) }),
+        order.map((r) => /* @__PURE__ */ jsx25("tr", { className: r === bestRow ? "hb-best" : void 0, children: rows[r].map((cell, c) => {
+          const big = bigNumber(cell);
+          const direction = change[c] ? changeOf(cell) : null;
+          const bar = change[c] && withBars ? cellNumber(cell) : null;
+          return /* @__PURE__ */ jsxs22("td", { className: cellClass(c, cell, direction ? `hb-${direction}` : ""), title: big?.full, children: [
+            bar !== null && /* @__PURE__ */ jsx25(MiniBar, { value: bar, largest: largest[c] }),
+            big ? big.short : /* @__PURE__ */ jsx25(InlineText, { text: cell }),
+            c === 0 && r === bestRow && /* @__PURE__ */ jsx25("span", { className: "hb-chip hb-chip-soft", children: "Best" })
+          ] }, c);
+        }) }, r))
+      ] })
+    ] }) })
+  ] });
+}
+function MiniBar({ value, largest }) {
+  const { left, width } = miniBar(value, largest);
+  return /* @__PURE__ */ jsxs22("span", { className: "hb-mini", "aria-hidden": "true", children: [
+    /* @__PURE__ */ jsx25("span", { className: "hb-mini-zero" }),
+    /* @__PURE__ */ jsx25("span", { className: "hb-mini-bar", style: { left: `${left}%`, width: `${width}%` } })
+  ] });
+}
+function largestChange(rows, column) {
+  return Math.max(0, ...rows.map((r) => Math.abs(cellNumber(r[column]) ?? 0)));
+}
+function sortMark(sort, column) {
+  if (!sort || sort.column !== column) return "\u2195";
+  return sort.direction === "up" ? "\u2191" : "\u2193";
+}
+function ariaSort(sort, column) {
+  if (!sort || sort.column !== column) return void 0;
+  return sort.direction === "up" ? "ascending" : "descending";
+}
+
+// src/blocks/widget/expr.ts
+var DIVIDED_BY_ZERO = "divided by zero";
+var NON_FINITE = "non-finite result";
+var UNKNOWN_REFERENCE = "unknown reference";
+var UNKNOWN_OPERATOR = "unknown operator";
+var WRONG_OPERAND_TYPE = "wrong operand type";
+var ARITY = { add: 2, sub: 2, mul: 2, div: 2, eq: 2, lt: 2, lte: 2, and: 2, or: 2, not: 1, if: 3 };
+var OPS = Object.keys(ARITY);
+var NAME = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+var PROTO = /* @__PURE__ */ new Set(["__proto__", "prototype", "constructor"]);
+var MAX_EXPR_STRING = 200;
+var MAX_EXPR_DEPTH = 6;
+var ok = (value) => ({ value, error: null });
+var fail = (error) => ({ value: null, error });
+function isObject(v) {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+function isNumber(v) {
+  return typeof v === "number" && isFinite(v);
+}
+function isReference(path) {
+  if (typeof path !== "string") return false;
+  const parts2 = path.split(".");
+  if (parts2.length !== 2) return false;
+  const [root, key] = parts2;
+  if (PROTO.has(root) || PROTO.has(key)) return false;
+  return (root === "data" || root === "state" || root === "computed" || root === "item") && NAME.test(key);
+}
+function computedReferences(expr, found = []) {
+  if (!isObject(expr)) return found;
+  if (typeof expr.get === "string") {
+    const path = expr.get;
+    if (path.startsWith("computed.")) found.push(path.slice("computed.".length));
+    return found;
+  }
+  const args = expr.args;
+  if (Array.isArray(args)) for (const arg of args) computedReferences(arg, found);
+  return found;
+}
+function checkExpr(expr, depth = 0) {
+  if (depth > MAX_EXPR_DEPTH) return "expression nested too deep";
+  if (expr === null || typeof expr === "boolean") return null;
+  if (typeof expr === "number") return isFinite(expr) ? null : "non-finite literal";
+  if (typeof expr === "string") return expr.length <= MAX_EXPR_STRING ? null : "string too long";
+  if (!isObject(expr)) return "not an expression";
+  if ("get" in expr) return isReference(expr.get) ? null : "bad reference";
+  const op = expr.op;
+  if (typeof op !== "string" || !Object.hasOwn(ARITY, op)) return "unknown operator";
+  const args = expr.args;
+  if (!Array.isArray(args) || args.length !== ARITY[op]) return "wrong arity";
+  for (const arg of args) {
+    const why = checkExpr(arg, depth + 1);
+    if (why) return why;
+  }
+  return null;
+}
+function evaluate2(expr, scope, resolveComputed) {
+  if (expr === null) return ok(null);
+  if (typeof expr === "boolean" || typeof expr === "string") return ok(expr);
+  if (typeof expr === "number") return isFinite(expr) ? ok(expr) : fail(NON_FINITE);
+  if (!isObject(expr)) return fail(WRONG_OPERAND_TYPE);
+  if ("get" in expr) return reference(expr.get, scope, resolveComputed);
+  const op = expr.op;
+  if (typeof op !== "string" || !Object.hasOwn(ARITY, op)) return fail(UNKNOWN_OPERATOR);
+  const args = expr.args;
+  const arity = ARITY[op];
+  if (!Array.isArray(args) || args.length !== arity) return fail(WRONG_OPERAND_TYPE);
+  const arg = (i) => evaluate2(args[i], scope, resolveComputed);
+  switch (op) {
+    case "add":
+    case "sub":
+    case "mul":
+    case "div":
+      return arithmetic(op, arg(0), arg(1));
+    case "eq":
+      return equal(arg(0), arg(1));
+    case "lt":
+    case "lte":
+      return compare(op, arg(0), arg(1));
+    case "and":
+    case "or":
+      return logical(op, arg(0), arg(1));
+    case "not": {
+      const value = arg(0);
+      if (value.error) return value;
+      if (value.value === null) return ok(null);
+      if (typeof value.value !== "boolean") return fail(WRONG_OPERAND_TYPE);
+      return ok(!value.value);
+    }
+    case "if": {
+      const test = arg(0);
+      if (test.error) return test;
+      if (test.value === null) return ok(null);
+      if (typeof test.value !== "boolean") return fail(WRONG_OPERAND_TYPE);
+      return arg(test.value ? 1 : 2);
+    }
+  }
+}
+function reference(path, scope, resolve) {
+  if (!isReference(path)) return fail(UNKNOWN_REFERENCE);
+  const [root, key] = path.split(".");
+  if (root === "computed" && resolve) {
+    const defined = resolve(key);
+    if (defined) return defined;
+  }
+  const bag = root === "data" ? scope.data : root === "state" ? scope.state : root === "computed" ? scope.computed : scope.item;
+  if (!isObject(bag) || !Object.hasOwn(bag, key)) return fail(UNKNOWN_REFERENCE);
+  const value = bag[key];
+  return value === void 0 ? fail(UNKNOWN_REFERENCE) : ok(value);
+}
+function arithmetic(op, a, b) {
+  if (a.error) return a;
+  if (b.error) return b;
+  if (a.value === null || b.value === null) return ok(null);
+  if (!isNumber(a.value) || !isNumber(b.value)) return fail(WRONG_OPERAND_TYPE);
+  if (op === "div" && b.value === 0) return fail(DIVIDED_BY_ZERO);
+  const value = op === "add" ? a.value + b.value : op === "sub" ? a.value - b.value : op === "mul" ? a.value * b.value : a.value / b.value;
+  return isFinite(value) ? ok(value) : fail(NON_FINITE);
+}
+function equal(a, b) {
+  if (a.error) return a;
+  if (b.error) return b;
+  if (a.value === null || b.value === null) return ok(null);
+  if (isNumber(a.value) && isNumber(b.value)) return ok(a.value === b.value);
+  if (typeof a.value === "string" && typeof b.value === "string") return ok(a.value === b.value);
+  if (typeof a.value === "boolean" && typeof b.value === "boolean") return ok(a.value === b.value);
+  if (isPrimitive(a.value) && isPrimitive(b.value)) return ok(false);
+  return ok(null);
+}
+function compare(op, a, b) {
+  if (a.error) return a;
+  if (b.error) return b;
+  if (a.value === null || b.value === null) return ok(null);
+  const sameNumbers = isNumber(a.value) && isNumber(b.value);
+  const sameStrings = typeof a.value === "string" && typeof b.value === "string";
+  if (!sameNumbers && !sameStrings) return fail(WRONG_OPERAND_TYPE);
+  const left = a.value;
+  const right = b.value;
+  return ok(op === "lt" ? left < right : left <= right);
+}
+function logical(op, a, b) {
+  if (a.error) return a;
+  if (a.value === null) return ok(null);
+  if (typeof a.value !== "boolean") return fail(WRONG_OPERAND_TYPE);
+  if (op === "and" && !a.value) return ok(false);
+  if (op === "or" && a.value) return ok(true);
+  if (b.error) return b;
+  if (b.value === null) return ok(null);
+  if (typeof b.value !== "boolean") return fail(WRONG_OPERAND_TYPE);
+  return ok(op === "and" ? a.value && b.value : a.value || b.value);
+}
+function isPrimitive(v) {
+  return v === null || typeof v === "number" || typeof v === "string" || typeof v === "boolean";
+}
+function evaluateComputed(definitions, base) {
+  const values = {};
+  const errors = {};
+  const visiting = /* @__PURE__ */ new Set();
+  const find = (name) => {
+    if (!Object.hasOwn(definitions, name)) return void 0;
+    if (Object.hasOwn(values, name)) return { value: values[name], error: errors[name] };
+    if (visiting.has(name)) return fail(UNKNOWN_REFERENCE);
+    visiting.add(name);
+    const result = evaluate2(definitions[name], { ...base, computed: values }, find);
+    visiting.delete(name);
+    values[name] = result.value;
+    errors[name] = result.error;
+    return result;
+  };
+  for (const name of Object.keys(definitions)) find(name);
+  return { values, errors };
 }
 
 // src/blocks/chart/read.ts
@@ -3484,10 +3970,10 @@ function specOf(d, type, x, series, unit) {
   if (type !== "pie" && type !== "donut") {
     const xLabel = caption(d.xLabel, 40);
     const yLabel = caption(d.yLabel, 40);
-    const drawn = kindToDraw(spec);
-    if (xLabel && drawn !== "hbar") spec.xLabel = xLabel;
-    if (yLabel && drawn !== "hbar") spec.yLabel = yLabel;
-    if (drawn === "hbar") {
+    const drawn2 = kindToDraw(spec);
+    if (xLabel && drawn2 !== "hbar") spec.xLabel = xLabel;
+    if (yLabel && drawn2 !== "hbar") spec.yLabel = yLabel;
+    if (drawn2 === "hbar") {
       const valueLabel = xLabel ?? yLabel;
       if (valueLabel) spec.xLabel = valueLabel;
     }
@@ -3542,9 +4028,1128 @@ function readWaterfallPoint(raw, here) {
   return clean({ label: str(raw.label, 40), value: num(raw.value), total: raw.total === true ? true : void 0 });
 }
 
+// src/blocks/kpis/read.ts
+var TREND_FEWEST = 2;
+var TREND_MOST = 60;
+var MAX_CHIP = 1e15;
+function readKpi(item) {
+  let value = num(item.value);
+  if (value === null) value = str(item.value, 40) ?? null;
+  const unit = typeof item.unit === "string" ? item.unit : void 0;
+  const fromPrevious = "previous" in item;
+  const changeUnit = readChangeUnit(item.change_unit, unit, fromPrevious);
+  let change = fromPrevious ? changeFrom(item.previous, value, changeUnit) : num(item.change);
+  if (change !== null && Math.abs(change) >= MAX_CHIP) change = null;
+  const kpi = { label: item.label, value, unit, change, change_unit: changeUnit };
+  if (kpi.unit === void 0) delete kpi.unit;
+  if (kpi.change === null) delete kpi.change;
+  if (item.invert_tone === true) kpi.invert_tone = true;
+  const trend = readTrend(item.trend);
+  if (trend) kpi.trend = trend;
+  return kpi;
+}
+function readChangeUnit(written, unit, fromPrevious) {
+  if (written === "%" || written === "pt") return written;
+  return fromPrevious && unit === "%" ? "pt" : "%";
+}
+function changeFrom(previous, value, unit) {
+  const before = num(previous);
+  if (before === null || typeof value !== "number") return null;
+  const moved = value - before;
+  if (unit === "pt") return moved;
+  return before === 0 ? null : moved / Math.abs(before) * 100;
+}
+function readTrend(v) {
+  if (!Array.isArray(v)) return void 0;
+  const slots = v.slice(-TREND_MOST).map((x) => num(x));
+  const known = slots.filter((n) => n !== null).length;
+  return known >= TREND_FEWEST ? slots : void 0;
+}
+function readKpis(raw, here) {
+  if (!Array.isArray(raw.items)) return here.drop("kpis needs items");
+  const items = [];
+  raw.items.forEach((item, i) => {
+    if (!item || typeof item.label !== "string") {
+      here.at("items").at(i).drop("item has no label");
+      return;
+    }
+    items.push(readKpi(item));
+  });
+  if (!items.length) return here.drop("kpis has no item with a label");
+  return { type: "kpis", items: keepFirst(items, 4, here, "items") };
+}
+function readStat(raw, here) {
+  const label = firstText([raw.label, raw.title], 40);
+  if (!label) return here.drop("stat needs a label");
+  return { type: "stat", ...readKpi({ ...raw, label }) };
+}
+
+// src/blocks/source/read.ts
+var KINDS = ["web", "file", "tool", "derived"];
+var MAX_ITEMS = 32;
+var ACCESSED = /^(\d{4}-\d{2}-\d{2})/;
+function short(v, max) {
+  if (typeof v !== "string") return void 0;
+  const s = v.trim();
+  return s ? s.slice(0, max) : void 0;
+}
+function safeUrl(v) {
+  const s = short(v, 500);
+  return s && /^https?:\/\/[^\s<>]+$/i.test(s) ? s : void 0;
+}
+function readItem(raw, here) {
+  const label = short(raw?.label, 80);
+  if (!label) {
+    here.drop("source item needs a label");
+    return null;
+  }
+  const kind = KINDS.find((k) => k === raw?.kind);
+  const accessed = ACCESSED.exec(short(raw?.accessed, 32) ?? "")?.[1];
+  const item = { label };
+  const url = safeUrl(raw?.url);
+  const note = short(raw?.note, 160);
+  if (url) item.url = url;
+  if (kind) item.kind = kind;
+  if (accessed) item.accessed = accessed;
+  if (note) item.note = note;
+  return item;
+}
+function readSource(raw, here) {
+  const title = short(raw.title, 80);
+  if (Array.isArray(raw.items)) {
+    const items = raw.items.map((item, i) => readItem(item, here.at("items").at(i)));
+    const kept = items.filter((item) => item !== null).slice(0, MAX_ITEMS);
+    if (raw.items.length > MAX_ITEMS) here.drop("source keeps 32 items");
+    if (kept.length) return { type: "source", ...title ? { title } : {}, items: kept };
+  }
+  const named = [];
+  if (Array.isArray(raw.sources)) {
+    for (const s of raw.sources) if (s && short(s.name ?? s.title ?? s.label, 80)) named.push(s);
+  }
+  let text = short(raw.text, 500) ?? "";
+  if (!text) text = named.map((s) => short(s.name ?? s.title ?? s.label, 80)).join(" \xB7 ");
+  if (!text) return here.drop("source needs text");
+  const candidates = [raw.url, ...named.map((s) => s.url)];
+  const url = candidates.find((u) => typeof u === "string" && /^https?:\/\/[^\s<>]+$/i.test(u.trim()));
+  return { type: "source", text, ...url ? { url: String(url).trim().slice(0, 500) } : {}, ...title ? { title } : {} };
+}
+
+// src/blocks/table/read.ts
+var MAX_COLUMNS = 8;
+var MAX_ROWS = 30;
+var KINDS2 = ["text", "number", "currency", "percent", "date", "badge", "link", "bar", "sources"];
+var OPS2 = ["sum", "avg", "min", "max", "count"];
+var TONES = ["accent", "good", "warn", "neutral"];
+function isObject2(v) {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+function plain(v, max) {
+  if (typeof v !== "string") return void 0;
+  const s = v.trim();
+  return s ? s.slice(0, max) : void 0;
+}
+function safeUrl2(v) {
+  const s = plain(v, 500);
+  return s && /^https?:\/\/[^\s<>]+$/i.test(s) ? s : void 0;
+}
+function readSources(raw) {
+  if (!Array.isArray(raw)) return [];
+  const sources = [];
+  for (const item of raw.slice(0, 4)) {
+    const label = isObject2(item) ? firstText([item.label, item.name, item.title], 40) : plain(item, 40);
+    if (!label) continue;
+    const source = { label };
+    const url = safeUrl2(isObject2(item) ? item.url : void 0);
+    if (url) source.url = url;
+    sources.push(source);
+  }
+  return sources;
+}
+function readStructuredColumns(raw, here) {
+  const list = Array.isArray(raw) ? raw.slice(0, MAX_COLUMNS) : [];
+  const used = /* @__PURE__ */ new Set();
+  const columns = list.map((item, i) => {
+    if (!isObject2(item)) return { id: `c${i}`, label: plain(item, 40) ?? `Column ${i + 1}`, kind: "text" };
+    const label = firstText([item.label, item.title, item.name], 40) ?? `Column ${i + 1}`;
+    let id = plain(item.id ?? item.key, 40)?.replace(/[^A-Za-z0-9_-]+/g, "-").toLowerCase() ?? `c${i}`;
+    if (used.has(id)) id = `${id}-${i}`;
+    used.add(id);
+    const column = { id, label, kind: KINDS2.find((k) => k === item.kind) ?? "text" };
+    const align = ["left", "right", "center"].find((a) => a === item.align);
+    const tone2 = TONES.find((t) => t === item.tone);
+    const max = num(item.max);
+    const unit = plain(item.unit, 12);
+    if (align) column.align = align;
+    if (tone2) column.tone = tone2;
+    if (max !== null && max > 0) column.max = max;
+    if (unit) column.unit = unit;
+    return column;
+  });
+  if (Array.isArray(raw) && raw.length > MAX_COLUMNS) here.drop("table keeps 8 columns");
+  return columns;
+}
+function readStructuredCell(raw, column) {
+  if (isObject2(raw)) {
+    const value = num(raw.value ?? raw.number);
+    const text2 = firstText([raw.text, raw.label, raw.value], 120) ?? "";
+    const cell = { text: text2 };
+    if (value !== null) cell.value = value;
+    const url = safeUrl2(raw.url ?? raw.href);
+    if (url) cell.url = url;
+    const tone2 = TONES.find((t) => t === raw.tone);
+    if (tone2) cell.tone = tone2;
+    return cell.text || cell.value !== void 0 ? cell : null;
+  }
+  if (column.kind === "sources") return null;
+  if (typeof raw === "number") return { text: String(raw), value: raw };
+  const text = plain(raw, 120);
+  if (!text) return null;
+  if (column.kind === "number" || column.kind === "currency" || column.kind === "percent" || column.kind === "bar") {
+    const n = Number(text.replace(/,/g, ""));
+    return isFinite(n) ? { text, value: n } : null;
+  }
+  return { text };
+}
+function readAggregates(raw, columns) {
+  if (!Array.isArray(raw)) return [];
+  return raw.slice(0, 4).map((item, i) => {
+    const id = plain(isObject2(item) ? item.column ?? item.id : void 0, 40);
+    const column = columns.find((c) => c.id === id) ?? columns[i];
+    const op = OPS2.find((o) => o === (isObject2(item) ? item.op : void 0)) ?? "sum";
+    const label = firstText([isObject2(item) ? item.label : void 0, column?.label], 20) ?? op;
+    return { column: column.id, op, label };
+  }).filter((a) => columns.some((c) => c.id === a.column));
+}
+function readStructuredTable(raw, here, caption2) {
+  const columns = readStructuredColumns(raw.columns, here.at("columns"));
+  if (!columns.length) return here.drop("table needs columns");
+  const rawRows = Array.isArray(raw.rows) ? raw.rows : [];
+  const rows = [];
+  rawRows.slice(0, MAX_ROWS).forEach((row) => {
+    const cells = {};
+    let hasCell = false;
+    const sources = readSources(isObject2(row) ? row.sources ?? row.sourceIds : void 0);
+    columns.forEach((column, ci) => {
+      const values = isObject2(row) && isObject2(row.cells) ? row.cells : row;
+      const value = isObject2(values) ? values[column.id] ?? values[column.label] : Array.isArray(values) ? values[ci] : void 0;
+      if (column.kind === "sources") {
+        sources.push(...readSources(Array.isArray(value) ? value : value ? [value] : []));
+        return;
+      }
+      const cell = readStructuredCell(value, column);
+      if (cell) {
+        cells[column.id] = cell;
+        hasCell = true;
+      }
+    });
+    if (hasCell || sources.length) rows.push({ cells, sources });
+  });
+  if (rawRows.length > MAX_ROWS) here.drop("table keeps 30 rows");
+  if (!rows.length) return here.drop("table needs at least one row");
+  const page = num(raw.page);
+  return clean({
+    type: "table",
+    caption: caption2,
+    structured: true,
+    columns,
+    rows,
+    filterable: raw.filterable === true,
+    page: page !== null && page >= 1 && page <= 10 ? Math.floor(page) : 1,
+    aggregates: readAggregates(raw.aggregates, columns)
+  });
+}
+function readTable(raw, here) {
+  const caption2 = firstText([raw.caption, raw.title], 100);
+  const structured = Array.isArray(raw.columns) && raw.columns.some(isObject2) || raw.filterable === true || raw.page !== void 0 || Array.isArray(raw.aggregates);
+  if (structured) return readStructuredTable(raw, here, caption2);
+  const rawRows = firstList([raw.rows, raw.data]) ?? [];
+  let columns = readColumns(firstList([raw.columns, raw.headers, raw.header]));
+  let rowsToRead = rawRows;
+  if (!columns.length) {
+    const first = rawRows[0];
+    if (Array.isArray(first)) {
+      columns = readColumns(first);
+      rowsToRead = rawRows.slice(1);
+    } else if (first && typeof first === "object") {
+      columns = readColumns(Object.keys(first));
+    }
+  }
+  if (!columns.length) return here.drop("table needs columns");
+  columns = keepFirst(columns, MAX_COLUMNS, here.at("columns"), "columns");
+  const rows = [];
+  rowsToRead.forEach((row, i) => {
+    const cells = readRow(row, columns, here.at("rows").at(i));
+    if (cells) rows.push(cells);
+  });
+  if (!rows.length) here.drop("table has no rows");
+  const kept = keepFirst(rows, MAX_ROWS, here.at("rows"), "rows");
+  const highlight = readHighlight(raw.highlight, columns, kept, here.at("highlight"));
+  return clean({ type: "table", columns, rows: kept, highlight, caption: caption2 });
+}
+function readColumns(list) {
+  if (!list) return [];
+  return list.map((c) => {
+    if (c && typeof c === "object") return firstText([c.label, c.name, c.title], 40) ?? "";
+    return textOrNumber(c, 40) ?? "";
+  });
+}
+function readRow(row, columns, here) {
+  let cells;
+  if (Array.isArray(row)) {
+    cells = row;
+  } else if (row && typeof row === "object") {
+    cells = cellsByColumnName(row, columns);
+  } else {
+    return here.drop("row is not a list of cells");
+  }
+  if (cells.length > columns.length) return here.drop(`row has ${cells.length} cells, table has ${columns.length} columns`);
+  const out = cells.map(cellText);
+  while (out.length < columns.length) out.push("");
+  return out;
+}
+function cellsByColumnName(row, columns) {
+  const byLowerName = new Map(Object.entries(row).map(([k, v]) => [k.toLowerCase(), v]));
+  return columns.map((c) => byLowerName.get(c.toLowerCase()));
+}
+function cellText(v) {
+  if (v === null) return "\u2013";
+  if (v === true) return "Yes";
+  if (v === false) return "No";
+  return textOrNumber(v, 120) ?? "";
+}
+function readHighlight(v, columns, rows, here) {
+  if (v === void 0 || v === null) return void 0;
+  let found;
+  if (num(v) !== null) {
+    found = { row: v };
+  } else if (typeof v === "string") {
+    found = highlightByName(v, columns, rows);
+  } else if (typeof v === "object") {
+    if (num(v.row) !== null) found = { row: v.row };
+    const column = num(v.column) ?? num(v.col);
+    if (!found && column !== null) found = { column };
+  }
+  if (!found) {
+    here.drop("highlight should be {row: n} or {column: n}");
+    return void 0;
+  }
+  const inRange = "row" in found ? isIndex(found.row, rows.length) : isIndex(found.column, columns.length);
+  if (!inRange) {
+    here.drop("highlight is outside the table");
+    return void 0;
+  }
+  return found;
+}
+function highlightByName(name, columns, rows) {
+  const wanted = str(name)?.toLowerCase();
+  const row = rows.findIndex((r) => r[0].toLowerCase() === wanted);
+  if (row >= 0) return { row };
+  const column = columns.findIndex((c) => c.toLowerCase() === wanted);
+  if (column >= 0) return { column };
+  return void 0;
+}
+function isIndex(n, length) {
+  return Number.isInteger(n) && n >= 0 && n < length;
+}
+
+// src/blocks/widget/read.ts
+var WIDGET_VERSION = 1;
+var MAX_STATE = 16;
+var MAX_COMPUTED = 32;
+var MAX_NODES = 200;
+var MAX_DEPTH2 = 8;
+var MAX_REPEAT_ITEMS = 100;
+var MAX_FILL_FIELDS = 8;
+var NAME2 = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+var PROTO2 = /* @__PURE__ */ new Set(["__proto__", "prototype", "constructor"]);
+var FORBIDDEN_KEYS = /* @__PURE__ */ new Set(["fetch", "tool", "tools", "include"]);
+var GAPS = ["xs", "sm", "md", "lg"];
+var TONES2 = ["muted", "good", "warn", "bad", "info"];
+var CONTROLS = ["number", "slider", "select", "checkbox", "text"];
+var EMBED_KINDS = ["stat", "bar", "chart", "table", "source"];
+function isObject3(v) {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+function ident(v) {
+  return typeof v === "string" && NAME2.test(v) ? v : void 0;
+}
+function gap(v) {
+  return GAPS.includes(v) ? v : void 0;
+}
+function tone(v) {
+  return TONES2.includes(v) ? v : void 0;
+}
+function readWidget(raw, here) {
+  if (!isObject3(raw)) return here.drop("widget must be an object");
+  if (raw.version !== WIDGET_VERSION) return here.drop("widget version must be 1");
+  const id = ident(raw.id);
+  if (!id) return here.drop("widget needs an id");
+  const title = firstText([raw.title], 120);
+  if (!title) return here.drop("widget needs a title");
+  const data = readData(raw.data, here.at("data"));
+  if (!data) return null;
+  const state = readState(raw.state, here.at("state"));
+  if (!state) return null;
+  const computed = readComputed(raw.computed, here.at("computed"));
+  if (!computed) return null;
+  if (!Array.isArray(raw.view)) return here.drop("widget needs a view list");
+  const context = { data, state, seen: /* @__PURE__ */ new Set(), budget: { used: 0 }, depth: 1, inRepeat: false };
+  const view = readNodes(raw.view, here.at("view"), context);
+  return { type: "widget", version: WIDGET_VERSION, id, title, data, state, computed, view };
+}
+function readData(raw, here) {
+  if (raw === void 0 || raw === null) return {};
+  if (!isObject3(raw)) return here.drop("widget data must be an object");
+  const why = forbidden(raw, 0);
+  if (why) return here.drop(why);
+  return raw;
+}
+function forbidden(value, depth) {
+  if (depth > 12) return "widget data is nested too deep";
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const why = forbidden(item, depth + 1);
+      if (why) return why;
+    }
+    return null;
+  }
+  if (!isObject3(value)) return null;
+  if (value.type === "include") return "widget data can't carry an include block";
+  for (const [key, inner] of Object.entries(value)) {
+    if (FORBIDDEN_KEYS.has(key)) return `widget data can't carry "${key}"`;
+    const why = forbidden(inner, depth + 1);
+    if (why) return why;
+  }
+  return null;
+}
+function readState(raw, here) {
+  if (raw === void 0 || raw === null) return {};
+  if (!isObject3(raw)) return here.drop("widget state must be an object");
+  const names = Object.keys(raw);
+  if (names.length > MAX_STATE) return here.drop(`widget state keeps ${MAX_STATE} entries`);
+  const state = {};
+  for (const name of names) {
+    if (!NAME2.test(name) || PROTO2.has(name)) return here.at(name).drop("state name must be a letter, then letters, digits, _ or -");
+    const decl = readDecl(raw[name], here.at(name));
+    if (!decl) return null;
+    state[name] = decl;
+  }
+  return state;
+}
+function readDecl(raw, here) {
+  if (!isObject3(raw)) return here.drop("a state entry must be an object");
+  const label = firstText([raw.label], 40);
+  if (!label) return here.drop("a state entry needs a label");
+  if (raw.type === "number") {
+    const initial = num(raw.initial);
+    const min = num(raw.min);
+    const max = num(raw.max);
+    const step = num(raw.step);
+    if (initial === null || min === null || max === null || step === null) return here.drop("a number needs finite initial, min, max and step");
+    if (min > max) return here.drop("a number's min is above its max");
+    if (initial < min || initial > max) return here.drop("a number's initial is outside min and max");
+    if (step <= 0) return here.drop("a number's step must be above zero");
+    return { type: "number", label, initial, min, max, step };
+  }
+  if (raw.type === "string") {
+    if (typeof raw.initial !== "string") return here.drop("a string's initial must be text");
+    const maxLength = num(raw.maxLength);
+    if (maxLength === null || maxLength < 1 || !Number.isInteger(maxLength)) return here.drop("a string needs a whole maxLength above zero");
+    if (raw.initial.length > maxLength) return here.drop("a string's initial is longer than maxLength");
+    const decl = { type: "string", label, initial: raw.initial, maxLength };
+    const options = readOptions(raw.options, maxLength, here);
+    if (options) decl.options = options;
+    return decl;
+  }
+  if (raw.type === "boolean") {
+    if (typeof raw.initial !== "boolean") return here.drop("a boolean's initial must be true or false");
+    return { type: "boolean", label, initial: raw.initial };
+  }
+  return here.drop('a state entry type must be "number", "string" or "boolean"');
+}
+function readOptions(raw, maxLength, here) {
+  if (raw === void 0) return void 0;
+  if (!Array.isArray(raw)) {
+    here.drop("options must be a list of text");
+    return void 0;
+  }
+  const options = [];
+  for (const option of raw) {
+    const text = str(option, maxLength);
+    if (text === void 0) {
+      here.drop("an option must be text within maxLength");
+      continue;
+    }
+    if (!options.includes(text)) options.push(text);
+  }
+  if (options.length > 24) here.drop("options keeps 24 entries");
+  return options.slice(0, 24);
+}
+function readComputed(raw, here) {
+  if (raw === void 0 || raw === null) return {};
+  if (!isObject3(raw)) return here.drop("widget computed must be an object");
+  const names = Object.keys(raw);
+  if (names.length > MAX_COMPUTED) return here.drop(`widget computed keeps ${MAX_COMPUTED} entries`);
+  const computed = {};
+  for (const name of names) {
+    if (!NAME2.test(name) || PROTO2.has(name)) return here.at(name).drop("computed name must be a letter, then letters, digits, _ or -");
+    const why = checkExpr(raw[name]);
+    if (why) return here.at(name).drop(`computed "${name}": ${why}`);
+    computed[name] = raw[name];
+  }
+  const cycle = findCycle(computed);
+  if (cycle) return here.drop(`computed has a cycle through "${cycle}"`);
+  return computed;
+}
+function findCycle(computed) {
+  const state = /* @__PURE__ */ new Map();
+  const walk = (name) => {
+    if (state.get(name) === "done") return null;
+    if (state.get(name) === "open") return name;
+    state.set(name, "open");
+    for (const next of computedReferences(computed[name])) {
+      if (!Object.hasOwn(computed, next)) continue;
+      const found = walk(next);
+      if (found) return found;
+    }
+    state.set(name, "done");
+    return null;
+  };
+  for (const name of Object.keys(computed)) {
+    const found = walk(name);
+    if (found) return found;
+  }
+  return null;
+}
+function readNodes(list, here, context) {
+  const nodes = [];
+  list.forEach((raw, i) => {
+    const node = readNode(raw, here.at(i), context);
+    if (node) nodes.push(node);
+  });
+  return nodes;
+}
+function readNode(raw, here, context) {
+  if (!isObject3(raw)) return here.drop("an element must be an object");
+  if (context.depth > MAX_DEPTH2) return here.drop(`widget elements nest ${MAX_DEPTH2} deep`);
+  if (context.budget.used >= MAX_NODES) return here.drop(`widget keeps ${MAX_NODES} elements`);
+  const id = ident(raw.id);
+  if (!id) return here.drop("an element needs an id (a letter, then letters, digits, _ or -)");
+  if (context.seen.has(id)) return here.drop(`element id "${id}" is used twice`);
+  context.seen.add(id);
+  context.budget.used += 1;
+  switch (raw.kind) {
+    case "stack":
+    case "row":
+    case "grid":
+    case "surface":
+      return readBox(raw, here, context, id);
+    case "text":
+      return readText2(raw, here, id);
+    case "number":
+      return readNumber(raw, here, id);
+    case "badge":
+      return readBadge2(raw, here, id);
+    case "divider":
+      return { kind: "divider", id };
+    case "image":
+      return readImage2(raw, here, id);
+    case "link":
+      return readLink2(raw, here, id);
+    case "input":
+      return readInput2(raw, here, context, id);
+    case "button":
+      return readButton2(raw, here, context, id);
+    case "when":
+      return readWhen(raw, here, context, id);
+    case "repeat":
+      return readRepeat(raw, here, context, id);
+    case "block":
+      return readEmbedded(raw, here, id);
+    default:
+      return here.drop(`unknown element kind "${String(raw.kind)}"`);
+  }
+}
+function readBox(raw, here, context, id) {
+  if (!Array.isArray(raw.children)) return here.drop(`${raw.kind} needs a children list`);
+  const children = readNodes(raw.children, here.at("children"), { ...context, depth: context.depth + 1 });
+  const box = { id, gap: gap(raw.gap), children };
+  if (raw.kind === "grid") {
+    const columns = num(raw.columns) ?? 2;
+    if (!Number.isInteger(columns) || columns < 1 || columns > 4) return here.drop("a grid has 1 to 4 columns");
+    return { kind: "grid", ...box, columns };
+  }
+  return { kind: raw.kind, ...box };
+}
+function readText2(raw, here, id) {
+  const text = str(raw.text, 600);
+  const expr = readExpr(raw.expr);
+  if (expr === null) return here.drop("text expression is malformed");
+  if (text === void 0 && expr === void 0) return here.drop("text needs text or an expression");
+  return cleanNode({ kind: "text", id, text, expr, tone: tone(raw.tone) });
+}
+function readNumber(raw, here, id) {
+  const expr = readExpr(raw.expr);
+  if (expr === null) return here.drop("number expression is malformed");
+  if (expr === void 0) return here.drop("number needs an expression");
+  return cleanNode({ kind: "number", id, expr, label: str(raw.label, 40), unit: str(raw.unit, 12), tone: tone(raw.tone) });
+}
+function readBadge2(raw, here, id) {
+  const text = str(raw.text, 40);
+  const expr = readExpr(raw.expr);
+  if (expr === null) return here.drop("badge expression is malformed");
+  if (text === void 0 && expr === void 0) return here.drop("badge needs text or an expression");
+  return cleanNode({ kind: "badge", id, text, expr, tone: tone(raw.tone) });
+}
+function readImage2(raw, here, id) {
+  const url = https(raw.url);
+  if (!url) return here.drop("image needs a literal https url");
+  const alt = str(raw.alt, 200);
+  if (!alt) return here.drop("image needs alt text");
+  return { kind: "image", id, url, alt };
+}
+function readLink2(raw, here, id) {
+  const url = https(raw.url);
+  if (!url) return here.drop("link needs a literal https url");
+  const text = str(raw.text, 80);
+  if (!text) return here.drop("link needs text");
+  return { kind: "link", id, text, url };
+}
+function readInput2(raw, here, context, id) {
+  const control = CONTROLS.includes(raw.control) ? raw.control : null;
+  if (!control) return here.drop("input control must be number, slider, select, checkbox or text");
+  const name = stateName(raw.state);
+  if (!name || !Object.hasOwn(context.state, name)) return here.drop("input needs a declared state name");
+  const decl = context.state[name];
+  const expected = control === "number" || control === "slider" ? "number" : control === "checkbox" ? "boolean" : "string";
+  if (decl.type !== expected) return here.drop(`a ${control} input needs a ${expected} state entry`);
+  if (control === "select" && (!("options" in decl) || !decl.options?.length)) return here.drop("a select input needs options on its state entry");
+  const label = str(raw.label, 40);
+  if (!label) return here.drop("input needs a visible label");
+  return { kind: "input", id, control, state: name, label };
+}
+function readButton2(raw, here, context, id) {
+  const label = str(raw.label, 60);
+  if (!label) return here.drop("button needs a label");
+  const action = readAction(raw.action, here.at("action"), context);
+  if (!action) return null;
+  return { kind: "button", id, label, action };
+}
+function readAction(raw, here, context) {
+  if (!isObject3(raw)) return here.drop("button needs an action");
+  if (raw.op === "reset") return { op: "reset" };
+  if (raw.op === "set") {
+    const name = stateName(raw.state);
+    if (!name || !Object.hasOwn(context.state, name)) return here.drop("set needs a declared state name");
+    const value = readExpr(raw.value);
+    if (value === null) return here.drop("set value expression is malformed");
+    if (value === void 0) return here.drop("set needs a value expression");
+    return { op: "set", state: name, value };
+  }
+  if (raw.op === "fill") {
+    const message = str(raw.message, 300);
+    if (!message) return here.drop("fill needs a message");
+    if (actsBeforeTheModel(message)) return here.drop("a fill message can't start with / @ or ! or carry @-references");
+    const fields = readFillFields(raw.fields, context, here);
+    if (!fields) return null;
+    return { op: "fill", message, fields };
+  }
+  return here.drop("a button action must be set, reset or fill");
+}
+function readFillFields(raw, context, here) {
+  if (raw === void 0) return [];
+  if (!Array.isArray(raw)) return here.drop("fill fields must be a list of state names");
+  const fields = [];
+  for (const entry2 of raw) {
+    const name = stateName(entry2);
+    if (!name || !Object.hasOwn(context.state, name)) return here.drop("fill fields must name declared state entries");
+    if (!fields.includes(name)) fields.push(name);
+  }
+  if (fields.length > MAX_FILL_FIELDS) return here.drop(`fill keeps ${MAX_FILL_FIELDS} fields`);
+  return fields;
+}
+function readWhen(raw, here, context, id) {
+  const test = readExpr(raw.test);
+  if (test === null) return here.drop("when test expression is malformed");
+  if (test === void 0) return here.drop("when needs a test expression");
+  if (!Array.isArray(raw.then)) return here.drop("when needs a then list");
+  if (raw.else !== void 0 && !Array.isArray(raw.else)) return here.drop("else must be a list");
+  const branch = { ...context, depth: context.depth + 1 };
+  return {
+    kind: "when",
+    id,
+    test,
+    then: readNodes(raw.then, here.at("then"), branch),
+    else: Array.isArray(raw.else) ? readNodes(raw.else, here.at("else"), branch) : []
+  };
+}
+function readRepeat(raw, here, context, id) {
+  if (context.inRepeat) return here.drop("a repeat cannot nest inside another repeat");
+  const items = readExpr(raw.items);
+  if (items === null) return here.drop("repeat items expression is malformed");
+  const path = items === void 0 ? "" : items.get;
+  if (!isReference(path) || !path.startsWith("data.")) return here.drop("repeat items must reference a data list");
+  const list = context.data[path.slice("data.".length)];
+  if (!Array.isArray(list)) return here.drop("repeat items must reference a data list");
+  const key = ident(raw.key);
+  if (!key) return here.drop("repeat needs a key field name");
+  if (!Array.isArray(raw.template) || !raw.template.length) return here.drop("repeat needs a template list");
+  if (raw.empty !== void 0 && !Array.isArray(raw.empty)) return here.drop("repeat empty must be a list");
+  const branch = { ...context, depth: context.depth + 1, inRepeat: true };
+  const node = {
+    kind: "repeat",
+    id,
+    items,
+    key,
+    template: readNodes(raw.template, here.at("template"), branch),
+    empty: Array.isArray(raw.empty) ? readNodes(raw.empty, here.at("empty"), branch) : []
+  };
+  if (list.length > MAX_REPEAT_ITEMS) here.drop(`repeat keeps the first ${MAX_REPEAT_ITEMS} items`);
+  const shown2 = list.slice(0, MAX_REPEAT_ITEMS);
+  if (shown2.length && !itemsKeyed(node, shown2)) return here.drop(`repeat needs a unique "${key}" on every item`);
+  return node;
+}
+function repeatItems(block, node) {
+  const path = node.items.get;
+  const value = block.data[path.slice("data.".length)];
+  return Array.isArray(value) ? value.slice(0, MAX_REPEAT_ITEMS) : [];
+}
+function readEmbedded(raw, here, id) {
+  if (!isObject3(raw.spec)) return here.drop("block needs a spec object");
+  const kind = raw.spec.type;
+  if (kind === "include" || kind === "widget") return here.drop(`widget can't embed ${kind}`);
+  if (!EMBED_KINDS.includes(kind)) {
+    return here.drop("widget can embed stat, bar, chart, table or source");
+  }
+  const embed = kind;
+  const bindings = readBindings(raw.bindings, embed, raw.spec, here.at("bindings"));
+  if (bindings === null) return null;
+  if (!readEmbed(embed, raw.spec)) return here.drop(`embedded ${embed} doesn't read`);
+  return { kind: "block", id, spec: raw.spec, bindings };
+}
+function readBindings(raw, kind, spec, here) {
+  if (raw === void 0) return {};
+  if (!isObject3(raw)) return here.drop("bindings must be an object of pointer \u2192 expression");
+  const bindings = {};
+  for (const [pointer, expr] of Object.entries(raw)) {
+    const target = bindingTarget(pointer, kind);
+    if (!target) {
+      here.drop(`binding "${pointer}" is not allowed on ${kind}`);
+      continue;
+    }
+    const value = readExpr(expr);
+    if (value === null) {
+      here.drop(`binding "${pointer}" is not a valid expression`);
+      continue;
+    }
+    if (value === void 0) {
+      here.drop(`binding "${pointer}" needs an expression`);
+      continue;
+    }
+    if (!target.exists(spec)) {
+      here.drop(`binding "${pointer}" points outside the ${kind}`);
+      continue;
+    }
+    bindings[pointer] = value;
+  }
+  return bindings;
+}
+function bindingTarget(pointer, kind) {
+  if (kind === "stat") return pointer === "/value" ? { exists: () => true } : null;
+  if (kind === "bar") {
+    if (pointer === "/value" || pointer === "/max") return { exists: () => true };
+    return null;
+  }
+  if (kind === "chart") {
+    const match = /^\/series\/(\d+)\/data\/(\d+)$/.exec(pointer);
+    if (!match) return null;
+    const series = Number(match[1]);
+    const point = Number(match[2]);
+    return {
+      exists: (spec) => {
+        const list = spec.series;
+        if (!Array.isArray(list) || !isObject3(list[series])) return false;
+        const data = list[series].data;
+        return Array.isArray(data) && point < data.length;
+      }
+    };
+  }
+  if (kind === "table") {
+    const match = /^\/rows\/(\d+)\/(\d+|[A-Za-z0-9_-]+)$/.exec(pointer);
+    if (!match) return null;
+    const row = Number(match[1]);
+    const cell = match[2];
+    return {
+      exists: (spec) => {
+        const rows = spec.rows;
+        if (!Array.isArray(rows)) return false;
+        const one = rows[row];
+        if (Array.isArray(one)) return Number(cell) < one.length;
+        return isObject3(one);
+      }
+    };
+  }
+  return null;
+}
+function readExpr(raw) {
+  if (raw === void 0) return void 0;
+  return checkExpr(raw) === null ? raw : null;
+}
+function stateName(raw) {
+  const text = typeof raw === "string" ? raw.trim() : "";
+  const name = text.startsWith("state.") ? text.slice("state.".length) : text;
+  return NAME2.test(name) && !PROTO2.has(name) ? name : void 0;
+}
+function cleanNode(node) {
+  return Object.fromEntries(Object.entries(node).filter(([, value]) => value !== void 0));
+}
+function applyBindings(spec, bindings, scope) {
+  const out = cloneJson(spec);
+  const errors = [];
+  for (const [pointer, expr] of Object.entries(bindings)) {
+    const result = evaluate2(expr, scope);
+    if (result.error) {
+      errors.push(`${pointer}: ${result.error}`);
+      continue;
+    }
+    const segments = pointer.split("/").slice(1);
+    const why = writeBinding(out, segments, result.value);
+    if (why) errors.push(`${pointer}: ${why}`);
+  }
+  return { spec: out, errors };
+}
+function writeBinding(spec, segments, value) {
+  const head = segments[0];
+  if (head === "value" || head === "max") {
+    if (value === null) {
+      if (head !== "value") return "max needs a number";
+      spec[head] = null;
+      return null;
+    }
+    if (typeof value !== "number" || !isFinite(value)) return "not a finite number";
+    if (head === "max" && value <= 0) return "max must be above zero";
+    spec[head] = value;
+    return null;
+  }
+  if (head === "series" && segments.length === 4) {
+    if (value !== null && (typeof value !== "number" || !isFinite(value))) return "a chart point must be a number or null";
+    const series = spec.series;
+    if (!Array.isArray(series)) return "the chart has no series";
+    const one = series[Number(segments[1])];
+    if (!isObject3(one) || !Array.isArray(one.data)) return "the chart point is outside the series";
+    one.data[Number(segments[3])] = value;
+    return null;
+  }
+  if (head === "rows" && segments.length === 3) {
+    const cell = value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean";
+    if (!cell) return "not a table cell";
+    const rows = spec.rows;
+    if (!Array.isArray(rows)) return "the table has no rows";
+    const row = rows[Number(segments[1])];
+    if (Array.isArray(row)) {
+      row[Number(segments[2])] = value;
+      return null;
+    }
+    if (isObject3(row)) {
+      row[segments[2]] = value;
+      return null;
+    }
+    return "the table row is outside the table";
+  }
+  return "not an allowed binding target";
+}
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+function readEmbed(kind, spec) {
+  const here = new Trail();
+  switch (kind) {
+    case "stat":
+      return readStat(spec, here);
+    case "bar":
+      return readBar(spec, here);
+    case "chart":
+      return readChart(spec, here);
+    case "table":
+      return readTable(spec, here);
+    case "source":
+      return readSource(spec, here);
+  }
+}
+function itemKey(node, item) {
+  if (!isObject3(item)) return null;
+  const value = item[node.key];
+  if (typeof value === "string" && value) return value;
+  if (typeof value === "number" && isFinite(value)) return String(value);
+  return null;
+}
+function itemsKeyed(node, items) {
+  const keys = /* @__PURE__ */ new Set();
+  for (const item of items) {
+    const key = itemKey(node, item);
+    if (key === null || keys.has(key)) return false;
+    keys.add(key);
+  }
+  return true;
+}
+function initialState(state) {
+  return Object.fromEntries(Object.entries(state).map(([name, decl]) => [name, decl.initial]));
+}
+
+// src/blocks/widget/Widget.tsx
+import { Fragment as Fragment6, jsx as jsx26, jsxs as jsxs23 } from "react/jsx-runtime";
+function Widget({ block }) {
+  const { fill } = useContext6(BlockActions);
+  const uid = `hb-widget-${useId3().replace(/[^A-Za-z0-9_-]/g, "")}`;
+  const [values, setValues] = useState13(() => initialState(block.state));
+  const computed = useMemo7(() => evaluateComputed(block.computed, { data: block.data, state: values }), [block, values]);
+  const context = {
+    block,
+    values,
+    computed: computed.values,
+    uid,
+    set: (name, value) => setValues((all) => ({ ...all, [name]: value })),
+    reset: () => setValues(initialState(block.state)),
+    fill
+  };
+  return /* @__PURE__ */ jsx26("div", { className: "hb-widget", role: "group", "aria-label": block.title, children: drawNodes(block.view, context, null, []) });
+}
+function drawNodes(nodes, context, item, path) {
+  return nodes.map((node) => /* @__PURE__ */ jsx26(Fragment5, { children: drawNode(node, context, item, path) }, `${path.join("/")}/${node.id}`));
+}
+function drawNode(node, context, item, path) {
+  const scope = { data: context.block.data, state: context.values, computed: context.computed, item };
+  const here = [...path, node.id];
+  switch (node.kind) {
+    case "stack":
+    case "row":
+    case "surface":
+      return /* @__PURE__ */ jsx26("div", { className: `hb-widget-${node.kind} hb-widget-gap-${node.gap ?? "md"}`, children: drawNodes(node.children, context, item, here) });
+    case "grid":
+      return /* @__PURE__ */ jsx26("div", { className: `hb-widget-grid hb-widget-grid-${node.columns} hb-widget-gap-${node.gap ?? "md"}`, children: drawNodes(node.children, context, item, here) });
+    case "text": {
+      const result = node.text !== void 0 ? { value: node.text, error: null } : evaluate2(node.expr, scope);
+      return /* @__PURE__ */ jsxs23("div", { className: `hb-widget-text hb-widget-tone-${node.tone ?? "plain"}`, children: [
+        /* @__PURE__ */ jsx26(InlineText, { text: shownText(result.value) }),
+        result.error && /* @__PURE__ */ jsxs23("span", { className: "hb-widget-note", role: "note", children: [
+          " ",
+          result.error
+        ] })
+      ] });
+    }
+    case "number": {
+      const result = evaluate2(node.expr, scope);
+      return /* @__PURE__ */ jsxs23("div", { className: `hb-widget-figure hb-widget-tone-${node.tone ?? "plain"}`, children: [
+        node.label && /* @__PURE__ */ jsx26("div", { className: "hb-widget-figure-label", children: node.label }),
+        /* @__PURE__ */ jsx26("div", { className: "hb-widget-figure-value", children: result.error ? "unavailable" : typeof result.value === "number" ? formatWithUnit(result.value, node.unit) : shownText(result.value) }),
+        result.error && /* @__PURE__ */ jsx26("div", { className: "hb-widget-note", role: "note", children: result.error })
+      ] });
+    }
+    case "badge": {
+      const result = node.text !== void 0 ? { value: node.text, error: null } : evaluate2(node.expr, scope);
+      return /* @__PURE__ */ jsxs23("div", { className: "hb-widget-badge", children: [
+        /* @__PURE__ */ jsx26("span", { className: `hb-chip ${chipClass(node.tone)}`, children: shownText(result.value) }),
+        result.error && /* @__PURE__ */ jsxs23("span", { className: "hb-widget-note", role: "note", children: [
+          " ",
+          result.error
+        ] })
+      ] });
+    }
+    case "divider":
+      return /* @__PURE__ */ jsx26("div", { className: "hb-divider", role: "separator" });
+    case "image":
+      return /* @__PURE__ */ jsx26("figure", { className: "hb-image", children: /* @__PURE__ */ jsx26("img", { src: node.url, alt: node.alt, loading: "lazy", referrerPolicy: "no-referrer" }) });
+    case "link":
+      return /* @__PURE__ */ jsx26(LinkLine, { type: "link", text: node.text, url: node.url });
+    case "input":
+      return drawInput(node.state, node.control, node.label, context, here);
+    case "button":
+      return /* @__PURE__ */ jsx26("div", { className: "hb-widget-button", children: /* @__PURE__ */ jsx26("button", { type: "button", className: "hb-pill", onClick: () => runAction(node.action, context, item, scope), children: node.label }) });
+    case "when": {
+      const result = evaluate2(node.test, scope);
+      const branch = result.value === true ? node.then : result.value === false ? node.else : [];
+      return /* @__PURE__ */ jsxs23(Fragment6, { children: [
+        drawNodes(branch, context, item, here),
+        result.error && /* @__PURE__ */ jsx26("div", { className: "hb-widget-note", role: "note", children: result.error })
+      ] });
+    }
+    case "repeat": {
+      const items = repeatItems(context.block, node);
+      if (!items.length) return /* @__PURE__ */ jsx26(Fragment6, { children: drawNodes(node.empty, context, item, here) });
+      return /* @__PURE__ */ jsx26("div", { className: "hb-widget-repeat", children: items.map((entry2, i) => {
+        const key = itemKey(node, entry2) ?? String(i);
+        const next = entry2 !== null && typeof entry2 === "object" && !Array.isArray(entry2) ? entry2 : null;
+        return /* @__PURE__ */ jsx26(Fragment5, { children: drawNodes(node.template, context, next, [...here, key]) }, key);
+      }) });
+    }
+    case "block":
+      return /* @__PURE__ */ jsx26(Embedded, { spec: node.spec, bindings: node.bindings, scope });
+  }
+}
+function drawInput(name, control, label, context, here) {
+  const decl = context.block.state[name];
+  const id = `${context.uid}-${here.join("-")}`;
+  const value = context.values[name];
+  if (!decl) return null;
+  if (control === "checkbox" && decl.type === "boolean") {
+    return /* @__PURE__ */ jsxs23("label", { className: "hb-widget-field hb-widget-check", htmlFor: id, children: [
+      /* @__PURE__ */ jsx26("input", { id, type: "checkbox", checked: value === true, onChange: (e) => context.set(name, e.target.checked) }),
+      /* @__PURE__ */ jsx26("span", { className: "hb-widget-label", children: label })
+    ] });
+  }
+  if (decl.type === "number" && (control === "number" || control === "slider")) {
+    const current = typeof value === "number" ? value : decl.initial;
+    return /* @__PURE__ */ jsxs23("label", { className: "hb-widget-field", htmlFor: id, children: [
+      /* @__PURE__ */ jsxs23("span", { className: "hb-widget-field-head", children: [
+        /* @__PURE__ */ jsx26("span", { className: "hb-widget-label", children: label }),
+        /* @__PURE__ */ jsx26("span", { className: "hb-widget-value", children: formatNumber(current) })
+      ] }),
+      /* @__PURE__ */ jsx26(
+        "input",
+        {
+          id,
+          className: control === "slider" ? "hb-range" : "hb-input",
+          type: control === "slider" ? "range" : "number",
+          min: decl.min,
+          max: decl.max,
+          step: decl.step,
+          value: current,
+          onChange: (e) => {
+            const next = Number(e.target.value);
+            if (e.target.value !== "" && isFinite(next)) context.set(name, within(decl, next));
+          }
+        }
+      )
+    ] });
+  }
+  if (decl.type === "string" && control === "select") {
+    return /* @__PURE__ */ jsxs23("label", { className: "hb-widget-field", htmlFor: id, children: [
+      /* @__PURE__ */ jsx26("span", { className: "hb-widget-label", children: label }),
+      /* @__PURE__ */ jsx26("select", { id, className: "hb-input", value: typeof value === "string" ? value : decl.initial, onChange: (e) => context.set(name, e.target.value), children: (decl.options ?? []).map((option) => /* @__PURE__ */ jsx26("option", { value: option, children: option }, option)) })
+    ] });
+  }
+  if (decl.type === "string") {
+    return /* @__PURE__ */ jsxs23("label", { className: "hb-widget-field", htmlFor: id, children: [
+      /* @__PURE__ */ jsx26("span", { className: "hb-widget-label", children: label }),
+      /* @__PURE__ */ jsx26(
+        "input",
+        {
+          id,
+          className: "hb-input",
+          type: "text",
+          maxLength: decl.maxLength,
+          value: typeof value === "string" ? value : decl.initial,
+          onChange: (e) => context.set(name, e.target.value.slice(0, decl.maxLength))
+        }
+      )
+    ] });
+  }
+  return null;
+}
+function within(decl, value) {
+  return Math.min(decl.max, Math.max(decl.min, value));
+}
+function typedValue(decl, value) {
+  if (decl.type === "number") return typeof value === "number" && isFinite(value) ? within(decl, value) : null;
+  if (decl.type === "boolean") return typeof value === "boolean" ? value : null;
+  if (typeof value !== "string") return null;
+  const text = value.slice(0, decl.maxLength);
+  if (decl.options && !decl.options.includes(text)) return null;
+  return text;
+}
+function runAction(action, context, item, scope) {
+  if (action.op === "reset") {
+    context.reset();
+    return;
+  }
+  if (action.op === "fill") {
+    context.fill(fillMessage(action, context));
+    return;
+  }
+  const decl = context.block.state[action.state];
+  if (!decl) return;
+  const result = evaluate2(action.value, { ...scope, item });
+  if (result.error || result.value === null) return;
+  const value = typedValue(decl, result.value);
+  if (value !== null) context.set(action.state, value);
+}
+function fillMessage(action, context) {
+  const lines = action.fields.map((name) => {
+    const decl = context.block.state[name];
+    return `${decl?.label ?? name}: ${shownText(context.values[name])}`;
+  });
+  return lines.length ? `${action.message}
+
+${lines.join("\n")}` : action.message;
+}
+function shownText(value) {
+  if (typeof value === "number") return formatNumber(value);
+  if (typeof value === "string") return value;
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return "unknown";
+}
+function chipClass(tone2) {
+  if (tone2 === "good") return "hb-chip-good";
+  if (tone2 === "warn") return "hb-chip-warn";
+  if (tone2 === "bad") return "hb-widget-chip-bad";
+  if (tone2 === "info") return "hb-chip-soft";
+  return "hb-chip-plain";
+}
+function Embedded({ spec, bindings, scope }) {
+  const { spec: bound2, errors } = applyBindings(spec, bindings, scope);
+  const block = readEmbed(spec.type, bound2);
+  return /* @__PURE__ */ jsxs23(Fragment6, { children: [
+    block && drawn(block),
+    errors.map((why) => /* @__PURE__ */ jsx26("div", { className: "hb-widget-note", role: "note", children: why }, why))
+  ] });
+}
+function drawn(block) {
+  switch (block.type) {
+    case "stat":
+      return /* @__PURE__ */ jsx26(KpiCard, { item: block });
+    case "bar":
+      return /* @__PURE__ */ jsx26(Bar, { ...block });
+    case "chart":
+      return /* @__PURE__ */ jsx26(Chart, { spec: block.spec });
+    case "table":
+      return /* @__PURE__ */ jsx26(Table, { ...block });
+    case "source":
+      return /* @__PURE__ */ jsx26(Source, { ...block });
+  }
+}
+
+// src/blocks/callout/read.ts
+var TONES3 = {
+  info: "info",
+  note: "info",
+  neutral: "info",
+  tip: "tip",
+  success: "tip",
+  good: "tip",
+  idea: "tip",
+  warn: "warn",
+  warning: "warn",
+  caution: "warn",
+  danger: "warn",
+  alert: "warn",
+  error: "warn"
+};
+function readCallout(raw, here) {
+  const toneWord = firstText([raw.tone, raw.variant], 20)?.toLowerCase() ?? "info";
+  const tone2 = TONES3[toneWord] ?? "info";
+  let title = firstText([raw.title], 80);
+  let text = firstWords([raw.text, raw.body, raw.message, raw.content], 400);
+  if (!text && title) {
+    text = title;
+    title = void 0;
+  }
+  if (!text) return here.drop("callout needs text");
+  return clean({ type: "callout", tone: tone2, title, text });
+}
+
 // src/blocks/checklist/Checklist.tsx
-import { useId as useId3 } from "react";
-import { jsx as jsx22, jsxs as jsxs19 } from "react/jsx-runtime";
+import { useId as useId4 } from "react";
+import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
 var STATE_WORDS = {
   pending: void 0,
   active: "In progress",
@@ -3558,7 +5163,7 @@ function segmentName(item, on) {
 }
 function Checklist({ title, numbered, items, ticked, path, density }) {
   const [ticks, tap] = useSavedTicks(path, ticked, items.length);
-  const uid = useId3();
+  const uid = useId4();
   const done = ticks.length;
   const allDone = done === items.length;
   const open = items.filter((_, i) => !ticks.includes(i));
@@ -3576,7 +5181,7 @@ function Checklist({ title, numbered, items, ticked, path, density }) {
     const sourceId = item.sourceIds?.length ? `${uid}-source-${index}` : void 0;
     const describedBy = [wordId, ownerId, noteId, sourceId].filter(Boolean).join(" ") || void 0;
     const classes = ["hb-check", on ? "hb-check-on" : state ? `hb-check-${state}` : "", pointer === index ? "hb-check-pointer" : ""];
-    return /* @__PURE__ */ jsx22("div", { className: "hb-checklist-row", children: /* @__PURE__ */ jsxs19(
+    return /* @__PURE__ */ jsx27("div", { className: "hb-checklist-row", children: /* @__PURE__ */ jsxs24(
       "button",
       {
         type: "button",
@@ -3588,15 +5193,15 @@ function Checklist({ title, numbered, items, ticked, path, density }) {
         onClick: () => tap(index),
         className: classes.join(" ").trim(),
         children: [
-          /* @__PURE__ */ jsx22("span", { className: "hb-check-mark", children: on ? /* @__PURE__ */ jsx22(Icon, { name: "check", size: 13, stroke: 3 }) : numbered ? index + 1 : null }),
-          /* @__PURE__ */ jsxs19("span", { className: "hb-check-text", children: [
-            /* @__PURE__ */ jsxs19("span", { className: "hb-check-line", children: [
-              /* @__PURE__ */ jsx22("span", { className: "hb-check-label", id: labelId, children: /* @__PURE__ */ jsx22(InlineText, { text: item.text }) }),
-              word && /* @__PURE__ */ jsx22("span", { className: "hb-check-state", id: wordId, children: word }),
-              item.owner && /* @__PURE__ */ jsx22("span", { className: "hb-check-owner", id: ownerId, children: item.owner })
+          /* @__PURE__ */ jsx27("span", { className: "hb-check-mark", children: on ? /* @__PURE__ */ jsx27(Icon, { name: "check", size: 13, stroke: 3 }) : numbered ? index + 1 : null }),
+          /* @__PURE__ */ jsxs24("span", { className: "hb-check-text", children: [
+            /* @__PURE__ */ jsxs24("span", { className: "hb-check-line", children: [
+              /* @__PURE__ */ jsx27("span", { className: "hb-check-label", id: labelId, children: /* @__PURE__ */ jsx27(InlineText, { text: item.text }) }),
+              word && /* @__PURE__ */ jsx27("span", { className: "hb-check-state", id: wordId, children: word }),
+              item.owner && /* @__PURE__ */ jsx27("span", { className: "hb-check-owner", id: ownerId, children: item.owner })
             ] }),
-            item.note && /* @__PURE__ */ jsx22("span", { className: "hb-check-note", id: noteId, children: item.note }),
-            item.sourceIds?.length && /* @__PURE__ */ jsxs19("span", { className: "hb-check-source", id: sourceId, children: [
+            item.note && /* @__PURE__ */ jsx27("span", { className: "hb-check-note", id: noteId, children: item.note }),
+            item.sourceIds?.length && /* @__PURE__ */ jsxs24("span", { className: "hb-check-source", id: sourceId, children: [
               "sources ",
               item.sourceIds.join(", ")
             ] })
@@ -3605,13 +5210,13 @@ function Checklist({ title, numbered, items, ticked, path, density }) {
       }
     ) }, index);
   }
-  return /* @__PURE__ */ jsxs19("div", { className: "hb-card hb-checklist", children: [
-    /* @__PURE__ */ jsxs19("div", { className: "hb-checklist-head", children: [
-      title && /* @__PURE__ */ jsx22("span", { className: "hb-card-title", children: /* @__PURE__ */ jsx22(InlineText, { text: title }) }),
-      /* @__PURE__ */ jsx22("span", { className: allDone ? "hb-checklist-count hb-checklist-count-done" : "hb-checklist-count", "aria-live": "polite", children: countText(done, items.length, blocked, skipped) })
+  return /* @__PURE__ */ jsxs24("div", { className: "hb-card hb-checklist", children: [
+    /* @__PURE__ */ jsxs24("div", { className: "hb-checklist-head", children: [
+      title && /* @__PURE__ */ jsx27("span", { className: "hb-card-title", children: /* @__PURE__ */ jsx27(InlineText, { text: title }) }),
+      /* @__PURE__ */ jsx27("span", { className: allDone ? "hb-checklist-count hb-checklist-count-done" : "hb-checklist-count", "aria-live": "polite", children: countText(done, items.length, blocked, skipped) })
     ] }),
-    /* @__PURE__ */ jsx22("div", { className: "hb-checklist-track", "aria-hidden": "true", children: /* @__PURE__ */ jsx22("span", { className: "hb-checklist-fill", style: { transform: `scaleX(${done / (items.length || 1)})` } }) }),
-    density === "compact" && /* @__PURE__ */ jsx22("div", { className: "hb-checklist-compact", role: "group", "aria-label": title ?? "Phases", children: items.map((item, index) => {
+    /* @__PURE__ */ jsx27("div", { className: "hb-checklist-track", "aria-hidden": "true", children: /* @__PURE__ */ jsx27("span", { className: "hb-checklist-fill", style: { transform: `scaleX(${done / (items.length || 1)})` } }) }),
+    density === "compact" && /* @__PURE__ */ jsx27("div", { className: "hb-checklist-compact", role: "group", "aria-label": title ?? "Phases", children: items.map((item, index) => {
       const on = ticks.includes(index);
       const state = on ? void 0 : item.state;
       const classes = [
@@ -3619,7 +5224,7 @@ function Checklist({ title, numbered, items, ticked, path, density }) {
         on ? "hb-check-on" : state ? `hb-check-${state}` : "",
         pointer === index ? "hb-check-pointer" : ""
       ];
-      return /* @__PURE__ */ jsx22(
+      return /* @__PURE__ */ jsx27(
         "button",
         {
           type: "button",
@@ -3630,16 +5235,16 @@ function Checklist({ title, numbered, items, ticked, path, density }) {
           title: segmentName(item, on),
           onClick: () => tap(index),
           className: classes.join(" ").trim(),
-          children: /* @__PURE__ */ jsx22("span", { className: "hb-sr", children: segmentName(item, on) })
+          children: /* @__PURE__ */ jsx27("span", { className: "hb-sr", children: segmentName(item, on) })
         },
         index
       );
     }) }),
     density !== "compact" && segmentsOf(items).map(
-      (segment, si) => segment.label ? /* @__PURE__ */ jsxs19("div", { className: "hb-checklist-group", role: "group", "aria-labelledby": `${uid}-group-${si}`, children: [
-        /* @__PURE__ */ jsx22("div", { className: "hb-checklist-group-label", id: `${uid}-group-${si}`, children: /* @__PURE__ */ jsx22(InlineText, { text: segment.label }) }),
+      (segment, si) => segment.label ? /* @__PURE__ */ jsxs24("div", { className: "hb-checklist-group", role: "group", "aria-labelledby": `${uid}-group-${si}`, children: [
+        /* @__PURE__ */ jsx27("div", { className: "hb-checklist-group-label", id: `${uid}-group-${si}`, children: /* @__PURE__ */ jsx27(InlineText, { text: segment.label }) }),
         segment.rows.map(({ item, index }) => row(item, index))
-      ] }, si) : /* @__PURE__ */ jsx22("div", { className: "hb-checklist-plain", children: segment.rows.map(({ item, index }) => row(item, index)) }, si)
+      ] }, si) : /* @__PURE__ */ jsx27("div", { className: "hb-checklist-plain", children: segment.rows.map(({ item, index }) => row(item, index)) }, si)
     )
   ] });
 }
@@ -3693,11 +5298,11 @@ var STATE_ALIASES = {
   blocked: "blocked",
   skipped: "skipped"
 };
-var MAX_ITEMS = 40;
+var MAX_ITEMS2 = 40;
 function readChecklist(raw, here) {
   const found = collectItems(raw, here);
   if (!found.length) return here.drop("checklist has no item with text");
-  const kept = keepFirst(found, MAX_ITEMS, here, "items");
+  const kept = keepFirst(found, MAX_ITEMS2, here, "items");
   const items = [];
   const ticked = [];
   kept.forEach((item, i) => {
@@ -3721,7 +5326,7 @@ function collectItems(raw, here) {
   const found = [];
   const flat = firstList([raw.items, raw.tasks, raw.steps]);
   flat?.forEach((item, i) => {
-    const read = readItem(item, void 0, here.at("items").at(i));
+    const read = readItem2(item, void 0, here.at("items").at(i));
     if (read) found.push(read);
     else here.at("items").at(i).drop("item has no text");
   });
@@ -3730,14 +5335,14 @@ function collectItems(raw, here) {
     const label = firstText([g?.label, g?.title, g?.name], 60);
     const list = firstList([g?.items, g?.tasks]) ?? [];
     list.forEach((item, i) => {
-      const read = readItem(item, label, here.at("groups").at(gi).at("items").at(i));
+      const read = readItem2(item, label, here.at("groups").at(gi).at("items").at(i));
       if (read) found.push(read);
       else here.at("groups").at(gi).at("items").at(i).drop("item has no text");
     });
   });
   return found;
 }
-function readItem(item, groupLabel, here) {
+function readItem2(item, groupLabel, here) {
   if (typeof item === "string") {
     const text2 = firstText([item], 160);
     if (!text2) return null;
@@ -3748,7 +5353,7 @@ function readItem(item, groupLabel, here) {
   if (!text) return null;
   const group = firstText([item.group, item.section, item.category], 60) ?? groupLabel;
   const id = typeof item.id === "string" && item.id.trim() ? item.id.trim().slice(0, 40) : void 0;
-  const state = readState(item.state, here);
+  const state = readState2(item.state, here);
   return {
     text,
     group,
@@ -3769,7 +5374,7 @@ function readSourceIds(raw, here) {
 function readDensity(raw) {
   return typeof raw === "string" && raw.trim().toLowerCase() === "compact" ? "compact" : void 0;
 }
-function readState(raw, here) {
+function readState2(raw, here) {
   if (raw === void 0 || raw === null) return void 0;
   if (typeof raw === "string") {
     const found = STATE_ALIASES[raw.trim().toLowerCase()];
@@ -3780,7 +5385,7 @@ function readState(raw, here) {
 }
 
 // src/blocks/flip/Flip.tsx
-import { useState as useState11 } from "react";
+import { useState as useState14 } from "react";
 
 // src/blocks/flip/columns.ts
 function flipColumns(cards) {
@@ -3790,40 +5395,40 @@ function flipColumns(cards) {
 }
 
 // src/blocks/flip/Flip.tsx
-import { jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
+import { jsx as jsx28, jsxs as jsxs25 } from "react/jsx-runtime";
 function Flip({ title, cards }) {
-  const [turned, setTurned] = useState11(() => cards.map(() => false));
+  const [turned, setTurned] = useState14(() => cards.map(() => false));
   const toggle = (i) => setTurned((was) => was.map((t, k) => k === i ? !t : t));
   const tall = cards.some((c) => c.image);
-  return /* @__PURE__ */ jsxs20("div", { className: "hb-flip", children: [
-    title && /* @__PURE__ */ jsx23("div", { className: "hb-card-title", children: title }),
-    /* @__PURE__ */ jsx23(
+  return /* @__PURE__ */ jsxs25("div", { className: "hb-flip", children: [
+    title && /* @__PURE__ */ jsx28("div", { className: "hb-card-title", children: title }),
+    /* @__PURE__ */ jsx28(
       "div",
       {
         className: tall ? "hb-flip-grid hb-flip-tall" : "hb-flip-grid",
         style: { "--hb-flip-cols": flipColumns(cards.length) },
-        children: cards.map((c, i) => /* @__PURE__ */ jsx23(Card2, { card: c, place: `${i + 1} of ${cards.length}`, turned: turned[i] === true, onTurn: () => toggle(i) }, i))
+        children: cards.map((c, i) => /* @__PURE__ */ jsx28(Card2, { card: c, place: `${i + 1} of ${cards.length}`, turned: turned[i] === true, onTurn: () => toggle(i) }, i))
       }
     )
   ] });
 }
 function Card2({ card, place: place2, turned, onTurn }) {
-  const [photoFailed, setPhotoFailed] = useState11(false);
+  const [photoFailed, setPhotoFailed] = useState14(false);
   const photo = card.image && !photoFailed ? card.image : void 0;
   const label = turned ? `${card.front}: ${card.back}` : `${card.front}, tap to see the answer`;
-  return /* @__PURE__ */ jsx23("button", { type: "button", className: "hb-flip-card", onClick: onTurn, "aria-pressed": turned, "aria-label": label, children: /* @__PURE__ */ jsxs20("span", { className: turned ? "hb-flip-inner hb-flip-turned" : "hb-flip-inner", children: [
-    /* @__PURE__ */ jsxs20("span", { className: "hb-flip-face hb-flip-front", children: [
-      /* @__PURE__ */ jsx23("span", { className: "hb-flip-label", children: place2 }),
-      /* @__PURE__ */ jsx23("span", { className: "hb-flip-question", children: /* @__PURE__ */ jsx23(InlineText, { text: card.front }) }),
-      /* @__PURE__ */ jsxs20("span", { className: "hb-flip-foot", children: [
-        /* @__PURE__ */ jsx23("span", { children: "Tap to turn" }),
-        /* @__PURE__ */ jsx23("span", { "aria-hidden": "true", children: "\u21BB" })
+  return /* @__PURE__ */ jsx28("button", { type: "button", className: "hb-flip-card", onClick: onTurn, "aria-pressed": turned, "aria-label": label, children: /* @__PURE__ */ jsxs25("span", { className: turned ? "hb-flip-inner hb-flip-turned" : "hb-flip-inner", children: [
+    /* @__PURE__ */ jsxs25("span", { className: "hb-flip-face hb-flip-front", children: [
+      /* @__PURE__ */ jsx28("span", { className: "hb-flip-label", children: place2 }),
+      /* @__PURE__ */ jsx28("span", { className: "hb-flip-question", children: /* @__PURE__ */ jsx28(InlineText, { text: card.front }) }),
+      /* @__PURE__ */ jsxs25("span", { className: "hb-flip-foot", children: [
+        /* @__PURE__ */ jsx28("span", { children: "Tap to turn" }),
+        /* @__PURE__ */ jsx28("span", { "aria-hidden": "true", children: "\u21BB" })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs20("span", { className: "hb-flip-face hb-flip-back", children: [
-      photo && /* @__PURE__ */ jsx23("img", { src: photo, alt: "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => setPhotoFailed(true) }),
-      /* @__PURE__ */ jsx23("span", { className: "hb-flip-label", children: "Answer" }),
-      /* @__PURE__ */ jsx23("span", { className: "hb-flip-answer", children: /* @__PURE__ */ jsx23(InlineText, { text: card.back }) })
+    /* @__PURE__ */ jsxs25("span", { className: "hb-flip-face hb-flip-back", children: [
+      photo && /* @__PURE__ */ jsx28("img", { src: photo, alt: "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => setPhotoFailed(true) }),
+      /* @__PURE__ */ jsx28("span", { className: "hb-flip-label", children: "Answer" }),
+      /* @__PURE__ */ jsx28("span", { className: "hb-flip-answer", children: /* @__PURE__ */ jsx28(InlineText, { text: card.back }) })
     ] })
   ] }) });
 }
@@ -3848,7 +5453,7 @@ function readFlip(raw, here) {
 }
 
 // src/blocks/flow/Flow.tsx
-import { Fragment as Fragment5, useId as useId4, useLayoutEffect as useLayoutEffect3, useMemo as useMemo6, useRef as useRef8, useState as useState12 } from "react";
+import { Fragment as Fragment7, useId as useId5, useLayoutEffect as useLayoutEffect3, useMemo as useMemo8, useRef as useRef8, useState as useState15 } from "react";
 
 // src/lib/motion.ts
 function lessMotion() {
@@ -3912,7 +5517,7 @@ function isMoving(nodes, steps) {
 }
 
 // src/blocks/flow/Flow.tsx
-import { Fragment as Fragment6, jsx as jsx24, jsxs as jsxs21 } from "react/jsx-runtime";
+import { Fragment as Fragment8, jsx as jsx29, jsxs as jsxs26 } from "react/jsx-runtime";
 var NODE_MIN = 88;
 var ARROW = 24;
 var FRAME = 16;
@@ -3940,20 +5545,20 @@ function Flow({ id, title, direction, nodes, groups = [] }) {
   const packet = useRef8(null);
   const boxes = useRef8([]);
   const width = useWidth(box);
-  const [open, setOpen] = useState12(null);
+  const [open, setOpen] = useState15(null);
   const walk = useWalk(id);
   const steps = walk?.steps ?? NO_STEPS;
-  const target = useMemo6(() => flowState(nodes, groups, steps, walk?.at ?? 0), [nodes, groups, steps, walk?.at]);
+  const target = useMemo8(() => flowState(nodes, groups, steps, walk?.at ?? 0), [nodes, groups, steps, walk?.at]);
   const travelling = useTravel(walk, nodes, groups, target, packet, boxes, box);
   const state = travelling ?? target;
   const moving = isMoving(nodes, steps);
   const holds = state.holds.some((h) => h.length > 0);
-  const panelId = useId4();
+  const panelId = useId5();
   const down = direction === "down" || !fitsAcross(nodes.length, groups.length, width, holds);
   const shown2 = open === null ? void 0 : nodes[open];
-  const node = (n, i, arrow) => /* @__PURE__ */ jsxs21("li", { className: "hb-flow-step", children: [
-    arrow && /* @__PURE__ */ jsx24(Arrow, {}),
-    /* @__PURE__ */ jsx24(
+  const node = (n, i, arrow) => /* @__PURE__ */ jsxs26("li", { className: "hb-flow-step", children: [
+    arrow && /* @__PURE__ */ jsx29(Arrow, {}),
+    /* @__PURE__ */ jsx29(
       NodeBox,
       {
         node: n,
@@ -3972,32 +5577,32 @@ function Flow({ id, title, direction, nodes, groups = [] }) {
   function onKeyDown(e) {
     if (e.key === "Escape" && open !== null) setOpen(null);
   }
-  return /* @__PURE__ */ jsxs21("div", { className: "hb-card hb-flow", onKeyDown, children: [
-    title && /* @__PURE__ */ jsx24("div", { className: "hb-card-title", children: title }),
-    /* @__PURE__ */ jsxs21("div", { ref: box, className: "hb-flow-box", children: [
-      /* @__PURE__ */ jsx24("ol", { className: `hb-flow-chain ${down ? "hb-flow-down" : "hb-flow-right"}`, children: pieces(nodes.length, groups).map(({ start, end, group }) => group ? /* @__PURE__ */ jsxs21("li", { className: "hb-flow-step", style: { flexGrow: end - start + 1 }, children: [
-        start > 0 && /* @__PURE__ */ jsx24(Arrow, {}),
-        /* @__PURE__ */ jsxs21("div", { className: "hb-flow-group", children: [
-          /* @__PURE__ */ jsxs21("div", { className: "hb-flow-group-head", children: [
-            /* @__PURE__ */ jsx24("span", { className: "hb-flow-group-label", children: group.label }),
-            group.count !== void 0 && /* @__PURE__ */ jsx24(Counter, { layer: state.layers[groups.indexOf(group)], count: group.count })
+  return /* @__PURE__ */ jsxs26("div", { className: "hb-card hb-flow", onKeyDown, children: [
+    title && /* @__PURE__ */ jsx29("div", { className: "hb-card-title", children: title }),
+    /* @__PURE__ */ jsxs26("div", { ref: box, className: "hb-flow-box", children: [
+      /* @__PURE__ */ jsx29("ol", { className: `hb-flow-chain ${down ? "hb-flow-down" : "hb-flow-right"}`, children: pieces(nodes.length, groups).map(({ start, end, group }) => group ? /* @__PURE__ */ jsxs26("li", { className: "hb-flow-step", style: { flexGrow: end - start + 1 }, children: [
+        start > 0 && /* @__PURE__ */ jsx29(Arrow, {}),
+        /* @__PURE__ */ jsxs26("div", { className: "hb-flow-group", children: [
+          /* @__PURE__ */ jsxs26("div", { className: "hb-flow-group-head", children: [
+            /* @__PURE__ */ jsx29("span", { className: "hb-flow-group-label", children: group.label }),
+            group.count !== void 0 && /* @__PURE__ */ jsx29(Counter, { layer: state.layers[groups.indexOf(group)], count: group.count })
           ] }),
-          /* @__PURE__ */ jsx24("ol", { className: "hb-flow-chain", children: nodes.slice(start, end + 1).map((n, k) => node(n, start + k, k > 0)) })
+          /* @__PURE__ */ jsx29("ol", { className: "hb-flow-chain", children: nodes.slice(start, end + 1).map((n, k) => node(n, start + k, k > 0)) })
         ] })
-      ] }, start) : /* @__PURE__ */ jsx24(Fragment5, { children: node(nodes[start], start, start > 0) }, start)) }),
-      moving && walk && /* @__PURE__ */ jsx24("div", { ref: packet, className: "hb-flow-packet", "aria-hidden": "true" })
+      ] }, start) : /* @__PURE__ */ jsx29(Fragment7, { children: node(nodes[start], start, start > 0) }, start)) }),
+      moving && walk && /* @__PURE__ */ jsx29("div", { ref: packet, className: "hb-flow-packet", "aria-hidden": "true" })
     ] }),
-    shown2?.note && /* @__PURE__ */ jsxs21("div", { id: panelId, className: "hb-flow-panel", role: "region", "aria-label": shown2.label, children: [
-      /* @__PURE__ */ jsx24("div", { className: "hb-flow-panel-title", children: shown2.label }),
-      /* @__PURE__ */ jsx24("p", { className: "hb-flow-note", children: /* @__PURE__ */ jsx24(InlineText, { text: shown2.note }) })
+    shown2?.note && /* @__PURE__ */ jsxs26("div", { id: panelId, className: "hb-flow-panel", role: "region", "aria-label": shown2.label, children: [
+      /* @__PURE__ */ jsx29("div", { className: "hb-flow-panel-title", children: shown2.label }),
+      /* @__PURE__ */ jsx29("p", { className: "hb-flow-note", children: /* @__PURE__ */ jsx29(InlineText, { text: shown2.note }) })
     ] })
   ] });
 }
 function Counter({ layer, count: count2 }) {
-  return /* @__PURE__ */ jsx24("span", { className: "hb-chip hb-chip-soft hb-flow-count", children: layer ? `layer ${layer} of ${count2}` : `\xD7 ${count2}` });
+  return /* @__PURE__ */ jsx29("span", { className: "hb-chip hb-chip-soft hb-flow-count", children: layer ? `layer ${layer} of ${count2}` : `\xD7 ${count2}` });
 }
 function useTravel(walk, nodes, groups, target, packet, boxes, frame) {
-  const [travelling, setTravelling] = useState12(null);
+  const [travelling, setTravelling] = useState15(null);
   useLayoutEffect3(() => {
     const step = walk && walk.from !== null && walk.at === walk.from + 1 ? walk.steps[walk.at] : void 0;
     const dot = packet.current;
@@ -4057,16 +5662,16 @@ function useTravel(walk, nodes, groups, target, packet, boxes, frame) {
 }
 function NodeBox({ node, chips, lit, idle, open, panelId, boxRef, onTap }) {
   const className = `hb-flow-node${lit ? " hb-flow-lit" : ""}${open ? " hb-flow-open" : ""}${idle ? " hb-flow-idle" : ""}`;
-  const holds = chips.length > 0 && /* @__PURE__ */ jsx24(Chips, { chips }, JSON.stringify(chips));
-  const inside2 = /* @__PURE__ */ jsxs21(Fragment6, { children: [
-    node.icon && /* @__PURE__ */ jsx24("span", { className: "hb-flow-icon", children: /* @__PURE__ */ jsx24(Icon, { name: node.icon, size: 14 }) }),
-    /* @__PURE__ */ jsx24("span", { className: "hb-flow-label", children: node.label })
+  const holds = chips.length > 0 && /* @__PURE__ */ jsx29(Chips, { chips }, JSON.stringify(chips));
+  const inside2 = /* @__PURE__ */ jsxs26(Fragment8, { children: [
+    node.icon && /* @__PURE__ */ jsx29("span", { className: "hb-flow-icon", children: /* @__PURE__ */ jsx29(Icon, { name: node.icon, size: 14 }) }),
+    /* @__PURE__ */ jsx29("span", { className: "hb-flow-label", children: node.label })
   ] });
-  if (!node.note) return /* @__PURE__ */ jsxs21("div", { ref: boxRef, className, "aria-current": lit ? "step" : void 0, children: [
+  if (!node.note) return /* @__PURE__ */ jsxs26("div", { ref: boxRef, className, "aria-current": lit ? "step" : void 0, children: [
     inside2,
     holds
   ] });
-  return /* @__PURE__ */ jsxs21(
+  return /* @__PURE__ */ jsxs26(
     "button",
     {
       ref: boxRef,
@@ -4078,17 +5683,17 @@ function NodeBox({ node, chips, lit, idle, open, panelId, boxRef, onTap }) {
       onClick: onTap,
       children: [
         inside2,
-        /* @__PURE__ */ jsx24("span", { className: "hb-flow-more", "aria-hidden": "true", children: open ? "\u2212" : "+" }),
+        /* @__PURE__ */ jsx29("span", { className: "hb-flow-more", "aria-hidden": "true", children: open ? "\u2212" : "+" }),
         holds
       ]
     }
   );
 }
 function Chips({ chips }) {
-  return /* @__PURE__ */ jsx24("span", { className: "hb-flow-holds", children: chips.map((c, k) => /* @__PURE__ */ jsx24("span", { className: c.accent ? "hb-flow-chip hb-flow-chip-accent" : "hb-flow-chip", children: c.text }, k)) });
+  return /* @__PURE__ */ jsx29("span", { className: "hb-flow-holds", children: chips.map((c, k) => /* @__PURE__ */ jsx29("span", { className: c.accent ? "hb-flow-chip hb-flow-chip-accent" : "hb-flow-chip", children: c.text }, k)) });
 }
 function Arrow() {
-  return /* @__PURE__ */ jsx24("span", { className: "hb-flow-arrow", "aria-hidden": "true", children: /* @__PURE__ */ jsx24(
+  return /* @__PURE__ */ jsx29("span", { className: "hb-flow-arrow", "aria-hidden": "true", children: /* @__PURE__ */ jsx29(
     "svg",
     {
       width: "16",
@@ -4099,13 +5704,13 @@ function Arrow() {
       strokeWidth: "2",
       strokeLinecap: "round",
       strokeLinejoin: "round",
-      children: /* @__PURE__ */ jsx24("path", { d: "M4 12h15M13 6l6 6-6 6" })
+      children: /* @__PURE__ */ jsx29("path", { d: "M4 12h15M13 6l6 6-6 6" })
     }
   ) });
 }
 
 // src/blocks/flow/read.ts
-var MAX_NODES = 10;
+var MAX_NODES2 = 10;
 var MAX_GROUPS = 3;
 var MAX_CHIPS = 10;
 var CHIP = 16;
@@ -4127,7 +5732,7 @@ function readFlow(raw, here) {
     nodes.push(clean({ id, label, icon: icon(n.icon), note: firstText([n.note, n.text, n.description], 280), holds }));
   });
   if (nodes.length < 2) return here.drop("flow needs at least 2 nodes");
-  const kept = keepFirst(nodes, MAX_NODES, here, "nodes");
+  const kept = keepFirst(nodes, MAX_NODES2, here, "nodes");
   const groups = readGroups(raw.groups, kept, here);
   return clean({
     type: "flow",
@@ -4176,7 +5781,7 @@ function readChips(raw, here) {
 }
 
 // src/blocks/form/Form.tsx
-import { useContext as useContext6 } from "react";
+import { useContext as useContext7 } from "react";
 
 // src/blocks/form/read.ts
 var MAX_FIELDS = 12;
@@ -4188,7 +5793,7 @@ var GROUP = 40;
 var END = 20;
 var PLACEHOLDER = 60;
 var TEXT_VALUE = 500;
-var KINDS = ["select", "radio", "checkbox", "text", "slider"];
+var KINDS3 = ["select", "radio", "checkbox", "text", "slider"];
 var FIELD_ID = /^[A-Za-z_][\w-]{0,39}$/;
 var RESERVED_IDS = ["__proto__", "constructor", "prototype"];
 var KIND_NAMES = {
@@ -4242,7 +5847,7 @@ function readField(item, here) {
   if (!item || typeof item !== "object") return here.drop("field is not an object");
   const named = String(item.kind ?? item.type ?? "").trim().toLowerCase();
   const kind = KIND_NAMES[named];
-  if (!kind) return here.drop(`field kind "${named}" isn't one of ${KINDS.join(", ")}`);
+  if (!kind) return here.drop(`field kind "${named}" isn't one of ${KINDS3.join(", ")}`);
   const id = firstText([item.id, item.name, item.key], 200);
   if (!id) return here.drop("field needs an id");
   if (!FIELD_ID.test(id)) return here.drop('field id must be a word like "where" (letters, digits, _ or -)');
@@ -4252,7 +5857,7 @@ function readField(item, here) {
   const base = clean({ id, label: whole2 ? shortLabel2(whole2) : id, group, required: item.required === true });
   if (kind === "text") return readTextField(item, named, base);
   if (kind === "slider") return readSlider(item, base, here);
-  const options = readOptions(firstList([item.options, item.choices]) ?? [], here);
+  const options = readOptions2(firstList([item.options, item.choices]) ?? [], here);
   if (!options.length) return here.drop(`${kind} needs options`);
   const values = options.map((o) => o.value);
   if (kind === "checkbox") {
@@ -4268,14 +5873,14 @@ function prefilledList(value) {
   if (value === void 0) return [];
   return [value];
 }
-function readOptions(list, here) {
+function readOptions2(list, here) {
   const options = [];
   for (const o of list) {
-    const isObject3 = !!o && typeof o === "object";
-    const value = isObject3 ? firstTextOrNumber([o.value, o.id, o.label], OPTION) : firstTextOrNumber([o], OPTION);
+    const isObject5 = !!o && typeof o === "object";
+    const value = isObject5 ? firstTextOrNumber([o.value, o.id, o.label], OPTION) : firstTextOrNumber([o], OPTION);
     if (value === void 0 || options.some((x) => x.value === value)) continue;
-    const label = (isObject3 ? firstText([o.label, o.name], OPTION) : void 0) ?? value;
-    const note = isObject3 ? firstText([o.note, o.description], NOTE) : void 0;
+    const label = (isObject5 ? firstText([o.label, o.name], OPTION) : void 0) ?? value;
+    const note = isObject5 ? firstText([o.note, o.description], NOTE) : void 0;
     options.push(clean({ value, label, note }));
   }
   return keepFirst(options, MAX_OPTIONS, here, "options");
@@ -4394,9 +5999,9 @@ function fitting(field, value) {
 }
 
 // src/blocks/form/Form.tsx
-import { jsx as jsx25, jsxs as jsxs22 } from "react/jsx-runtime";
+import { jsx as jsx30, jsxs as jsxs27 } from "react/jsx-runtime";
 function Form(form) {
-  const { send } = useContext6(BlockActions);
+  const { send } = useContext7(BlockActions);
   const [draft, writeDraft] = useStoredValue({
     door: "identity",
     field: "~v",
@@ -4420,7 +6025,7 @@ function Form(form) {
     setRecord(sentRecord(values));
     send(answerMessage(form, values));
   }
-  return /* @__PURE__ */ jsxs22(
+  return /* @__PURE__ */ jsxs27(
     "form",
     {
       className: sent ? "hb-card hb-form hb-form-sent" : "hb-card hb-form",
@@ -4430,10 +6035,10 @@ function Form(form) {
         onSend();
       },
       children: [
-        form.title && /* @__PURE__ */ jsx25("div", { className: "hb-card-title", children: /* @__PURE__ */ jsx25(InlineText, { text: form.title }) }),
-        /* @__PURE__ */ jsx25("fieldset", { disabled: sent, children: form.fields.map((field, i) => /* @__PURE__ */ jsxs22("div", { children: [
-          startsGroup(form.fields, i) && /* @__PURE__ */ jsx25("div", { className: "hb-form-group", children: /* @__PURE__ */ jsx25(InlineText, { text: field.group }) }),
-          /* @__PURE__ */ jsx25(
+        form.title && /* @__PURE__ */ jsx30("div", { className: "hb-card-title", children: /* @__PURE__ */ jsx30(InlineText, { text: form.title }) }),
+        /* @__PURE__ */ jsx30("fieldset", { disabled: sent, children: form.fields.map((field, i) => /* @__PURE__ */ jsxs27("div", { children: [
+          startsGroup(form.fields, i) && /* @__PURE__ */ jsx30("div", { className: "hb-form-group", children: /* @__PURE__ */ jsx30(InlineText, { text: field.group }) }),
+          /* @__PURE__ */ jsx30(
             FieldView,
             {
               field,
@@ -4442,9 +6047,9 @@ function Form(form) {
             }
           )
         ] }, field.id)) }),
-        /* @__PURE__ */ jsxs22("div", { className: "hb-form-foot", children: [
-          sent && /* @__PURE__ */ jsx25("span", { className: "hb-form-done", children: "\u2713 Sent" }),
-          /* @__PURE__ */ jsx25("button", { type: "submit", className: "hb-pill hb-pill-solid", disabled: !ready, children: form.submit })
+        /* @__PURE__ */ jsxs27("div", { className: "hb-form-foot", children: [
+          sent && /* @__PURE__ */ jsx30("span", { className: "hb-form-done", children: "\u2713 Sent" }),
+          /* @__PURE__ */ jsx30("button", { type: "submit", className: "hb-pill hb-pill-solid", disabled: !ready, children: form.submit })
         ] })
       ]
     }
@@ -4453,12 +6058,12 @@ function Form(form) {
 function FieldView({ field, value, onChange }) {
   if (field.kind === "slider") {
     const at2 = typeof value === "number" ? value : field.value;
-    return /* @__PURE__ */ jsxs22("label", { className: "hb-form-field", children: [
-      /* @__PURE__ */ jsxs22("span", { className: "hb-calc-head", children: [
-        /* @__PURE__ */ jsx25("span", { className: "hb-calc-label", children: /* @__PURE__ */ jsx25(InlineText, { text: field.label }) }),
-        /* @__PURE__ */ jsx25("span", { className: "hb-calc-value", children: formatWithUnit(at2, field.unit) })
+    return /* @__PURE__ */ jsxs27("label", { className: "hb-form-field", children: [
+      /* @__PURE__ */ jsxs27("span", { className: "hb-calc-head", children: [
+        /* @__PURE__ */ jsx30("span", { className: "hb-calc-label", children: /* @__PURE__ */ jsx30(InlineText, { text: field.label }) }),
+        /* @__PURE__ */ jsx30("span", { className: "hb-calc-value", children: formatWithUnit(at2, field.unit) })
       ] }),
-      /* @__PURE__ */ jsx25(
+      /* @__PURE__ */ jsx30(
         "input",
         {
           type: "range",
@@ -4470,32 +6075,32 @@ function FieldView({ field, value, onChange }) {
           onChange: (e) => onChange(Number(e.target.value))
         }
       ),
-      field.ends && /* @__PURE__ */ jsxs22("span", { className: "hb-form-ends", children: [
-        /* @__PURE__ */ jsx25("span", { children: field.ends[0] }),
-        /* @__PURE__ */ jsx25("span", { children: field.ends[1] })
+      field.ends && /* @__PURE__ */ jsxs27("span", { className: "hb-form-ends", children: [
+        /* @__PURE__ */ jsx30("span", { children: field.ends[0] }),
+        /* @__PURE__ */ jsx30("span", { children: field.ends[1] })
       ] })
     ] });
   }
   if (field.kind === "text") {
     const text = typeof value === "string" ? value : "";
     const props = { className: "hb-input", value: text, maxLength: TEXT_VALUE, placeholder: field.placeholder };
-    return /* @__PURE__ */ jsxs22("label", { className: "hb-form-field", children: [
-      /* @__PURE__ */ jsx25("span", { className: "hb-form-label", children: /* @__PURE__ */ jsx25(InlineText, { text: field.label }) }),
-      field.multiline ? /* @__PURE__ */ jsx25("textarea", { ...props, rows: 3, onChange: (e) => onChange(e.target.value) }) : /* @__PURE__ */ jsx25("input", { type: "text", ...props, onChange: (e) => onChange(e.target.value) })
+    return /* @__PURE__ */ jsxs27("label", { className: "hb-form-field", children: [
+      /* @__PURE__ */ jsx30("span", { className: "hb-form-label", children: /* @__PURE__ */ jsx30(InlineText, { text: field.label }) }),
+      field.multiline ? /* @__PURE__ */ jsx30("textarea", { ...props, rows: 3, onChange: (e) => onChange(e.target.value) }) : /* @__PURE__ */ jsx30("input", { type: "text", ...props, onChange: (e) => onChange(e.target.value) })
     ] });
   }
   if (field.kind === "select") {
     const chosen = field.options.find((o) => o.value === value);
-    return /* @__PURE__ */ jsxs22("label", { className: "hb-form-field", children: [
-      /* @__PURE__ */ jsx25("span", { className: "hb-form-label", children: /* @__PURE__ */ jsx25(InlineText, { text: field.label }) }),
-      /* @__PURE__ */ jsxs22("select", { className: "hb-input", value: chosen ? chosen.value : "", onChange: (e) => onChange(e.target.value), children: [
-        !chosen && /* @__PURE__ */ jsx25("option", { value: "", disabled: true, children: "Choose\u2026" }),
-        field.options.map((o) => /* @__PURE__ */ jsx25("option", { value: o.value, children: o.label }, o.value))
+    return /* @__PURE__ */ jsxs27("label", { className: "hb-form-field", children: [
+      /* @__PURE__ */ jsx30("span", { className: "hb-form-label", children: /* @__PURE__ */ jsx30(InlineText, { text: field.label }) }),
+      /* @__PURE__ */ jsxs27("select", { className: "hb-input", value: chosen ? chosen.value : "", onChange: (e) => onChange(e.target.value), children: [
+        !chosen && /* @__PURE__ */ jsx30("option", { value: "", disabled: true, children: "Choose\u2026" }),
+        field.options.map((o) => /* @__PURE__ */ jsx30("option", { value: o.value, children: o.label }, o.value))
       ] }),
-      chosen?.note && /* @__PURE__ */ jsx25("span", { className: "hb-form-note", children: chosen.note })
+      chosen?.note && /* @__PURE__ */ jsx30("span", { className: "hb-form-note", children: chosen.note })
     ] });
   }
-  return /* @__PURE__ */ jsx25(Pills, { field, value, onChange });
+  return /* @__PURE__ */ jsx30(Pills, { field, value, onChange });
 }
 function Pills({ field, value, onChange }) {
   const isRadio = field.kind === "radio";
@@ -4505,11 +6110,11 @@ function Pills({ field, value, onChange }) {
     const ticked = picked.includes(option.value) ? picked.filter((v) => v !== option.value) : [...picked, option.value];
     onChange(field.options.map((o) => o.value).filter((v) => ticked.includes(v)));
   }
-  return /* @__PURE__ */ jsxs22("div", { className: "hb-form-field", role: isRadio ? "radiogroup" : "group", "aria-label": field.label, children: [
-    /* @__PURE__ */ jsx25("span", { className: "hb-form-label", children: /* @__PURE__ */ jsx25(InlineText, { text: field.label }) }),
-    /* @__PURE__ */ jsx25("div", { className: "hb-options", children: field.options.map((o) => {
+  return /* @__PURE__ */ jsxs27("div", { className: "hb-form-field", role: isRadio ? "radiogroup" : "group", "aria-label": field.label, children: [
+    /* @__PURE__ */ jsx30("span", { className: "hb-form-label", children: /* @__PURE__ */ jsx30(InlineText, { text: field.label }) }),
+    /* @__PURE__ */ jsx30("div", { className: "hb-options", children: field.options.map((o) => {
       const on = picked.includes(o.value);
-      return /* @__PURE__ */ jsxs22(
+      return /* @__PURE__ */ jsxs27(
         "button",
         {
           type: "button",
@@ -4519,7 +6124,7 @@ function Pills({ field, value, onChange }) {
           className: on ? "hb-option hb-option-on" : "hb-option",
           children: [
             o.label,
-            o.note && /* @__PURE__ */ jsx25("span", { className: "hb-option-note", children: o.note })
+            o.note && /* @__PURE__ */ jsx30("span", { className: "hb-option-note", children: o.note })
           ]
         },
         o.value
@@ -4529,7 +6134,7 @@ function Pills({ field, value, onChange }) {
 }
 
 // src/blocks/heatmap/Heatmap.tsx
-import { Fragment as Fragment7, useState as useState13 } from "react";
+import { Fragment as Fragment9, useState as useState16 } from "react";
 
 // src/blocks/heatmap/heatmapColour.ts
 var FAINT = 10;
@@ -4563,7 +6168,7 @@ function cellColour(value, range, scale) {
   const percent = Math.round(FAINT + (DEEP - FAINT) * share);
   return `color-mix(in srgb, var(${colour}) ${percent}%, transparent)`;
 }
-function cellText(value, unit) {
+function cellText2(value, unit) {
   if (value === null) return "\u2013";
   const text = Number.isInteger(value) ? String(value) : value.toFixed(1);
   if (!unit) return text;
@@ -4572,15 +6177,15 @@ function cellText(value, unit) {
 }
 
 // src/blocks/heatmap/Heatmap.tsx
-import { jsx as jsx26, jsxs as jsxs23 } from "react/jsx-runtime";
+import { jsx as jsx31, jsxs as jsxs28 } from "react/jsx-runtime";
 var SHOW_NUMBERS_UP_TO = 6;
 function Heatmap({ title, rows, cols, values, unit, scale }) {
-  const [picked, setPicked] = useState13(null);
+  const [picked, setPicked] = useState16(null);
   const range = rangeOf(values);
   const numbersInCells = cols.length <= SHOW_NUMBERS_UP_TO;
-  return /* @__PURE__ */ jsxs23("div", { className: "hb-card hb-heatmap", children: [
-    title && /* @__PURE__ */ jsx26("div", { className: "hb-card-title", children: title }),
-    /* @__PURE__ */ jsxs23(
+  return /* @__PURE__ */ jsxs28("div", { className: "hb-card hb-heatmap", children: [
+    title && /* @__PURE__ */ jsx31("div", { className: "hb-card-title", children: title }),
+    /* @__PURE__ */ jsxs28(
       "div",
       {
         className: "hb-heat-grid",
@@ -4588,21 +6193,21 @@ function Heatmap({ title, rows, cols, values, unit, scale }) {
         role: "table",
         "aria-label": title ?? "Heat map",
         children: [
-          /* @__PURE__ */ jsx26("span", {}),
-          cols.map((c, j) => /* @__PURE__ */ jsx26("span", { className: "hb-heat-col", role: "columnheader", children: c }, j)),
-          rows.map((r, i) => /* @__PURE__ */ jsxs23(Fragment7, { children: [
-            /* @__PURE__ */ jsx26("span", { className: "hb-heat-row", role: "rowheader", children: r }),
+          /* @__PURE__ */ jsx31("span", {}),
+          cols.map((c, j) => /* @__PURE__ */ jsx31("span", { className: "hb-heat-col", role: "columnheader", children: c }, j)),
+          rows.map((r, i) => /* @__PURE__ */ jsxs28(Fragment9, { children: [
+            /* @__PURE__ */ jsx31("span", { className: "hb-heat-row", role: "rowheader", children: r }),
             cols.map((c, j) => {
               const v = values[i][j];
-              return /* @__PURE__ */ jsx26(
+              return /* @__PURE__ */ jsx31(
                 "button",
                 {
                   type: "button",
                   className: "hb-heat-cell",
                   style: { background: cellColour(v, range, scale) },
                   onClick: () => setPicked({ row: i, col: j }),
-                  "aria-label": `${r}, ${c}: ${v === null ? "no data" : cellText(v, unit)}`,
-                  children: numbersInCells && v !== null ? cellText(v, unit) : ""
+                  "aria-label": `${r}, ${c}: ${v === null ? "no data" : cellText2(v, unit)}`,
+                  children: numbersInCells && v !== null ? cellText2(v, unit) : ""
                 },
                 j
               );
@@ -4611,12 +6216,12 @@ function Heatmap({ title, rows, cols, values, unit, scale }) {
         ]
       }
     ),
-    picked && /* @__PURE__ */ jsxs23("div", { className: "hb-heat-picked", children: [
+    picked && /* @__PURE__ */ jsxs28("div", { className: "hb-heat-picked", children: [
       rows[picked.row],
       " \xB7 ",
       cols[picked.col],
       ": ",
-      /* @__PURE__ */ jsx26("b", { children: cellText(values[picked.row][picked.col], unit) })
+      /* @__PURE__ */ jsx31("b", { children: cellText2(values[picked.row][picked.col], unit) })
     ] })
   ] });
 }
@@ -4673,17 +6278,17 @@ function scaleOf(asked, values) {
 }
 
 // src/blocks/images/Images.tsx
-import { useEffect as useEffect2, useState as useState14 } from "react";
-import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
+import { useEffect as useEffect2, useState as useState17 } from "react";
+import { jsx as jsx32, jsxs as jsxs29 } from "react/jsx-runtime";
 var GRID_FROM = 4;
 function Images({ block }) {
-  const [failed, setFailed] = useState14(/* @__PURE__ */ new Set());
-  const [open, setOpen] = useState14(null);
+  const [failed, setFailed] = useState17(/* @__PURE__ */ new Set());
+  const [open, setOpen] = useState17(null);
   const shown2 = block.images.filter((p) => !failed.has(p.url));
   if (!shown2.length) return null;
-  const fail = (url) => setFailed((before) => new Set(before).add(url));
+  const fail2 = (url) => setFailed((before) => new Set(before).add(url));
   const grid = shown2.length >= GRID_FROM;
-  const download = (p) => /* @__PURE__ */ jsx27(
+  const download = (p) => /* @__PURE__ */ jsx32(
     "a",
     {
       className: "hb-photo-download",
@@ -4691,31 +6296,31 @@ function Images({ block }) {
       download: p.caption || "photo",
       "aria-label": `Download ${p.caption ?? "photo"}`,
       onClick: (e) => e.stopPropagation(),
-      children: /* @__PURE__ */ jsx27("span", { "aria-hidden": "true", children: "\u2193" })
+      children: /* @__PURE__ */ jsx32("span", { "aria-hidden": "true", children: "\u2193" })
     }
   );
-  return /* @__PURE__ */ jsxs24("figure", { className: grid ? "hb-photos hb-photos-grid" : "hb-photos", children: [
-    block.title && /* @__PURE__ */ jsx27("figcaption", { className: "hb-chart-title", children: block.title }),
-    /* @__PURE__ */ jsx27("div", { className: "hb-photo-strip", children: shown2.map((p) => grid ? /* @__PURE__ */ jsxs24("div", { className: "hb-photo", children: [
-      /* @__PURE__ */ jsx27("button", { type: "button", className: "hb-photo-open", onClick: () => setOpen(p), "aria-label": p.caption ?? "Open photo", children: /* @__PURE__ */ jsx27("img", { src: p.url, alt: p.caption ?? "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => fail(p.url) }) }),
-      /* @__PURE__ */ jsxs24("div", { className: "hb-photo-text", children: [
-        /* @__PURE__ */ jsxs24("button", { type: "button", className: "hb-photo-label", onClick: () => setOpen(p), children: [
-          p.caption && /* @__PURE__ */ jsx27("span", { className: "hb-photo-caption", children: p.caption }),
-          p.source && /* @__PURE__ */ jsx27("span", { className: "hb-photo-source", children: p.source })
+  return /* @__PURE__ */ jsxs29("figure", { className: grid ? "hb-photos hb-photos-grid" : "hb-photos", children: [
+    block.title && /* @__PURE__ */ jsx32("figcaption", { className: "hb-chart-title", children: block.title }),
+    /* @__PURE__ */ jsx32("div", { className: "hb-photo-strip", children: shown2.map((p) => grid ? /* @__PURE__ */ jsxs29("div", { className: "hb-photo", children: [
+      /* @__PURE__ */ jsx32("button", { type: "button", className: "hb-photo-open", onClick: () => setOpen(p), "aria-label": p.caption ?? "Open photo", children: /* @__PURE__ */ jsx32("img", { src: p.url, alt: p.caption ?? "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => fail2(p.url) }) }),
+      /* @__PURE__ */ jsxs29("div", { className: "hb-photo-text", children: [
+        /* @__PURE__ */ jsxs29("button", { type: "button", className: "hb-photo-label", onClick: () => setOpen(p), children: [
+          p.caption && /* @__PURE__ */ jsx32("span", { className: "hb-photo-caption", children: p.caption }),
+          p.source && /* @__PURE__ */ jsx32("span", { className: "hb-photo-source", children: p.source })
         ] }),
         download(p)
       ] })
-    ] }, p.url) : /* @__PURE__ */ jsxs24("div", { className: "hb-photo", children: [
-      /* @__PURE__ */ jsxs24("button", { type: "button", className: "hb-photo-open", onClick: () => setOpen(p), "aria-label": p.caption ?? "Open photo", children: [
-        /* @__PURE__ */ jsx27("img", { src: p.url, alt: p.caption ?? "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => fail(p.url) }),
-        (p.caption || p.source) && /* @__PURE__ */ jsxs24("span", { className: "hb-photo-text", children: [
-          p.caption && /* @__PURE__ */ jsx27("span", { className: "hb-photo-caption", children: p.caption }),
-          p.source && /* @__PURE__ */ jsx27("span", { className: "hb-photo-source", children: p.source })
+    ] }, p.url) : /* @__PURE__ */ jsxs29("div", { className: "hb-photo", children: [
+      /* @__PURE__ */ jsxs29("button", { type: "button", className: "hb-photo-open", onClick: () => setOpen(p), "aria-label": p.caption ?? "Open photo", children: [
+        /* @__PURE__ */ jsx32("img", { src: p.url, alt: p.caption ?? "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => fail2(p.url) }),
+        (p.caption || p.source) && /* @__PURE__ */ jsxs29("span", { className: "hb-photo-text", children: [
+          p.caption && /* @__PURE__ */ jsx32("span", { className: "hb-photo-caption", children: p.caption }),
+          p.source && /* @__PURE__ */ jsx32("span", { className: "hb-photo-source", children: p.source })
         ] })
       ] }),
       download(p)
     ] }, p.url)) }),
-    open && /* @__PURE__ */ jsx27(Overlay, { photo: open, onClose: () => setOpen(null) })
+    open && /* @__PURE__ */ jsx32(Overlay, { photo: open, onClose: () => setOpen(null) })
   ] });
 }
 function Overlay({ photo, onClose }) {
@@ -4724,11 +6329,11 @@ function Overlay({ photo, onClose }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  return /* @__PURE__ */ jsxs24("div", { className: "hb-photo-overlay", role: "dialog", "aria-label": photo.caption ?? "Photo", onClick: onClose, children: [
-    /* @__PURE__ */ jsx27("img", { src: photo.url, alt: photo.caption ?? "", referrerPolicy: "no-referrer" }),
-    (photo.caption || photo.source) && /* @__PURE__ */ jsxs24("div", { className: "hb-photo-overlay-text", children: [
+  return /* @__PURE__ */ jsxs29("div", { className: "hb-photo-overlay", role: "dialog", "aria-label": photo.caption ?? "Photo", onClick: onClose, children: [
+    /* @__PURE__ */ jsx32("img", { src: photo.url, alt: photo.caption ?? "", referrerPolicy: "no-referrer" }),
+    (photo.caption || photo.source) && /* @__PURE__ */ jsxs29("div", { className: "hb-photo-overlay-text", children: [
       photo.caption,
-      photo.source && /* @__PURE__ */ jsxs24("span", { children: [
+      photo.source && /* @__PURE__ */ jsxs29("span", { children: [
         " \xB7 ",
         photo.source
       ] })
@@ -4752,162 +6357,35 @@ function readImages(raw, here) {
   return clean({ type: "images", title: str(raw.title, 60), images: keepFirst(photos, 12, here, "photos") });
 }
 
-// src/blocks/kpis/Kpis.tsx
-import { jsx as jsx28, jsxs as jsxs25 } from "react/jsx-runtime";
-function isYear(k) {
-  return typeof k.value === "number" && !k.unit && Number.isInteger(k.value) && k.value >= 1800 && k.value <= 2100;
-}
-var CURRENCY = /^[$₹€£¥]$/;
-function kpiValue(k, { full = false } = {}) {
-  if (k.value === null) return "no data";
-  if (typeof k.value === "string") return k.value;
-  if (isYear(k)) return String(k.value);
-  const short2 = !full && Math.abs(k.value) >= SHORT_FROM;
-  if (short2 && k.unit && CURRENCY.test(k.unit)) return fmt(k.value, k.unit);
-  const money = formatAmount(k.value, k.unit);
-  if (money !== null) return money;
-  const plain2 = short2 ? fmt(k.value) : formatNumber(k.value, { digits: Math.abs(k.value) >= 1e3 ? 0 : 1 });
-  const attached = k.unit === "%" || k.unit?.startsWith("/");
-  return attached ? `${plain2}${k.unit}` : k.unit ? `${plain2} ${k.unit}` : plain2;
-}
-function KpiCard({ item, trendColour }) {
-  const shown2 = kpiValue(item);
-  const full = kpiValue(item, { full: true });
-  const change = formatChange(item.change, item.change_unit);
-  const isText = typeof item.value === "string";
-  const empty = item.value === null;
-  const valueClass = ["hb-kpi-value", isText ? "hb-kpi-value-text" : "", empty ? "hb-kpi-value-empty" : ""].filter(Boolean).join(" ");
-  return /* @__PURE__ */ jsxs25("div", { className: "hb-card hb-kpi", children: [
-    /* @__PURE__ */ jsx28("div", { className: "hb-kpi-label", children: item.label }),
-    /* @__PURE__ */ jsx28("div", { className: valueClass, title: full !== shown2 ? full : void 0, children: shown2 }),
-    change && /* @__PURE__ */ jsx28("div", { className: changeClass(item), children: change }),
-    item.trend && /* @__PURE__ */ jsx28(Sparkline, { values: item.trend, colour: trendColour })
-  ] });
-}
-function Kpis({ items }) {
-  const several = items.filter((k) => k.trend).length >= 2;
-  return /* @__PURE__ */ jsx28("div", { className: "hb-kpis", children: items.map((k, i) => /* @__PURE__ */ jsx28(KpiCard, { item: k, trendColour: several ? partColour(i) : void 0 }, i)) });
-}
-function changeClass(item) {
-  const change = item.change ?? 0;
-  const direction = change > 0 ? "hb-kpi-up" : change < 0 ? "hb-kpi-down" : "hb-kpi-flat";
-  return `hb-kpi-change ${direction}${item.invert_tone ? " hb-kpi-invert" : ""}`;
-}
-var SPARK_W = 120;
-var SPARK_H = 28;
-var SPARK_PAD = 2;
-function Sparkline({ values, colour }) {
-  return /* @__PURE__ */ jsx28("svg", { className: "hb-kpi-spark", viewBox: `0 0 ${SPARK_W} ${SPARK_H}`, preserveAspectRatio: "none", "aria-hidden": "true", children: /* @__PURE__ */ jsx28("path", { d: sparkPath(values), style: colour ? { stroke: colour } : void 0 }) });
-}
-function sparkPath(values) {
-  const known = values.filter((v) => v !== null);
-  if (!known.length) return "";
-  const lo = Math.min(...known);
-  const hi = Math.max(...known);
-  const span = SPARK_H - 2 * SPARK_PAD;
-  const y = (v) => hi === lo ? SPARK_H / 2 : SPARK_PAD + (1 - (v - lo) / (hi - lo)) * span;
-  const x = (i) => i / (values.length - 1) * SPARK_W;
-  let d = "";
-  let pen = false;
-  values.forEach((v, i) => {
-    if (v === null) {
-      pen = false;
-      return;
-    }
-    d += `${pen ? "L" : "M"}${round(x(i))} ${round(y(v))}`;
-    pen = true;
-  });
-  return d;
-}
-function round(n) {
-  return Math.round(n * 10) / 10;
-}
-
-// src/blocks/kpis/read.ts
-var TREND_FEWEST = 2;
-var TREND_MOST = 60;
-var MAX_CHIP = 1e15;
-function readKpi(item) {
-  let value = num(item.value);
-  if (value === null) value = str(item.value, 40) ?? null;
-  const unit = typeof item.unit === "string" ? item.unit : void 0;
-  const fromPrevious = "previous" in item;
-  const changeUnit = readChangeUnit(item.change_unit, unit, fromPrevious);
-  let change = fromPrevious ? changeFrom(item.previous, value, changeUnit) : num(item.change);
-  if (change !== null && Math.abs(change) >= MAX_CHIP) change = null;
-  const kpi = { label: item.label, value, unit, change, change_unit: changeUnit };
-  if (kpi.unit === void 0) delete kpi.unit;
-  if (kpi.change === null) delete kpi.change;
-  if (item.invert_tone === true) kpi.invert_tone = true;
-  const trend = readTrend(item.trend);
-  if (trend) kpi.trend = trend;
-  return kpi;
-}
-function readChangeUnit(written, unit, fromPrevious) {
-  if (written === "%" || written === "pt") return written;
-  return fromPrevious && unit === "%" ? "pt" : "%";
-}
-function changeFrom(previous, value, unit) {
-  const before = num(previous);
-  if (before === null || typeof value !== "number") return null;
-  const moved = value - before;
-  if (unit === "pt") return moved;
-  return before === 0 ? null : moved / Math.abs(before) * 100;
-}
-function readTrend(v) {
-  if (!Array.isArray(v)) return void 0;
-  const slots = v.slice(-TREND_MOST).map((x) => num(x));
-  const known = slots.filter((n) => n !== null).length;
-  return known >= TREND_FEWEST ? slots : void 0;
-}
-function readKpis(raw, here) {
-  if (!Array.isArray(raw.items)) return here.drop("kpis needs items");
-  const items = [];
-  raw.items.forEach((item, i) => {
-    if (!item || typeof item.label !== "string") {
-      here.at("items").at(i).drop("item has no label");
-      return;
-    }
-    items.push(readKpi(item));
-  });
-  if (!items.length) return here.drop("kpis has no item with a label");
-  return { type: "kpis", items: keepFirst(items, 4, here, "items") };
-}
-function readStat(raw, here) {
-  const label = firstText([raw.label, raw.title], 40);
-  if (!label) return here.drop("stat needs a label");
-  return { type: "stat", ...readKpi({ ...raw, label }) };
-}
-
 // src/blocks/layout/Containers.tsx
-import { isValidElement, useState as useState15 } from "react";
-import { jsx as jsx29, jsxs as jsxs26 } from "react/jsx-runtime";
+import { isValidElement, useState as useState18 } from "react";
+import { jsx as jsx33, jsxs as jsxs30 } from "react/jsx-runtime";
 function cellKey(child, i) {
   const k = isValidElement(child) ? child.key : null;
   return `c:${k ?? i}`;
 }
 var OWN_WIDTH_KINDS = ["badge", "button", "link"];
-function Row({ kinds, children }) {
-  return /* @__PURE__ */ jsx29("div", { className: "hb-row", children: children.map((child, i) => /* @__PURE__ */ jsx29("div", { className: OWN_WIDTH_KINDS.includes(kinds[i]) ? "hb-row-cell hb-row-cell-own" : "hb-row-cell", children: child }, cellKey(child, i))) });
+function Row2({ kinds, children }) {
+  return /* @__PURE__ */ jsx33("div", { className: "hb-row", children: children.map((child, i) => /* @__PURE__ */ jsx33("div", { className: OWN_WIDTH_KINDS.includes(kinds[i]) ? "hb-row-cell hb-row-cell-own" : "hb-row-cell", children: child }, cellKey(child, i))) });
 }
 function Grid({ children }) {
-  return /* @__PURE__ */ jsx29("div", { className: "hb-grid", children: children.map((child, i) => /* @__PURE__ */ jsx29("div", { className: "hb-grid-cell", children: child }, cellKey(child, i))) });
+  return /* @__PURE__ */ jsx33("div", { className: "hb-grid", children: children.map((child, i) => /* @__PURE__ */ jsx33("div", { className: "hb-grid-cell", children: child }, cellKey(child, i))) });
 }
 function Columns({ children }) {
-  return /* @__PURE__ */ jsx29("div", { className: "hb-columns", children: children.map((child, i) => /* @__PURE__ */ jsx29("div", { className: "hb-column", children: child }, cellKey(child, i))) });
+  return /* @__PURE__ */ jsx33("div", { className: "hb-columns", children: children.map((child, i) => /* @__PURE__ */ jsx33("div", { className: "hb-column", children: child }, cellKey(child, i))) });
 }
 function Section({ title, collapsed, children }) {
-  const [open, setOpen] = useState15(!collapsed);
+  const [open, setOpen] = useState18(!collapsed);
   if (!collapsed) {
-    return /* @__PURE__ */ jsxs26("div", { className: "hb-card hb-section", children: [
-      title && /* @__PURE__ */ jsx29("div", { className: "hb-card-title", children: /* @__PURE__ */ jsx29(InlineText, { text: title }) }),
-      /* @__PURE__ */ jsx29("div", { className: "hb-section-body", children })
+    return /* @__PURE__ */ jsxs30("div", { className: "hb-card hb-section", children: [
+      title && /* @__PURE__ */ jsx33("div", { className: "hb-card-title", children: /* @__PURE__ */ jsx33(InlineText, { text: title }) }),
+      /* @__PURE__ */ jsx33("div", { className: "hb-section-body", children })
     ] });
   }
-  return /* @__PURE__ */ jsxs26("div", { className: "hb-card hb-section", children: [
-    /* @__PURE__ */ jsxs26("button", { type: "button", className: "hb-section-toggle", onClick: () => setOpen(!open), "aria-expanded": open, children: [
-      /* @__PURE__ */ jsx29("span", { className: "hb-card-title", children: /* @__PURE__ */ jsx29(InlineText, { text: title ?? "" }) }),
-      /* @__PURE__ */ jsx29(
+  return /* @__PURE__ */ jsxs30("div", { className: "hb-card hb-section", children: [
+    /* @__PURE__ */ jsxs30("button", { type: "button", className: "hb-section-toggle", onClick: () => setOpen(!open), "aria-expanded": open, children: [
+      /* @__PURE__ */ jsx33("span", { className: "hb-card-title", children: /* @__PURE__ */ jsx33(InlineText, { text: title ?? "" }) }),
+      /* @__PURE__ */ jsx33(
         "svg",
         {
           className: open ? "hb-chevron hb-chevron-open" : "hb-chevron",
@@ -4920,11 +6398,11 @@ function Section({ title, collapsed, children }) {
           strokeLinecap: "round",
           strokeLinejoin: "round",
           "aria-hidden": "true",
-          children: /* @__PURE__ */ jsx29("path", { d: "M9 6l6 6-6 6" })
+          children: /* @__PURE__ */ jsx33("path", { d: "M9 6l6 6-6 6" })
         }
       )
     ] }),
-    open && /* @__PURE__ */ jsx29("div", { className: "hb-section-body hb-appear", children })
+    open && /* @__PURE__ */ jsx33("div", { className: "hb-section-body hb-appear", children })
   ] });
 }
 
@@ -4949,7 +6427,7 @@ var WIDE_KINDS = [
 ];
 var MAX_IN_ROW = 3;
 var MAX_IN_GRID = 6;
-var MAX_COLUMNS = 3;
+var MAX_COLUMNS2 = 3;
 function readContainer(raw, here, depth, readChild) {
   const kind = raw.type;
   const list = firstList([raw.children, raw.items, raw.blocks, raw.content]) ?? [];
@@ -4978,7 +6456,7 @@ function readContainer(raw, here, depth, readChild) {
   }
   if (kind === "columns") {
     if (children.length === 1) return children;
-    return [{ type: "columns", children: keepFirst(children, MAX_COLUMNS, here, "children") }];
+    return [{ type: "columns", children: keepFirst(children, MAX_COLUMNS2, here, "children") }];
   }
   const wide = children.find((b) => WIDE_KINDS.includes(b.type));
   if (kind === "row" && wide) {
@@ -5042,8 +6520,8 @@ function readTabChildren(list, here, depth, readChild) {
 }
 
 // src/blocks/layout/Tabs.tsx
-import { useId as useId5, useRef as useRef9 } from "react";
-import { jsx as jsx30, jsxs as jsxs27 } from "react/jsx-runtime";
+import { useId as useId6, useRef as useRef9 } from "react";
+import { jsx as jsx34, jsxs as jsxs31 } from "react/jsx-runtime";
 function tabAfterKey(current, count2, key) {
   if (key === "ArrowRight") return (current + 1) % count2;
   if (key === "ArrowLeft") return (current - 1 + count2) % count2;
@@ -5058,7 +6536,7 @@ function Tabs({ labels: labels2, badges = [], panel }) {
   });
   const picked = answer < labels2.length ? answer : 0;
   const buttons = useRef9([]);
-  const base = useId5().replace(/[^a-zA-Z0-9]/g, "");
+  const base = useId6().replace(/[^a-zA-Z0-9]/g, "");
   const onKey = (e) => {
     const next = tabAfterKey(picked, labels2.length, e.key);
     if (next === picked) return;
@@ -5066,8 +6544,8 @@ function Tabs({ labels: labels2, badges = [], panel }) {
     pick(next);
     buttons.current[next]?.focus();
   };
-  return /* @__PURE__ */ jsxs27("div", { className: "hb-tabs", children: [
-    /* @__PURE__ */ jsx30("div", { className: "hb-tab-bar", role: "tablist", onKeyDown: onKey, children: labels2.map((label, i) => /* @__PURE__ */ jsxs27(
+  return /* @__PURE__ */ jsxs31("div", { className: "hb-tabs", children: [
+    /* @__PURE__ */ jsx34("div", { className: "hb-tab-bar", role: "tablist", onKeyDown: onKey, children: labels2.map((label, i) => /* @__PURE__ */ jsxs31(
       "button",
       {
         type: "button",
@@ -5083,18 +6561,18 @@ function Tabs({ labels: labels2, badges = [], panel }) {
         onClick: () => pick(i),
         "aria-label": badges[i] ? `${label}, ${badges[i]} open` : void 0,
         children: [
-          /* @__PURE__ */ jsx30(InlineText, { text: label }),
-          badges[i] ? /* @__PURE__ */ jsx30("span", { className: "hb-tab-badge", "aria-hidden": "true", children: badges[i] }) : null
+          /* @__PURE__ */ jsx34(InlineText, { text: label }),
+          badges[i] ? /* @__PURE__ */ jsx34("span", { className: "hb-tab-badge", "aria-hidden": "true", children: badges[i] }) : null
         ]
       },
       i
     )) }),
-    /* @__PURE__ */ jsx30("div", { className: "hb-tab-panel hb-appear", role: "tabpanel", id: `${base}-panel`, "aria-labelledby": `${base}-tab-${picked}`, children: panel(picked) }, picked)
+    /* @__PURE__ */ jsx34("div", { className: "hb-tab-panel hb-appear", role: "tabpanel", id: `${base}-panel`, "aria-labelledby": `${base}-tab-${picked}`, children: panel(picked) }, picked)
   ] });
 }
 
 // src/blocks/list/List.tsx
-import { useContext as useContext7, useState as useState16 } from "react";
+import { useContext as useContext8, useState as useState19 } from "react";
 
 // src/blocks/list/rowAvatar.ts
 var AVATAR_COLOURS = [1, 3, 8, 4, 6];
@@ -5120,46 +6598,46 @@ function avatarColour(title) {
 }
 
 // src/blocks/list/List.tsx
-import { Fragment as Fragment8, jsx as jsx31, jsxs as jsxs28 } from "react/jsx-runtime";
+import { Fragment as Fragment10, jsx as jsx35, jsxs as jsxs32 } from "react/jsx-runtime";
 function List({ title, ranked, items, max }) {
   const hasBars = items.some((item) => item.bar !== void 0);
   const ceiling = max ?? Math.max(0, ...items.map((item) => item.bar ?? 0));
-  return /* @__PURE__ */ jsxs28("div", { className: hasBars ? "hb-card hb-list hb-list-bars" : "hb-card hb-list", children: [
-    title && /* @__PURE__ */ jsx31("div", { className: "hb-list-heading", children: /* @__PURE__ */ jsx31(InlineText, { text: title }) }),
-    items.map((item, i) => /* @__PURE__ */ jsx31(ListRow, { item, rank: ranked ? i + 1 : null, ceiling }, i))
+  return /* @__PURE__ */ jsxs32("div", { className: hasBars ? "hb-card hb-list hb-list-bars" : "hb-card hb-list", children: [
+    title && /* @__PURE__ */ jsx35("div", { className: "hb-list-heading", children: /* @__PURE__ */ jsx35(InlineText, { text: title }) }),
+    items.map((item, i) => /* @__PURE__ */ jsx35(ListRow, { item, rank: ranked ? i + 1 : null, ceiling }, i))
   ] });
 }
 function ListRow({ item, rank, ceiling }) {
-  const { send } = useContext7(BlockActions);
-  const [photoFailed, setPhotoFailed] = useState16(false);
+  const { send } = useContext8(BlockActions);
+  const [photoFailed, setPhotoFailed] = useState19(false);
   const lead = rowLead(item, rank !== null, photoFailed);
   const width = ceiling > 0 ? Math.max(0, Math.min(1, (item.bar ?? 0) / ceiling)) * 100 : 0;
-  const body = /* @__PURE__ */ jsxs28(Fragment8, { children: [
-    rank !== null && /* @__PURE__ */ jsx31("span", { className: "hb-list-rank", children: rank }),
-    lead === "image" && /* @__PURE__ */ jsx31("img", { className: "hb-list-photo", src: item.image, alt: "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => setPhotoFailed(true) }),
-    lead === "icon" && item.icon && /* @__PURE__ */ jsx31("span", { className: "hb-list-icon", children: /* @__PURE__ */ jsx31(Icon, { name: item.icon, size: 17, stroke: 2.2 }) }),
-    lead === "initial" && /* @__PURE__ */ jsx31("span", { className: "hb-list-initial", style: { background: avatarColour(item.title) }, "aria-hidden": "true", children: initialOf(item.title) }),
-    /* @__PURE__ */ jsxs28("span", { className: "hb-list-body", children: [
-      /* @__PURE__ */ jsx31("span", { className: "hb-list-title", children: /* @__PURE__ */ jsx31(InlineText, { text: item.title }) }),
-      item.subtitle && /* @__PURE__ */ jsx31("span", { className: "hb-list-subtitle", children: /* @__PURE__ */ jsx31(InlineText, { text: item.subtitle }) })
+  const body = /* @__PURE__ */ jsxs32(Fragment10, { children: [
+    rank !== null && /* @__PURE__ */ jsx35("span", { className: "hb-list-rank", children: rank }),
+    lead === "image" && /* @__PURE__ */ jsx35("img", { className: "hb-list-photo", src: item.image, alt: "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => setPhotoFailed(true) }),
+    lead === "icon" && item.icon && /* @__PURE__ */ jsx35("span", { className: "hb-list-icon", children: /* @__PURE__ */ jsx35(Icon, { name: item.icon, size: 17, stroke: 2.2 }) }),
+    lead === "initial" && /* @__PURE__ */ jsx35("span", { className: "hb-list-initial", style: { background: avatarColour(item.title) }, "aria-hidden": "true", children: initialOf(item.title) }),
+    /* @__PURE__ */ jsxs32("span", { className: "hb-list-body", children: [
+      /* @__PURE__ */ jsx35("span", { className: "hb-list-title", children: /* @__PURE__ */ jsx35(InlineText, { text: item.title }) }),
+      item.subtitle && /* @__PURE__ */ jsx35("span", { className: "hb-list-subtitle", children: /* @__PURE__ */ jsx35(InlineText, { text: item.subtitle }) })
     ] }),
-    (item.bar !== void 0 || item.value) && /* @__PURE__ */ jsxs28("span", { className: "hb-list-tail", children: [
-      item.bar !== void 0 && /* @__PURE__ */ jsx31("span", { className: "hb-list-bar", "aria-hidden": "true", children: /* @__PURE__ */ jsx31("span", { className: "hb-list-bar-fill", style: { width: `${width}%` } }) }),
-      item.value && /* @__PURE__ */ jsx31("span", { className: "hb-list-value", children: /* @__PURE__ */ jsx31(InlineText, { text: item.value }) })
+    (item.bar !== void 0 || item.value) && /* @__PURE__ */ jsxs32("span", { className: "hb-list-tail", children: [
+      item.bar !== void 0 && /* @__PURE__ */ jsx35("span", { className: "hb-list-bar", "aria-hidden": "true", children: /* @__PURE__ */ jsx35("span", { className: "hb-list-bar-fill", style: { width: `${width}%` } }) }),
+      item.value && /* @__PURE__ */ jsx35("span", { className: "hb-list-value", children: /* @__PURE__ */ jsx35(InlineText, { text: item.value }) })
     ] }),
-    (item.run || item.url) && /* @__PURE__ */ jsx31(Chevron, {})
+    (item.run || item.url) && /* @__PURE__ */ jsx35(Chevron, {})
   ] });
   if (item.run) {
     const run = item.run;
-    return /* @__PURE__ */ jsx31("button", { type: "button", className: "hb-list-row hb-list-link hb-list-button", title: run, onClick: () => send(run), children: body });
+    return /* @__PURE__ */ jsx35("button", { type: "button", className: "hb-list-row hb-list-link hb-list-button", title: run, onClick: () => send(run), children: body });
   }
   if (item.url) {
-    return /* @__PURE__ */ jsx31("a", { className: "hb-list-row hb-list-link", href: item.url, target: "_blank", rel: "noreferrer", children: body });
+    return /* @__PURE__ */ jsx35("a", { className: "hb-list-row hb-list-link", href: item.url, target: "_blank", rel: "noreferrer", children: body });
   }
-  return /* @__PURE__ */ jsx31("div", { className: "hb-list-row", children: body });
+  return /* @__PURE__ */ jsx35("div", { className: "hb-list-row", children: body });
 }
 function Chevron() {
-  return /* @__PURE__ */ jsx31(
+  return /* @__PURE__ */ jsx35(
     "svg",
     {
       className: "hb-list-chevron",
@@ -5172,16 +6650,16 @@ function Chevron() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       "aria-hidden": "true",
-      children: /* @__PURE__ */ jsx31("path", { d: "M9 6l6 6-6 6" })
+      children: /* @__PURE__ */ jsx35("path", { d: "M9 6l6 6-6 6" })
     }
   );
 }
 
 // src/blocks/layers/Layers.tsx
-import { useEffect as useEffect4, useRef as useRef10, useState as useState18 } from "react";
+import { useEffect as useEffect4, useRef as useRef10, useState as useState21 } from "react";
 
 // src/lib/canvas.ts
-import { useEffect as useEffect3, useState as useState17 } from "react";
+import { useEffect as useEffect3, useState as useState20 } from "react";
 function fitCanvas(canvas, height) {
   const ctx = canvas.getContext?.("2d");
   if (!ctx) return null;
@@ -5201,7 +6679,7 @@ function colourOf2(el, token) {
   return colour;
 }
 function useTheme() {
-  const [version2, setVersion] = useState17(0);
+  const [version2, setVersion] = useState20(0);
   useEffect3(() => {
     const bump = () => setVersion((v) => v + 1);
     const watcher = typeof MutationObserver === "undefined" ? null : new MutationObserver(bump);
@@ -5270,7 +6748,7 @@ function slabAt(shapes, x, y) {
 }
 
 // src/blocks/layers/Layers.tsx
-import { jsx as jsx32, jsxs as jsxs29 } from "react/jsx-runtime";
+import { jsx as jsx36, jsxs as jsxs33 } from "react/jsx-runtime";
 var TURN = 40;
 var START_YAW = 28;
 var PITCH = 30;
@@ -5288,8 +6766,8 @@ function Layers({ title, caption: caption2, layers }) {
   const canvas = useRef10(null);
   const shapes = useRef10([]);
   const drag = useRef10(null);
-  const [at2, setAt] = useState18(0);
-  const [yaw, setYaw] = useState18(START_YAW);
+  const [at2, setAt] = useState21(0);
+  const [yaw, setYaw] = useState21(START_YAW);
   const open = useOpening(at2, layers.length);
   const width = useWidth(canvas);
   const theme = useTheme();
@@ -5339,11 +6817,11 @@ function Layers({ title, caption: caption2, layers }) {
     go(at2 + (e.key === "ArrowRight" ? 1 : -1));
   }
   const plainNote = layer.note ? ` ${layer.note.replace(/\*\*/g, "")}` : "";
-  return /* @__PURE__ */ jsxs29("div", { className: "hb-card hb-layers", children: [
-    title && /* @__PURE__ */ jsx32("div", { className: "hb-card-title", children: title }),
-    /* @__PURE__ */ jsxs29("div", { className: "hb-layers-body", children: [
-      /* @__PURE__ */ jsxs29("div", { className: "hb-layers-stage", children: [
-        /* @__PURE__ */ jsx32(
+  return /* @__PURE__ */ jsxs33("div", { className: "hb-card hb-layers", children: [
+    title && /* @__PURE__ */ jsx36("div", { className: "hb-card-title", children: title }),
+    /* @__PURE__ */ jsxs33("div", { className: "hb-layers-body", children: [
+      /* @__PURE__ */ jsxs33("div", { className: "hb-layers-stage", children: [
+        /* @__PURE__ */ jsx36(
           "canvas",
           {
             ref: canvas,
@@ -5360,26 +6838,26 @@ function Layers({ title, caption: caption2, layers }) {
             onKeyDown: onCanvasKey
           }
         ),
-        /* @__PURE__ */ jsx32("p", { className: "hb-layers-hint", children: "Drag the drawing, or use \u2190 \u2192 on it, to turn it; \u2191 \u2193 change the slab." }),
-        caption2 && /* @__PURE__ */ jsx32("p", { className: "hb-layers-caption", children: caption2 })
+        /* @__PURE__ */ jsx36("p", { className: "hb-layers-hint", children: "Drag the drawing, or use \u2190 \u2192 on it, to turn it; \u2191 \u2193 change the slab." }),
+        caption2 && /* @__PURE__ */ jsx36("p", { className: "hb-layers-caption", children: caption2 })
       ] }),
-      /* @__PURE__ */ jsxs29("div", { className: "hb-layers-side", onKeyDown: onSideKey, children: [
-        /* @__PURE__ */ jsxs29("div", { className: "hb-steps-head", children: [
-          /* @__PURE__ */ jsx32("div", { className: "hb-steps-title", children: layer.label }),
-          /* @__PURE__ */ jsx32("span", { className: "hb-steps-place", children: `${at2 + 1} of ${layers.length}` })
+      /* @__PURE__ */ jsxs33("div", { className: "hb-layers-side", onKeyDown: onSideKey, children: [
+        /* @__PURE__ */ jsxs33("div", { className: "hb-steps-head", children: [
+          /* @__PURE__ */ jsx36("div", { className: "hb-steps-title", children: layer.label }),
+          /* @__PURE__ */ jsx36("span", { className: "hb-steps-place", children: `${at2 + 1} of ${layers.length}` })
         ] }),
-        /* @__PURE__ */ jsx32("div", { className: "hb-steps-body", "aria-live": "polite", children: layer.note && /* @__PURE__ */ jsx32("p", { className: "hb-steps-text", children: /* @__PURE__ */ jsx32(InlineText, { text: layer.note }) }) }),
-        /* @__PURE__ */ jsx32("div", { className: "hb-steps-foot", children: /* @__PURE__ */ jsxs29("div", { className: "hb-steps-moves", children: [
-          /* @__PURE__ */ jsx32("button", { type: "button", className: "hb-pill", disabled: at2 === 0, onClick: () => go(at2 - 1), children: "Back" }),
-          /* @__PURE__ */ jsx32("button", { type: "button", className: "hb-pill hb-pill-solid", disabled: at2 === layers.length - 1, onClick: () => go(at2 + 1), children: "Next" })
+        /* @__PURE__ */ jsx36("div", { className: "hb-steps-body", "aria-live": "polite", children: layer.note && /* @__PURE__ */ jsx36("p", { className: "hb-steps-text", children: /* @__PURE__ */ jsx36(InlineText, { text: layer.note }) }) }),
+        /* @__PURE__ */ jsx36("div", { className: "hb-steps-foot", children: /* @__PURE__ */ jsxs33("div", { className: "hb-steps-moves", children: [
+          /* @__PURE__ */ jsx36("button", { type: "button", className: "hb-pill", disabled: at2 === 0, onClick: () => go(at2 - 1), children: "Back" }),
+          /* @__PURE__ */ jsx36("button", { type: "button", className: "hb-pill hb-pill-solid", disabled: at2 === layers.length - 1, onClick: () => go(at2 + 1), children: "Next" })
         ] }) }),
-        /* @__PURE__ */ jsx32("ol", { className: "hb-layers-list", "aria-label": "Slabs", children: layers.map((l, i) => /* @__PURE__ */ jsx32("li", { children: /* @__PURE__ */ jsx32("button", { type: "button", className: "hb-layers-slab", "aria-pressed": i === at2, onClick: () => go(i), children: l.label }) }, i)) })
+        /* @__PURE__ */ jsx36("ol", { className: "hb-layers-list", "aria-label": "Slabs", children: layers.map((l, i) => /* @__PURE__ */ jsx36("li", { children: /* @__PURE__ */ jsx36("button", { type: "button", className: "hb-layers-slab", "aria-pressed": i === at2, onClick: () => go(i), children: l.label }) }, i)) })
       ] })
     ] })
   ] });
 }
 function useOpening(at2, n) {
-  const [open, setOpen] = useState18(() => Array.from({ length: n }, (_, i) => i === at2 ? 1 : 0));
+  const [open, setOpen] = useState21(() => Array.from({ length: n }, (_, i) => i === at2 ? 1 : 0));
   const now = useRef10(open);
   now.current = open;
   useEffect4(() => {
@@ -5407,7 +6885,7 @@ function paint(ctx, el, width, height, shapes, tones, labels2, open) {
   ctx.textBaseline = "middle";
   shapes.forEach((shape, i) => {
     const lit = (open[i] ?? 0) > 0.5;
-    const tone = lit ? accent : colourOf2(el, TONE_TOKEN[tones[i]]);
+    const tone2 = lit ? accent : colourOf2(el, TONE_TOKEN[tones[i]]);
     shape.faces.forEach((face, f) => {
       const roof = f === shape.faces.length - 1;
       ctx.beginPath();
@@ -5420,7 +6898,7 @@ function paint(ctx, el, width, height, shapes, tones, labels2, open) {
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.globalAlpha = roof && lit ? 0.45 : face.strength;
-      ctx.fillStyle = tone;
+      ctx.fillStyle = tone2;
       ctx.fill();
       ctx.globalAlpha = 0.28;
       ctx.strokeStyle = ink;
@@ -5435,14 +6913,14 @@ function paint(ctx, el, width, height, shapes, tones, labels2, open) {
 }
 
 // src/blocks/layers/read.ts
-var TONES2 = ["blue", "amber", "green", "violet", "accent", "grey"];
+var TONES4 = ["blue", "amber", "green", "violet", "accent", "grey"];
 function readLayers(raw, here) {
   const layers = [];
   (firstList([raw.layers, raw.levels]) ?? []).forEach((l, i) => {
     const label = firstText([l?.label, l?.title, l?.name], 24);
     if (!label) return here.at("layers").at(i).drop("layer needs a label");
-    const tone = TONES2.includes(l.tone) ? l.tone : "blue";
-    layers.push(clean({ label, tone, note: firstText([l.note, l.text, l.description], 280) }));
+    const tone2 = TONES4.includes(l.tone) ? l.tone : "blue";
+    layers.push(clean({ label, tone: tone2, note: firstText([l.note, l.text, l.description], 280) }));
   });
   if (layers.length < 2) return here.drop("layers needs at least 2 slabs");
   return clean({
@@ -5454,7 +6932,7 @@ function readLayers(raw, here) {
 }
 
 // src/blocks/list/read.ts
-var MAX_ITEMS2 = 12;
+var MAX_ITEMS3 = 12;
 function readList(raw, here) {
   const list = firstList([raw.items, raw.rows]);
   if (!list) return here.drop("list needs items");
@@ -5479,7 +6957,7 @@ function readList(raw, here) {
     title: firstText([raw.title], 60),
     ranked,
     max,
-    items: keepFirst(items, MAX_ITEMS2, here, "rows")
+    items: keepFirst(items, MAX_ITEMS3, here, "rows")
   });
 }
 function readListItem(item) {
@@ -5515,7 +6993,7 @@ function valueOf2(item, bar) {
 }
 
 // src/blocks/progress/Progress.tsx
-import { Fragment as Fragment9, jsx as jsx33, jsxs as jsxs30 } from "react/jsx-runtime";
+import { Fragment as Fragment11, jsx as jsx37, jsxs as jsxs34 } from "react/jsx-runtime";
 function trackShare(value, goal, steps) {
   if (value === null || goal === null) return 0;
   if (!steps.length) return Math.max(0, Math.min(1, value / goal));
@@ -5565,35 +7043,35 @@ function bandsOf(thresholds, goal) {
   }
   return bands;
 }
-function Progress({ title, value, goal, unit, steps, shape = "line", show_percent, tone, thresholds = [], segments = [] }) {
+function Progress({ title, value, goal, unit, steps, shape = "line", show_percent, tone: tone2, thresholds = [], segments = [] }) {
   const marks = thresholds.length ? thresholds : [];
   const checkpoints = marks.length ? [] : steps;
   const ring = shape === "circle" || shape === "dashboard";
   const share = ring ? place(value, goal) : trackShare(value, goal, checkpoints);
   const percent = percentOf(value, goal);
-  const active = zoneTone(value, marks, tone ?? "good", goal ?? Infinity);
-  return /* @__PURE__ */ jsxs30("div", { className: `hb-card hb-progress hb-progress-tone-${active}`, children: [
-    /* @__PURE__ */ jsxs30("div", { className: "hb-progress-head", children: [
-      /* @__PURE__ */ jsx33("span", { className: "hb-progress-icon", children: /* @__PURE__ */ jsx33(Icon, { name: "trophy", size: 19, stroke: 2.2 }) }),
-      /* @__PURE__ */ jsx33("span", { className: "hb-card-title", children: title }),
-      /* @__PURE__ */ jsxs30("span", { className: "hb-progress-amount", children: [
-        /* @__PURE__ */ jsx33(Icon, { name: "flame", size: 15, stroke: 2.2 }),
+  const active = zoneTone(value, marks, tone2 ?? "good", goal ?? Infinity);
+  return /* @__PURE__ */ jsxs34("div", { className: `hb-card hb-progress hb-progress-tone-${active}`, children: [
+    /* @__PURE__ */ jsxs34("div", { className: "hb-progress-head", children: [
+      /* @__PURE__ */ jsx37("span", { className: "hb-progress-icon", children: /* @__PURE__ */ jsx37(Icon, { name: "trophy", size: 19, stroke: 2.2 }) }),
+      /* @__PURE__ */ jsx37("span", { className: "hb-card-title", children: title }),
+      /* @__PURE__ */ jsxs34("span", { className: "hb-progress-amount", children: [
+        /* @__PURE__ */ jsx37(Icon, { name: "flame", size: 15, stroke: 2.2 }),
         amountOf(value, goal, unit)
       ] }),
-      show_percent && !ring && /* @__PURE__ */ jsxs30("span", { className: "hb-progress-pct", children: [
+      show_percent && !ring && /* @__PURE__ */ jsxs34("span", { className: "hb-progress-pct", children: [
         percent,
         "%"
       ] })
     ] }),
-    ring ? /* @__PURE__ */ jsx33(Ring, { shape, share, percent: show_percent ? percent : null, marks, segments, goal }) : segments.length ? /* @__PURE__ */ jsx33(Segments, { segments, goal, unit }) : checkpoints.length ? /* @__PURE__ */ jsx33(Checkpoints, { steps: checkpoints, value, share, unit }) : /* @__PURE__ */ jsx33(Bar2, { share, marks, goal, unit })
+    ring ? /* @__PURE__ */ jsx37(Ring, { shape, share, percent: show_percent ? percent : null, marks, segments, goal }) : segments.length ? /* @__PURE__ */ jsx37(Segments, { segments, goal, unit }) : checkpoints.length ? /* @__PURE__ */ jsx37(Checkpoints, { steps: checkpoints, value, share, unit }) : /* @__PURE__ */ jsx37(Bar2, { share, marks, goal, unit })
   ] });
 }
 function Bar2({ share, marks, goal, unit }) {
   const bands = bandsOf(marks, goal);
   const track = `hb-progress-track${marks.length ? " hb-progress-track-zoned" : ""}`;
-  const body = /* @__PURE__ */ jsxs30(Fragment9, { children: [
-    /* @__PURE__ */ jsxs30("div", { className: track, children: [
-      bands.map((b, k) => /* @__PURE__ */ jsx33(
+  const body = /* @__PURE__ */ jsxs34(Fragment11, { children: [
+    /* @__PURE__ */ jsxs34("div", { className: track, children: [
+      bands.map((b, k) => /* @__PURE__ */ jsx37(
         "span",
         {
           className: `hb-progress-band hb-progress-band-${b.tone}`,
@@ -5601,17 +7079,17 @@ function Bar2({ share, marks, goal, unit }) {
         },
         k
       )),
-      /* @__PURE__ */ jsx33("span", { className: "hb-progress-fill", style: { width: pctOf(share) } })
+      /* @__PURE__ */ jsx37("span", { className: "hb-progress-fill", style: { width: pctOf(share) } })
     ] }),
-    marks.map((m, k) => /* @__PURE__ */ jsx33("span", { className: "hb-progress-mark", style: { left: pctOf(place(m.at, goal)) } }, k)),
-    /* @__PURE__ */ jsx33(MarkLabels, { marks, goal, unit })
+    marks.map((m, k) => /* @__PURE__ */ jsx37("span", { className: "hb-progress-mark", style: { left: pctOf(place(m.at, goal)) } }, k)),
+    /* @__PURE__ */ jsx37(MarkLabels, { marks, goal, unit })
   ] });
-  return marks.length ? /* @__PURE__ */ jsx33("div", { className: "hb-progress-line", children: body }) : body;
+  return marks.length ? /* @__PURE__ */ jsx37("div", { className: "hb-progress-line", children: body }) : body;
 }
 function MarkLabels({ marks, goal, unit }) {
   const labelled = marks.filter((m) => m.label !== void 0);
   if (!labelled.length) return null;
-  return /* @__PURE__ */ jsx33("div", { className: "hb-progress-mark-labels", children: labelled.map((m, k) => /* @__PURE__ */ jsx33("span", { style: { left: pctOf(Math.min(0.96, Math.max(0.04, place(m.at, goal)))) }, children: typeof m.label === "number" ? fmt(m.label, unit) : m.label }, k)) });
+  return /* @__PURE__ */ jsx37("div", { className: "hb-progress-mark-labels", children: labelled.map((m, k) => /* @__PURE__ */ jsx37("span", { style: { left: pctOf(Math.min(0.96, Math.max(0.04, place(m.at, goal)))) }, children: typeof m.label === "number" ? fmt(m.label, unit) : m.label }, k)) });
 }
 function Segments({ segments, goal, unit }) {
   let at2 = 0;
@@ -5620,8 +7098,8 @@ function Segments({ segments, goal, unit }) {
     at2 = Math.min(1, at2 + (goal === null ? 0 : Math.max(0, s.value / goal)));
     return { key: k, left: from, width: at2 - from, label: s.label, value: s.value, tone: s.tone ?? "good" };
   });
-  return /* @__PURE__ */ jsxs30(Fragment9, { children: [
-    /* @__PURE__ */ jsx33("div", { className: "hb-progress-track hb-progress-track-zoned hb-progress-track-parts", children: parts2.filter((p) => p.width > 0).map((p) => /* @__PURE__ */ jsx33(
+  return /* @__PURE__ */ jsxs34(Fragment11, { children: [
+    /* @__PURE__ */ jsx37("div", { className: "hb-progress-track hb-progress-track-zoned hb-progress-track-parts", children: parts2.filter((p) => p.width > 0).map((p) => /* @__PURE__ */ jsx37(
       "span",
       {
         className: `hb-progress-seg hb-progress-seg-${p.tone}`,
@@ -5629,10 +7107,10 @@ function Segments({ segments, goal, unit }) {
       },
       p.key
     )) }),
-    parts2.some((p) => p.label) && /* @__PURE__ */ jsx33("div", { className: "hb-legend", children: parts2.filter((p) => p.label).map((p) => /* @__PURE__ */ jsxs30("span", { className: "hb-legend-item", children: [
-      /* @__PURE__ */ jsx33("i", { className: `hb-legend-dot hb-progress-dot-${p.tone}` }),
+    parts2.some((p) => p.label) && /* @__PURE__ */ jsx37("div", { className: "hb-legend", children: parts2.filter((p) => p.label).map((p) => /* @__PURE__ */ jsxs34("span", { className: "hb-legend-item", children: [
+      /* @__PURE__ */ jsx37("i", { className: `hb-legend-dot hb-progress-dot-${p.tone}` }),
       p.label,
-      /* @__PURE__ */ jsx33("span", { className: "hb-legend-value", children: fmt(p.value, unit) })
+      /* @__PURE__ */ jsx37("span", { className: "hb-legend-value", children: fmt(p.value, unit) })
     ] }, p.key)) })
   ] });
 }
@@ -5640,16 +7118,16 @@ function Checkpoints({ steps, value, share, unit }) {
   const n = steps.length;
   const edge = `${50 / n}%`;
   const span = (n - 1) / n * 100;
-  return /* @__PURE__ */ jsxs30(Fragment9, { children: [
-    /* @__PURE__ */ jsxs30("div", { className: "hb-progress-nodes", children: [
-      /* @__PURE__ */ jsx33("span", { className: "hb-progress-track hb-progress-track-steps", style: { left: edge, right: edge } }),
-      /* @__PURE__ */ jsx33("span", { className: "hb-progress-fill hb-progress-fill-steps", style: { left: edge, width: `${span * share}%` } }),
+  return /* @__PURE__ */ jsxs34(Fragment11, { children: [
+    /* @__PURE__ */ jsxs34("div", { className: "hb-progress-nodes", children: [
+      /* @__PURE__ */ jsx37("span", { className: "hb-progress-track hb-progress-track-steps", style: { left: edge, right: edge } }),
+      /* @__PURE__ */ jsx37("span", { className: "hb-progress-fill hb-progress-fill-steps", style: { left: edge, width: `${span * share}%` } }),
       steps.map((s, k) => {
         const done = value !== null && value >= s.at;
-        return /* @__PURE__ */ jsx33("span", { className: done ? "hb-progress-node hb-progress-node-done" : "hb-progress-node", style: { left: `${(k + 0.5) / n * 100}%` }, children: /* @__PURE__ */ jsx33(Icon, { name: done ? "check" : "lock", size: 12, stroke: 2.6 }) }, k);
+        return /* @__PURE__ */ jsx37("span", { className: done ? "hb-progress-node hb-progress-node-done" : "hb-progress-node", style: { left: `${(k + 0.5) / n * 100}%` }, children: /* @__PURE__ */ jsx37(Icon, { name: done ? "check" : "lock", size: 12, stroke: 2.6 }) }, k);
       })
     ] }),
-    /* @__PURE__ */ jsx33("div", { className: "hb-progress-labels", style: { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }, children: steps.map((s, k) => /* @__PURE__ */ jsx33("span", { children: typeof s.label === "number" ? fmt(s.label, unit) : s.label }, k)) })
+    /* @__PURE__ */ jsx37("div", { className: "hb-progress-labels", style: { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }, children: steps.map((s, k) => /* @__PURE__ */ jsx37("span", { children: typeof s.label === "number" ? fmt(s.label, unit) : s.label }, k)) })
   ] });
 }
 var RING_R = 50;
@@ -5667,17 +7145,17 @@ function startTurn(shape) {
 }
 function Ring({ shape, share, percent, marks, segments, goal }) {
   const length = ringLength(shape);
-  const track = shape === "dashboard" ? /* @__PURE__ */ jsx33("path", { className: "hb-progress-ring-track", d: "M 25 95 A 50 50 0 1 1 95 95" }) : /* @__PURE__ */ jsx33("circle", { className: "hb-progress-ring-track", cx: "60", cy: "60", r: RING_R });
+  const track = shape === "dashboard" ? /* @__PURE__ */ jsx37("path", { className: "hb-progress-ring-track", d: "M 25 95 A 50 50 0 1 1 95 95" }) : /* @__PURE__ */ jsx37("circle", { className: "hb-progress-ring-track", cx: "60", cy: "60", r: RING_R });
   let at2 = 0;
   const parts2 = segments.map((s) => {
     const from = at2;
     at2 = Math.min(1, at2 + (goal === null ? 0 : Math.max(0, s.value / goal)));
     return { from, to: at2, tone: s.tone ?? "good" };
   });
-  return /* @__PURE__ */ jsxs30("div", { className: `hb-progress-ring${shape === "dashboard" ? " hb-progress-ring-dash" : ""}`, children: [
-    /* @__PURE__ */ jsxs30("svg", { viewBox: "0 0 120 120", "aria-hidden": "true", children: [
+  return /* @__PURE__ */ jsxs34("div", { className: `hb-progress-ring${shape === "dashboard" ? " hb-progress-ring-dash" : ""}`, children: [
+    /* @__PURE__ */ jsxs34("svg", { viewBox: "0 0 120 120", "aria-hidden": "true", children: [
       track,
-      parts2.length ? parts2.filter((p) => p.to > p.from).map((p, k) => /* @__PURE__ */ jsx33(
+      parts2.length ? parts2.filter((p) => p.to > p.from).map((p, k) => /* @__PURE__ */ jsx37(
         "circle",
         {
           className: `hb-progress-ring-fill hb-progress-ring-${p.tone}`,
@@ -5689,7 +7167,7 @@ function Ring({ shape, share, percent, marks, segments, goal }) {
           strokeDashoffset: -length * p.from
         },
         k
-      )) : /* @__PURE__ */ jsx33(
+      )) : /* @__PURE__ */ jsx37(
         "circle",
         {
           className: "hb-progress-ring-fill",
@@ -5703,10 +7181,10 @@ function Ring({ shape, share, percent, marks, segments, goal }) {
       marks.map((m, k) => {
         const [x1, y1] = spot(place(m.at, goal), RING_R - 9, shape);
         const [x2, y2] = spot(place(m.at, goal), RING_R + 9, shape);
-        return /* @__PURE__ */ jsx33("line", { className: "hb-progress-ring-mark", x1, y1, x2, y2 }, k);
+        return /* @__PURE__ */ jsx37("line", { className: "hb-progress-ring-mark", x1, y1, x2, y2 }, k);
       })
     ] }),
-    percent !== null && /* @__PURE__ */ jsxs30("span", { className: "hb-progress-ring-pct", children: [
+    percent !== null && /* @__PURE__ */ jsxs34("span", { className: "hb-progress-ring-pct", children: [
       percent,
       "%"
     ] })
@@ -5714,7 +7192,7 @@ function Ring({ shape, share, percent, marks, segments, goal }) {
 }
 
 // src/blocks/progress/read.ts
-var TONES3 = {
+var TONES5 = {
   good: "good",
   success: "good",
   positive: "good",
@@ -5729,7 +7207,7 @@ var TONES3 = {
 };
 var SHAPES = { line: "line", bar: "line", circle: "circle", ring: "circle", dashboard: "dashboard", gauge: "dashboard" };
 function progressTone(v) {
-  return typeof v === "string" ? TONES3[v.toLowerCase()] : void 0;
+  return typeof v === "string" ? TONES5[v.toLowerCase()] : void 0;
 }
 function progressShape(v) {
   return typeof v === "string" ? SHAPES[v.toLowerCase()] : void 0;
@@ -5878,34 +7356,7 @@ function readPile(p, names, here) {
 }
 
 // src/blocks/simulate/Simulate.tsx
-import { useEffect as useEffect6, useMemo as useMemo7, useRef as useRef13, useState as useState19 } from "react";
-
-// src/blocks/source/Source.tsx
-import { jsx as jsx34, jsxs as jsxs31 } from "react/jsx-runtime";
-function Row2({ item, index }) {
-  const name = item.url ? /* @__PURE__ */ jsx34("a", { href: item.url, target: "_blank", rel: "noreferrer", children: item.label }) : /* @__PURE__ */ jsx34("span", { children: item.label });
-  return /* @__PURE__ */ jsxs31("li", { className: "hb-source-row", children: [
-    /* @__PURE__ */ jsx34("span", { className: "hb-source-n", "aria-hidden": "true", children: index + 1 }),
-    name,
-    item.kind && /* @__PURE__ */ jsx34("span", { className: `hb-source-kind hb-source-kind-${item.kind}`, children: item.kind }),
-    item.accessed && /* @__PURE__ */ jsxs31("span", { className: "hb-source-accessed", children: [
-      "accessed ",
-      item.accessed
-    ] }),
-    item.note && /* @__PURE__ */ jsx34("span", { className: "hb-source-note", children: item.note })
-  ] });
-}
-function Source({ text, url, title, items }) {
-  if (items?.length) {
-    return /* @__PURE__ */ jsxs31("div", { className: "hb-source hb-source-list", children: [
-      title && /* @__PURE__ */ jsx34("div", { className: "hb-source-head", children: title }),
-      /* @__PURE__ */ jsx34("ol", { className: "hb-source-rows", children: items.map((item, i) => /* @__PURE__ */ jsx34(Row2, { item, index: i }, `${item.label}-${i}`)) })
-    ] });
-  }
-  if (!text) return null;
-  if (!url) return /* @__PURE__ */ jsx34("div", { className: "hb-source", children: text });
-  return /* @__PURE__ */ jsx34("div", { className: "hb-source", children: /* @__PURE__ */ jsx34("a", { href: url, target: "_blank", rel: "noreferrer", children: text }) });
-}
+import { useEffect as useEffect6, useMemo as useMemo9, useRef as useRef13, useState as useState22 } from "react";
 
 // src/blocks/simulate/Piles.tsx
 import { useEffect as useEffect5, useRef as useRef11 } from "react";
@@ -5938,15 +7389,15 @@ function dotColour(n, start, counts, k) {
 }
 
 // src/blocks/simulate/Piles.tsx
-import { Fragment as Fragment10, jsx as jsx35, jsxs as jsxs32 } from "react/jsx-runtime";
+import { Fragment as Fragment12, jsx as jsx38, jsxs as jsxs35 } from "react/jsx-runtime";
 var GROW_MS = 280;
 var DOT = 14;
 function Piles({ piles, amounts, start, per, most, playing, unit, label }) {
   const counts = amounts.map((a) => Math.max(0, Math.round((a ?? 0) / per)));
   const startDots = Math.max(0, Math.round(start / per));
   const tallest = Math.max(1, ...most.map((m) => Math.round(m / per)));
-  return /* @__PURE__ */ jsxs32(Fragment10, { children: [
-    /* @__PURE__ */ jsx35("div", { className: "hb-sim-piles", children: piles.map((pile, k) => /* @__PURE__ */ jsx35(
+  return /* @__PURE__ */ jsxs35(Fragment12, { children: [
+    /* @__PURE__ */ jsx38("div", { className: "hb-sim-piles", children: piles.map((pile, k) => /* @__PURE__ */ jsx38(
       Pile,
       {
         k,
@@ -5960,13 +7411,13 @@ function Piles({ piles, amounts, start, per, most, playing, unit, label }) {
       },
       k
     )) }),
-    /* @__PURE__ */ jsxs32("div", { className: "hb-legend", children: [
-      /* @__PURE__ */ jsxs32("span", { className: "hb-legend-item", children: [
-        /* @__PURE__ */ jsx35("i", { className: "hb-legend-dot", style: { background: partColour(0) } }),
+    /* @__PURE__ */ jsxs35("div", { className: "hb-legend", children: [
+      /* @__PURE__ */ jsxs35("span", { className: "hb-legend-item", children: [
+        /* @__PURE__ */ jsx38("i", { className: "hb-legend-dot", style: { background: partColour(0) } }),
         `${label ?? "Start"} (a dot is ${fmt(per, unit, { full: true })})`
       ] }),
-      piles.map((pile, k) => /* @__PURE__ */ jsxs32("span", { className: "hb-legend-item", children: [
-        /* @__PURE__ */ jsx35("i", { className: "hb-legend-dot", style: { background: partColour(k + 1) } }),
+      piles.map((pile, k) => /* @__PURE__ */ jsxs35("span", { className: "hb-legend-item", children: [
+        /* @__PURE__ */ jsx38("i", { className: "hb-legend-dot", style: { background: partColour(k + 1) } }),
         pile.adds ?? pile.name
       ] }, k))
     ] })
@@ -6009,16 +7460,16 @@ function Pile({ k, name, amount, counts, startDots, tallest, playing, unit }) {
     draw();
     return () => cancelAnimationFrame(frame);
   }, [count2, counts.join(), startDots, width, height, theme]);
-  return /* @__PURE__ */ jsxs32("div", { className: "hb-sim-pile", children: [
-    /* @__PURE__ */ jsx35("div", { className: "hb-sim-pile-name", children: name }),
-    /* @__PURE__ */ jsx35("div", { className: "hb-sim-amount", children: shown2 }),
-    /* @__PURE__ */ jsx35("canvas", { ref: canvas, className: "hb-sim-canvas", style: { height }, role: "img", "aria-label": `${name}: ${shown2}, ${count2} dots` })
+  return /* @__PURE__ */ jsxs35("div", { className: "hb-sim-pile", children: [
+    /* @__PURE__ */ jsx38("div", { className: "hb-sim-pile-name", children: name }),
+    /* @__PURE__ */ jsx38("div", { className: "hb-sim-amount", children: shown2 }),
+    /* @__PURE__ */ jsx38("canvas", { ref: canvas, className: "hb-sim-canvas", style: { height }, role: "img", "aria-label": `${name}: ${shown2}, ${count2} dots` })
   ] });
 }
 
 // src/blocks/simulate/SimChart.tsx
 import { useRef as useRef12 } from "react";
-import { jsx as jsx36, jsxs as jsxs33 } from "react/jsx-runtime";
+import { jsx as jsx39, jsxs as jsxs36 } from "react/jsx-runtime";
 var HEIGHT = 220;
 var PAD = { left: 52, right: 12, top: 10, bottom: 22 };
 function SimChart({ piles, lines, times, index, unit }) {
@@ -6035,26 +7486,26 @@ function SimChart({ piles, lines, times, index, unit }) {
   const xTicks = Array.from({ length: Math.floor(to / xStep + 1e-9) + 1 }, (_, k) => k * xStep);
   const now = times[index];
   const label = piles.map((p, k) => `${p.name} ${valueText(lines[k][index], unit)}`).join(", ");
-  return /* @__PURE__ */ jsxs33("div", { ref: box, className: "hb-sim-chart", children: [
-    /* @__PURE__ */ jsxs33("svg", { width: "100%", height: HEIGHT, viewBox: `0 0 ${width} ${HEIGHT}`, role: "img", "aria-label": `Line chart at ${fmt(now)}: ${label}`, children: [
-      yTicks.map((v) => /* @__PURE__ */ jsxs33("g", { children: [
-        /* @__PURE__ */ jsx36("line", { x1: PAD.left, x2: width - PAD.right, y1: y(v), y2: y(v), className: "hb-sim-grid" }),
-        /* @__PURE__ */ jsx36("text", { x: PAD.left - 6, y: y(v) + 4, textAnchor: "end", children: fmt(v, unit) })
+  return /* @__PURE__ */ jsxs36("div", { ref: box, className: "hb-sim-chart", children: [
+    /* @__PURE__ */ jsxs36("svg", { width: "100%", height: HEIGHT, viewBox: `0 0 ${width} ${HEIGHT}`, role: "img", "aria-label": `Line chart at ${fmt(now)}: ${label}`, children: [
+      yTicks.map((v) => /* @__PURE__ */ jsxs36("g", { children: [
+        /* @__PURE__ */ jsx39("line", { x1: PAD.left, x2: width - PAD.right, y1: y(v), y2: y(v), className: "hb-sim-grid" }),
+        /* @__PURE__ */ jsx39("text", { x: PAD.left - 6, y: y(v) + 4, textAnchor: "end", children: fmt(v, unit) })
       ] }, v)),
-      xTicks.map((t) => /* @__PURE__ */ jsx36("text", { x: x(t), y: HEIGHT - 6, textAnchor: "middle", children: fmt(t) }, t)),
+      xTicks.map((t) => /* @__PURE__ */ jsx39("text", { x: x(t), y: HEIGHT - 6, textAnchor: "middle", children: fmt(t) }, t)),
       piles.map((_, k) => {
         const runs = lineRuns(lines[k].slice(0, index + 1).map((v, i) => v === null ? null : [x(times[i]), y(v)]));
         const last = lines[k][index];
-        return /* @__PURE__ */ jsxs33("g", { style: { color: partColour(k + 1) }, children: [
-          runs.map((run, j) => /* @__PURE__ */ jsx36("polyline", { points: run.pts.map(([cx, cy]) => `${cx.toFixed(1)},${cy.toFixed(1)}`).join(" "), className: "hb-sim-line" }, j)),
-          last !== null && /* @__PURE__ */ jsx36("circle", { cx: x(now), cy: y(last), r: 4.5, className: "hb-sim-point" })
+        return /* @__PURE__ */ jsxs36("g", { style: { color: partColour(k + 1) }, children: [
+          runs.map((run, j) => /* @__PURE__ */ jsx39("polyline", { points: run.pts.map(([cx, cy]) => `${cx.toFixed(1)},${cy.toFixed(1)}`).join(" "), className: "hb-sim-line" }, j)),
+          last !== null && /* @__PURE__ */ jsx39("circle", { cx: x(now), cy: y(last), r: 4.5, className: "hb-sim-point" })
         ] }, k);
       })
     ] }),
-    /* @__PURE__ */ jsx36("div", { className: "hb-legend", children: piles.map((p, k) => /* @__PURE__ */ jsxs33("span", { className: "hb-legend-item", children: [
-      /* @__PURE__ */ jsx36("i", { className: "hb-legend-dot", style: { background: partColour(k + 1) } }),
+    /* @__PURE__ */ jsx39("div", { className: "hb-legend", children: piles.map((p, k) => /* @__PURE__ */ jsxs36("span", { className: "hb-legend-item", children: [
+      /* @__PURE__ */ jsx39("i", { className: "hb-legend-dot", style: { background: partColour(k + 1) } }),
       p.name,
-      /* @__PURE__ */ jsx36("span", { className: "hb-legend-value", children: valueText(lines[k][index], unit) })
+      /* @__PURE__ */ jsx39("span", { className: "hb-legend-value", children: valueText(lines[k][index], unit) })
     ] }, k)) })
   ] });
 }
@@ -6063,7 +7514,7 @@ function valueText(v, unit) {
 }
 
 // src/blocks/simulate/Simulate.tsx
-import { jsx as jsx37, jsxs as jsxs34 } from "react/jsx-runtime";
+import { jsx as jsx40, jsxs as jsxs37 } from "react/jsx-runtime";
 function Simulate(block) {
   const { title, t: time, inputs, values: fixed, piles, unit, source } = block;
   const root = useRef13(null);
@@ -6082,7 +7533,7 @@ function Simulate(block) {
     },
     stored: (value) => value
   });
-  const sliders = useMemo7(() => new Map(Object.entries(answers)), [answers]);
+  const sliders = useMemo9(() => new Map(Object.entries(answers)), [answers]);
   const [view, setView] = useStoredValue({
     door: "identity",
     field: "~view",
@@ -6090,13 +7541,13 @@ function Simulate(block) {
     revive: (saved) => saved === "dots" || saved === "chart" ? saved : null,
     stored: (value) => value
   });
-  const [at2, setAt] = useState19(time.to);
-  const [playing, setPlaying] = useState19(false);
-  const trees = useMemo7(() => piles.map((p) => parseFormula(p.formula)), [piles]);
-  const names = useMemo7(() => new Map([...fixed, ...sliders]), [fixed, sliders]);
-  const times = useMemo7(() => timesOf(time.to, time.step), [time]);
-  const lines = useMemo7(() => valuesOver(trees, names, time.name, times), [trees, names, time.name, times]);
-  const most = useMemo7(() => {
+  const [at2, setAt] = useState22(time.to);
+  const [playing, setPlaying] = useState22(false);
+  const trees = useMemo9(() => piles.map((p) => parseFormula(p.formula)), [piles]);
+  const names = useMemo9(() => new Map([...fixed, ...sliders]), [fixed, sliders]);
+  const times = useMemo9(() => timesOf(time.to, time.step), [time]);
+  const lines = useMemo9(() => valuesOver(trees, names, time.name, times), [trees, names, time.name, times]);
+  const most = useMemo9(() => {
     const tops = new Map([...fixed, ...inputs.map((x) => [x.id, x.max])]);
     const high = valuesOver(trees, tops, time.name, [time.to]);
     return trees.map((_, k) => Math.max(0, high[k][0] ?? 0, ...lines[k].map((v) => v ?? 0)));
@@ -6119,25 +7570,25 @@ function Simulate(block) {
     clock.current = v;
     setAt(v);
   }
-  return /* @__PURE__ */ jsxs34("div", { ref: root, className: "hb-card hb-sim", children: [
-    /* @__PURE__ */ jsxs34("div", { className: "hb-sim-head", children: [
-      title && /* @__PURE__ */ jsx37("div", { className: "hb-card-title", children: /* @__PURE__ */ jsx37(InlineText, { text: title }) }),
-      /* @__PURE__ */ jsxs34("div", { className: "hb-sim-switch", role: "group", "aria-label": "View", children: [
-        /* @__PURE__ */ jsx37("button", { type: "button", "aria-pressed": view === "dots", onClick: () => setView("dots"), children: "Dots" }),
-        /* @__PURE__ */ jsx37("button", { type: "button", "aria-pressed": view === "chart", onClick: () => setView("chart"), children: "Line chart" })
+  return /* @__PURE__ */ jsxs37("div", { ref: root, className: "hb-card hb-sim", children: [
+    /* @__PURE__ */ jsxs37("div", { className: "hb-sim-head", children: [
+      title && /* @__PURE__ */ jsx40("div", { className: "hb-card-title", children: /* @__PURE__ */ jsx40(InlineText, { text: title }) }),
+      /* @__PURE__ */ jsxs37("div", { className: "hb-sim-switch", role: "group", "aria-label": "View", children: [
+        /* @__PURE__ */ jsx40("button", { type: "button", "aria-pressed": view === "dots", onClick: () => setView("dots"), children: "Dots" }),
+        /* @__PURE__ */ jsx40("button", { type: "button", "aria-pressed": view === "chart", onClick: () => setView("chart"), children: "Line chart" })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs34("div", { className: "hb-sim-controls", children: [
-      /* @__PURE__ */ jsxs34("button", { type: "button", className: "hb-pill hb-pill-solid hb-sim-play", onClick: play, children: [
-        /* @__PURE__ */ jsx37("svg", { width: "14", height: "14", viewBox: "0 0 24 24", "aria-hidden": "true", fill: "currentColor", children: /* @__PURE__ */ jsx37("path", { d: playing ? "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" : "M8 5.5v13l10.5-6.5z" }) }),
+    /* @__PURE__ */ jsxs37("div", { className: "hb-sim-controls", children: [
+      /* @__PURE__ */ jsxs37("button", { type: "button", className: "hb-pill hb-pill-solid hb-sim-play", onClick: play, children: [
+        /* @__PURE__ */ jsx40("svg", { width: "14", height: "14", viewBox: "0 0 24 24", "aria-hidden": "true", fill: "currentColor", children: /* @__PURE__ */ jsx40("path", { d: playing ? "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" : "M8 5.5v13l10.5-6.5z" }) }),
         playing ? "Pause" : "Play"
       ] }),
-      /* @__PURE__ */ jsxs34("label", { className: "hb-calc-slider hb-sim-time", children: [
-        /* @__PURE__ */ jsxs34("span", { className: "hb-calc-head", children: [
-          /* @__PURE__ */ jsx37("span", { className: "hb-calc-label", children: time.unit ? capital(time.unit) : time.name }),
-          /* @__PURE__ */ jsx37("span", { className: "hb-calc-value", children: `${fmt(at2)} of ${fmt(time.to)}` })
+      /* @__PURE__ */ jsxs37("label", { className: "hb-calc-slider hb-sim-time", children: [
+        /* @__PURE__ */ jsxs37("span", { className: "hb-calc-head", children: [
+          /* @__PURE__ */ jsx40("span", { className: "hb-calc-label", children: time.unit ? capital(time.unit) : time.name }),
+          /* @__PURE__ */ jsx40("span", { className: "hb-calc-value", children: `${fmt(at2)} of ${fmt(time.to)}` })
         ] }),
-        /* @__PURE__ */ jsx37(
+        /* @__PURE__ */ jsx40(
           "input",
           {
             type: "range",
@@ -6151,7 +7602,7 @@ function Simulate(block) {
           }
         )
       ] }),
-      inputs.map((input) => /* @__PURE__ */ jsx37(
+      inputs.map((input) => /* @__PURE__ */ jsx40(
         Slider,
         {
           input,
@@ -6161,8 +7612,8 @@ function Simulate(block) {
         input.id
       ))
     ] }),
-    view === "dots" ? /* @__PURE__ */ jsx37(Piles, { piles, amounts, start: lines[0][0] ?? 0, per, most, playing, unit, label: block.start }) : /* @__PURE__ */ jsx37(SimChart, { piles, lines, times, index, unit }),
-    source && /* @__PURE__ */ jsx37(Source, { text: source })
+    view === "dots" ? /* @__PURE__ */ jsx40(Piles, { piles, amounts, start: lines[0][0] ?? 0, per, most, playing, unit, label: block.start }) : /* @__PURE__ */ jsx40(SimChart, { piles, lines, times, index, unit }),
+    source && /* @__PURE__ */ jsx40(Source, { text: source })
   ] });
 }
 function capital(word) {
@@ -6195,56 +7646,6 @@ function usePauseWhenHidden(root, playing, pause) {
     watcher.observe(root.current);
     return () => watcher.disconnect();
   }, [playing]);
-}
-
-// src/blocks/source/read.ts
-var KINDS2 = ["web", "file", "tool", "derived"];
-var MAX_ITEMS3 = 32;
-var ACCESSED = /^(\d{4}-\d{2}-\d{2})/;
-function short(v, max) {
-  if (typeof v !== "string") return void 0;
-  const s = v.trim();
-  return s ? s.slice(0, max) : void 0;
-}
-function safeUrl(v) {
-  const s = short(v, 500);
-  return s && /^https?:\/\/[^\s<>]+$/i.test(s) ? s : void 0;
-}
-function readItem2(raw, here) {
-  const label = short(raw?.label, 80);
-  if (!label) {
-    here.drop("source item needs a label");
-    return null;
-  }
-  const kind = KINDS2.find((k) => k === raw?.kind);
-  const accessed = ACCESSED.exec(short(raw?.accessed, 32) ?? "")?.[1];
-  const item = { label };
-  const url = safeUrl(raw?.url);
-  const note = short(raw?.note, 160);
-  if (url) item.url = url;
-  if (kind) item.kind = kind;
-  if (accessed) item.accessed = accessed;
-  if (note) item.note = note;
-  return item;
-}
-function readSource(raw, here) {
-  const title = short(raw.title, 80);
-  if (Array.isArray(raw.items)) {
-    const items = raw.items.map((item, i) => readItem2(item, here.at("items").at(i)));
-    const kept = items.filter((item) => item !== null).slice(0, MAX_ITEMS3);
-    if (raw.items.length > MAX_ITEMS3) here.drop("source keeps 32 items");
-    if (kept.length) return { type: "source", ...title ? { title } : {}, items: kept };
-  }
-  const named = [];
-  if (Array.isArray(raw.sources)) {
-    for (const s of raw.sources) if (s && short(s.name ?? s.title ?? s.label, 80)) named.push(s);
-  }
-  let text = short(raw.text, 500) ?? "";
-  if (!text) text = named.map((s) => short(s.name ?? s.title ?? s.label, 80)).join(" \xB7 ");
-  if (!text) return here.drop("source needs text");
-  const candidates = [raw.url, ...named.map((s) => s.url)];
-  const url = candidates.find((u) => typeof u === "string" && /^https?:\/\/[^\s<>]+$/i.test(u.trim()));
-  return { type: "source", text, ...url ? { url: String(url).trim().slice(0, 500) } : {}, ...title ? { title } : {} };
 }
 
 // src/blocks/steps/read.ts
@@ -6283,11 +7684,11 @@ function readHolds(raw, here) {
 }
 
 // src/blocks/steps/Steps.tsx
-import { useEffect as useEffect7, useRef as useRef14, useState as useState20 } from "react";
-import { jsx as jsx38, jsxs as jsxs35 } from "react/jsx-runtime";
+import { useEffect as useEffect7, useRef as useRef14, useState as useState23 } from "react";
+import { jsx as jsx41, jsxs as jsxs38 } from "react/jsx-runtime";
 function Steps({ title, for: flow, items }) {
-  const [at2, setAt] = useState20(0);
-  const [failed, setFailed] = useState20(() => /* @__PURE__ */ new Set());
+  const [at2, setAt] = useState23(0);
+  const [failed, setFailed] = useState23(() => /* @__PURE__ */ new Set());
   const setWalk = useSetWalk();
   const before = useRef14(null);
   const step = items[at2];
@@ -6306,15 +7707,15 @@ function Steps({ title, for: flow, items }) {
     e.preventDefault();
   }
   const photo = step.image && !failed.has(at2) ? step.image : void 0;
-  return /* @__PURE__ */ jsxs35("div", { className: "hb-card hb-steps", role: "group", "aria-label": title ?? "Steps", onKeyDown, children: [
-    /* @__PURE__ */ jsxs35("div", { className: "hb-steps-head", children: [
-      title && /* @__PURE__ */ jsx38("div", { className: "hb-card-title", children: title }),
-      /* @__PURE__ */ jsx38("span", { className: "hb-steps-place", children: `${at2 + 1} of ${items.length}` })
+  return /* @__PURE__ */ jsxs38("div", { className: "hb-card hb-steps", role: "group", "aria-label": title ?? "Steps", onKeyDown, children: [
+    /* @__PURE__ */ jsxs38("div", { className: "hb-steps-head", children: [
+      title && /* @__PURE__ */ jsx41("div", { className: "hb-card-title", children: title }),
+      /* @__PURE__ */ jsx41("span", { className: "hb-steps-place", children: `${at2 + 1} of ${items.length}` })
     ] }),
-    /* @__PURE__ */ jsxs35("div", { className: "hb-steps-body", "aria-live": "polite", children: [
-      /* @__PURE__ */ jsx38("div", { className: "hb-steps-title", children: step.title }),
-      step.text && /* @__PURE__ */ jsx38("p", { className: "hb-steps-text", children: /* @__PURE__ */ jsx38(InlineText, { text: step.text }) }),
-      photo && /* @__PURE__ */ jsx38(
+    /* @__PURE__ */ jsxs38("div", { className: "hb-steps-body", "aria-live": "polite", children: [
+      /* @__PURE__ */ jsx41("div", { className: "hb-steps-title", children: step.title }),
+      step.text && /* @__PURE__ */ jsx41("p", { className: "hb-steps-text", children: /* @__PURE__ */ jsx41(InlineText, { text: step.text }) }),
+      photo && /* @__PURE__ */ jsx41(
         "img",
         {
           className: "hb-steps-photo",
@@ -6327,8 +7728,8 @@ function Steps({ title, for: flow, items }) {
         at2
       )
     ] }),
-    /* @__PURE__ */ jsxs35("div", { className: "hb-steps-foot", children: [
-      /* @__PURE__ */ jsx38("div", { className: "hb-steps-dots", children: items.map((s, i) => /* @__PURE__ */ jsx38(
+    /* @__PURE__ */ jsxs38("div", { className: "hb-steps-foot", children: [
+      /* @__PURE__ */ jsx41("div", { className: "hb-steps-dots", children: items.map((s, i) => /* @__PURE__ */ jsx41(
         "button",
         {
           type: "button",
@@ -6339,9 +7740,9 @@ function Steps({ title, for: flow, items }) {
         },
         i
       )) }),
-      /* @__PURE__ */ jsxs35("div", { className: "hb-steps-moves", children: [
-        /* @__PURE__ */ jsx38("button", { type: "button", className: "hb-pill", disabled: at2 === 0, onClick: () => go(at2 - 1), children: "Back" }),
-        /* @__PURE__ */ jsx38("button", { type: "button", className: "hb-pill hb-pill-solid", disabled: at2 === items.length - 1, onClick: () => go(at2 + 1), children: "Next" })
+      /* @__PURE__ */ jsxs38("div", { className: "hb-steps-moves", children: [
+        /* @__PURE__ */ jsx41("button", { type: "button", className: "hb-pill", disabled: at2 === 0, onClick: () => go(at2 - 1), children: "Back" }),
+        /* @__PURE__ */ jsx41("button", { type: "button", className: "hb-pill hb-pill-solid", disabled: at2 === items.length - 1, onClick: () => go(at2 + 1), children: "Next" })
       ] })
     ] })
   ] });
@@ -6367,489 +7768,30 @@ function readStreak(raw, here) {
 }
 
 // src/blocks/streak/Streak.tsx
-import { jsx as jsx39, jsxs as jsxs36 } from "react/jsx-runtime";
+import { jsx as jsx42, jsxs as jsxs39 } from "react/jsx-runtime";
 function unitFor(count2, unit) {
   if (count2 === 1 && unit.endsWith("s")) return unit.slice(0, -1);
   return unit;
 }
 function Streak({ count: count2, label, unit, days }) {
-  return /* @__PURE__ */ jsxs36("div", { className: "hb-card hb-streak", children: [
-    /* @__PURE__ */ jsxs36("div", { className: "hb-streak-head", children: [
-      /* @__PURE__ */ jsxs36("div", { children: [
-        /* @__PURE__ */ jsx39("div", { className: "hb-streak-label", children: label }),
-        /* @__PURE__ */ jsxs36("div", { className: "hb-streak-count", children: [
+  return /* @__PURE__ */ jsxs39("div", { className: "hb-card hb-streak", children: [
+    /* @__PURE__ */ jsxs39("div", { className: "hb-streak-head", children: [
+      /* @__PURE__ */ jsxs39("div", { children: [
+        /* @__PURE__ */ jsx42("div", { className: "hb-streak-label", children: label }),
+        /* @__PURE__ */ jsxs39("div", { className: "hb-streak-count", children: [
           formatNumber(count2, { digits: 3 }),
           " ",
-          /* @__PURE__ */ jsx39("span", { children: unitFor(count2, unit) })
+          /* @__PURE__ */ jsx42("span", { children: unitFor(count2, unit) })
         ] })
       ] }),
-      /* @__PURE__ */ jsx39("span", { className: "hb-streak-medal", children: /* @__PURE__ */ jsx39(Icon, { name: "star", size: 24, stroke: 2.4 }) })
+      /* @__PURE__ */ jsx42("span", { className: "hb-streak-medal", children: /* @__PURE__ */ jsx42(Icon, { name: "star", size: 24, stroke: 2.4 }) })
     ] }),
-    days.length > 0 && /* @__PURE__ */ jsx39("div", { className: "hb-streak-week", style: { gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }, children: days.map((d, k) => /* @__PURE__ */ jsxs36("div", { className: d.today ? "hb-streak-day hb-streak-today" : "hb-streak-day", children: [
-      /* @__PURE__ */ jsx39("span", { className: "hb-streak-day-label", children: d.label }),
-      d.done ? /* @__PURE__ */ jsx39("span", { className: "hb-streak-done", children: /* @__PURE__ */ jsx39(Icon, { name: "check", size: 15, stroke: 2.6 }) }) : /* @__PURE__ */ jsx39("span", { className: "hb-streak-date", children: d.date ?? "\xB7" }),
-      /* @__PURE__ */ jsx39("span", { className: "hb-streak-dot" })
+    days.length > 0 && /* @__PURE__ */ jsx42("div", { className: "hb-streak-week", style: { gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }, children: days.map((d, k) => /* @__PURE__ */ jsxs39("div", { className: d.today ? "hb-streak-day hb-streak-today" : "hb-streak-day", children: [
+      /* @__PURE__ */ jsx42("span", { className: "hb-streak-day-label", children: d.label }),
+      d.done ? /* @__PURE__ */ jsx42("span", { className: "hb-streak-done", children: /* @__PURE__ */ jsx42(Icon, { name: "check", size: 15, stroke: 2.6 }) }) : /* @__PURE__ */ jsx42("span", { className: "hb-streak-date", children: d.date ?? "\xB7" }),
+      /* @__PURE__ */ jsx42("span", { className: "hb-streak-dot" })
     ] }, k)) })
   ] });
-}
-
-// src/blocks/table/read.ts
-var MAX_COLUMNS2 = 8;
-var MAX_ROWS = 30;
-var KINDS3 = ["text", "number", "currency", "percent", "date", "badge", "link", "bar", "sources"];
-var OPS = ["sum", "avg", "min", "max", "count"];
-var TONES4 = ["accent", "good", "warn", "neutral"];
-function isObject(v) {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
-}
-function plain(v, max) {
-  if (typeof v !== "string") return void 0;
-  const s = v.trim();
-  return s ? s.slice(0, max) : void 0;
-}
-function safeUrl2(v) {
-  const s = plain(v, 500);
-  return s && /^https?:\/\/[^\s<>]+$/i.test(s) ? s : void 0;
-}
-function readSources(raw) {
-  if (!Array.isArray(raw)) return [];
-  const sources = [];
-  for (const item of raw.slice(0, 4)) {
-    const label = isObject(item) ? firstText([item.label, item.name, item.title], 40) : plain(item, 40);
-    if (!label) continue;
-    const source = { label };
-    const url = safeUrl2(isObject(item) ? item.url : void 0);
-    if (url) source.url = url;
-    sources.push(source);
-  }
-  return sources;
-}
-function readStructuredColumns(raw, here) {
-  const list = Array.isArray(raw) ? raw.slice(0, MAX_COLUMNS2) : [];
-  const used = /* @__PURE__ */ new Set();
-  const columns = list.map((item, i) => {
-    if (!isObject(item)) return { id: `c${i}`, label: plain(item, 40) ?? `Column ${i + 1}`, kind: "text" };
-    const label = firstText([item.label, item.title, item.name], 40) ?? `Column ${i + 1}`;
-    let id = plain(item.id ?? item.key, 40)?.replace(/[^A-Za-z0-9_-]+/g, "-").toLowerCase() ?? `c${i}`;
-    if (used.has(id)) id = `${id}-${i}`;
-    used.add(id);
-    const column = { id, label, kind: KINDS3.find((k) => k === item.kind) ?? "text" };
-    const align = ["left", "right", "center"].find((a) => a === item.align);
-    const tone = TONES4.find((t) => t === item.tone);
-    const max = num(item.max);
-    const unit = plain(item.unit, 12);
-    if (align) column.align = align;
-    if (tone) column.tone = tone;
-    if (max !== null && max > 0) column.max = max;
-    if (unit) column.unit = unit;
-    return column;
-  });
-  if (Array.isArray(raw) && raw.length > MAX_COLUMNS2) here.drop("table keeps 8 columns");
-  return columns;
-}
-function readStructuredCell(raw, column) {
-  if (isObject(raw)) {
-    const value = num(raw.value ?? raw.number);
-    const text2 = firstText([raw.text, raw.label, raw.value], 120) ?? "";
-    const cell = { text: text2 };
-    if (value !== null) cell.value = value;
-    const url = safeUrl2(raw.url ?? raw.href);
-    if (url) cell.url = url;
-    const tone = TONES4.find((t) => t === raw.tone);
-    if (tone) cell.tone = tone;
-    return cell.text || cell.value !== void 0 ? cell : null;
-  }
-  if (column.kind === "sources") return null;
-  if (typeof raw === "number") return { text: String(raw), value: raw };
-  const text = plain(raw, 120);
-  if (!text) return null;
-  if (column.kind === "number" || column.kind === "currency" || column.kind === "percent" || column.kind === "bar") {
-    const n = Number(text.replace(/,/g, ""));
-    return isFinite(n) ? { text, value: n } : null;
-  }
-  return { text };
-}
-function readAggregates(raw, columns) {
-  if (!Array.isArray(raw)) return [];
-  return raw.slice(0, 4).map((item, i) => {
-    const id = plain(isObject(item) ? item.column ?? item.id : void 0, 40);
-    const column = columns.find((c) => c.id === id) ?? columns[i];
-    const op = OPS.find((o) => o === (isObject(item) ? item.op : void 0)) ?? "sum";
-    const label = firstText([isObject(item) ? item.label : void 0, column?.label], 20) ?? op;
-    return { column: column.id, op, label };
-  }).filter((a) => columns.some((c) => c.id === a.column));
-}
-function readStructuredTable(raw, here, caption2) {
-  const columns = readStructuredColumns(raw.columns, here.at("columns"));
-  if (!columns.length) return here.drop("table needs columns");
-  const rawRows = Array.isArray(raw.rows) ? raw.rows : [];
-  const rows = [];
-  rawRows.slice(0, MAX_ROWS).forEach((row) => {
-    const cells = {};
-    let hasCell = false;
-    const sources = readSources(isObject(row) ? row.sources ?? row.sourceIds : void 0);
-    columns.forEach((column, ci) => {
-      const values = isObject(row) && isObject(row.cells) ? row.cells : row;
-      const value = isObject(values) ? values[column.id] ?? values[column.label] : Array.isArray(values) ? values[ci] : void 0;
-      if (column.kind === "sources") {
-        sources.push(...readSources(Array.isArray(value) ? value : value ? [value] : []));
-        return;
-      }
-      const cell = readStructuredCell(value, column);
-      if (cell) {
-        cells[column.id] = cell;
-        hasCell = true;
-      }
-    });
-    if (hasCell || sources.length) rows.push({ cells, sources });
-  });
-  if (rawRows.length > MAX_ROWS) here.drop("table keeps 30 rows");
-  if (!rows.length) return here.drop("table needs at least one row");
-  const page = num(raw.page);
-  return clean({
-    type: "table",
-    caption: caption2,
-    structured: true,
-    columns,
-    rows,
-    filterable: raw.filterable === true,
-    page: page !== null && page >= 1 && page <= 10 ? Math.floor(page) : 1,
-    aggregates: readAggregates(raw.aggregates, columns)
-  });
-}
-function readTable(raw, here) {
-  const caption2 = firstText([raw.caption, raw.title], 100);
-  const structured = Array.isArray(raw.columns) && raw.columns.some(isObject) || raw.filterable === true || raw.page !== void 0 || Array.isArray(raw.aggregates);
-  if (structured) return readStructuredTable(raw, here, caption2);
-  const rawRows = firstList([raw.rows, raw.data]) ?? [];
-  let columns = readColumns(firstList([raw.columns, raw.headers, raw.header]));
-  let rowsToRead = rawRows;
-  if (!columns.length) {
-    const first = rawRows[0];
-    if (Array.isArray(first)) {
-      columns = readColumns(first);
-      rowsToRead = rawRows.slice(1);
-    } else if (first && typeof first === "object") {
-      columns = readColumns(Object.keys(first));
-    }
-  }
-  if (!columns.length) return here.drop("table needs columns");
-  columns = keepFirst(columns, MAX_COLUMNS2, here.at("columns"), "columns");
-  const rows = [];
-  rowsToRead.forEach((row, i) => {
-    const cells = readRow(row, columns, here.at("rows").at(i));
-    if (cells) rows.push(cells);
-  });
-  if (!rows.length) here.drop("table has no rows");
-  const kept = keepFirst(rows, MAX_ROWS, here.at("rows"), "rows");
-  const highlight = readHighlight(raw.highlight, columns, kept, here.at("highlight"));
-  return clean({ type: "table", columns, rows: kept, highlight, caption: caption2 });
-}
-function readColumns(list) {
-  if (!list) return [];
-  return list.map((c) => {
-    if (c && typeof c === "object") return firstText([c.label, c.name, c.title], 40) ?? "";
-    return textOrNumber(c, 40) ?? "";
-  });
-}
-function readRow(row, columns, here) {
-  let cells;
-  if (Array.isArray(row)) {
-    cells = row;
-  } else if (row && typeof row === "object") {
-    cells = cellsByColumnName(row, columns);
-  } else {
-    return here.drop("row is not a list of cells");
-  }
-  if (cells.length > columns.length) return here.drop(`row has ${cells.length} cells, table has ${columns.length} columns`);
-  const out = cells.map(cellText2);
-  while (out.length < columns.length) out.push("");
-  return out;
-}
-function cellsByColumnName(row, columns) {
-  const byLowerName = new Map(Object.entries(row).map(([k, v]) => [k.toLowerCase(), v]));
-  return columns.map((c) => byLowerName.get(c.toLowerCase()));
-}
-function cellText2(v) {
-  if (v === null) return "\u2013";
-  if (v === true) return "Yes";
-  if (v === false) return "No";
-  return textOrNumber(v, 120) ?? "";
-}
-function readHighlight(v, columns, rows, here) {
-  if (v === void 0 || v === null) return void 0;
-  let found;
-  if (num(v) !== null) {
-    found = { row: v };
-  } else if (typeof v === "string") {
-    found = highlightByName(v, columns, rows);
-  } else if (typeof v === "object") {
-    if (num(v.row) !== null) found = { row: v.row };
-    const column = num(v.column) ?? num(v.col);
-    if (!found && column !== null) found = { column };
-  }
-  if (!found) {
-    here.drop("highlight should be {row: n} or {column: n}");
-    return void 0;
-  }
-  const inRange = "row" in found ? isIndex(found.row, rows.length) : isIndex(found.column, columns.length);
-  if (!inRange) {
-    here.drop("highlight is outside the table");
-    return void 0;
-  }
-  return found;
-}
-function highlightByName(name, columns, rows) {
-  const wanted = str(name)?.toLowerCase();
-  const row = rows.findIndex((r) => r[0].toLowerCase() === wanted);
-  if (row >= 0) return { row };
-  const column = columns.findIndex((c) => c.toLowerCase() === wanted);
-  if (column >= 0) return { column };
-  return void 0;
-}
-function isIndex(n, length) {
-  return Number.isInteger(n) && n >= 0 && n < length;
-}
-
-// src/blocks/table/Table.tsx
-import { useState as useState22 } from "react";
-
-// src/blocks/table/StructuredTable.tsx
-import { useMemo as useMemo8, useState as useState21 } from "react";
-import { jsx as jsx40, jsxs as jsxs37 } from "react/jsx-runtime";
-var PAGE = 10;
-function shown(cell, column) {
-  if (!cell) return "\u2013";
-  if (cell.value === void 0) return cell.text;
-  if (column.kind === "currency") return formatAmount(cell.value, column.unit) ?? formatNumber(cell.value);
-  if (column.kind === "percent") return formatPercent(cell.value);
-  if (column.kind === "number" || column.kind === "bar") return formatNumber(cell.value);
-  return cell.text;
-}
-function aggregateValue(rows, a) {
-  const values = rows.map((r) => r.cells[a.column]?.value).filter((v) => v !== void 0);
-  if (a.op === "count") return values.length;
-  if (!values.length) return null;
-  if (a.op === "sum") return values.reduce((s, v) => s + v, 0);
-  if (a.op === "avg") return values.reduce((s, v) => s + v, 0) / values.length;
-  if (a.op === "min") return Math.min(...values);
-  return Math.max(...values);
-}
-function aggregateLabel(op) {
-  return { sum: "Total", avg: "Average", min: "Lowest", max: "Highest", count: "Count" }[op];
-}
-function StructuredTable({ caption: caption2, columns, rows, filterable, page, aggregates }) {
-  const [query, setQuery] = useState21("");
-  const [at2, setAt] = useState21(page);
-  const needle = query.trim().toLowerCase();
-  const filtered = useMemo8(() => {
-    if (!needle) return rows;
-    return rows.filter((row) => columns.some((c) => {
-      const cell = row.cells[c.id];
-      return `${cell?.text ?? ""} ${row.sources.map((s) => s.label).join(" ")}`.toLowerCase().includes(needle);
-    }));
-  }, [rows, columns, needle]);
-  const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
-  const current = Math.min(at2, pages);
-  const slice = filtered.slice((current - 1) * PAGE, current * PAGE);
-  return /* @__PURE__ */ jsxs37("div", { className: "hb-card hb-table-card hb-table hb-table-structured", children: [
-    /* @__PURE__ */ jsxs37("table", { className: "hb-table-grid", children: [
-      caption2 && /* @__PURE__ */ jsx40("caption", { className: "hb-table-caption", children: caption2 }),
-      /* @__PURE__ */ jsx40("thead", { children: /* @__PURE__ */ jsx40("tr", { children: columns.map((c) => /* @__PURE__ */ jsx40("th", { scope: "col", className: c.align ? `hb-align-${c.align}` : void 0, children: c.label }, c.id)) }) }),
-      /* @__PURE__ */ jsxs37("tbody", { children: [
-        slice.map((row, i) => /* @__PURE__ */ jsx40("tr", { children: columns.map((column, ci) => /* @__PURE__ */ jsxs37("td", { className: column.align ? `hb-align-${column.align}` : void 0, children: [
-          column.kind === "sources" ? /* @__PURE__ */ jsx40("span", { className: "hb-table-sources", children: row.sources.length ? row.sources.map(
-            (s, si) => s.url ? /* @__PURE__ */ jsx40("a", { href: s.url, target: "_blank", rel: "noreferrer", children: s.label }, si) : /* @__PURE__ */ jsx40("span", { children: s.label }, si)
-          ) : /* @__PURE__ */ jsx40("span", { className: "hb-table-empty", children: "\u2013" }) }) : column.kind === "bar" ? /* @__PURE__ */ jsxs37("span", { className: "hb-table-bar", children: [
-            /* @__PURE__ */ jsx40(
-              "span",
-              {
-                className: "hb-table-bar-fill",
-                style: { width: `${Math.min(100, Math.max(0, (row.cells[column.id]?.value ?? 0) / (column.max ?? Math.max(1, ...rows.map((r) => r.cells[column.id]?.value ?? 0))) * 100))}%` }
-              }
-            ),
-            /* @__PURE__ */ jsx40("span", { className: "hb-table-bar-value", children: shown(row.cells[column.id], column) })
-          ] }) : column.kind === "badge" ? /* @__PURE__ */ jsx40("span", { className: `hb-chip hb-chip-${row.cells[column.id]?.tone ?? column.tone ?? "plain"}`, children: shown(row.cells[column.id], column) }) : column.kind === "link" && row.cells[column.id]?.url ? /* @__PURE__ */ jsx40("a", { href: row.cells[column.id].url, target: "_blank", rel: "noreferrer", children: shown(row.cells[column.id], column) }) : /* @__PURE__ */ jsx40("span", { children: shown(row.cells[column.id], column) }),
-          ci === 0 && row.sources.length > 0 && column.kind !== "sources" && /* @__PURE__ */ jsx40("span", { className: "hb-table-source-hint", "aria-label": `Sources: ${row.sources.map((s) => s.label).join(", ")}`, children: "\u2022" })
-        ] }, column.id)) }, `${(current - 1) * PAGE + i}`)),
-        !slice.length && /* @__PURE__ */ jsx40("tr", { children: /* @__PURE__ */ jsx40("td", { colSpan: columns.length, className: "hb-table-empty-cell", children: "No rows match." }) })
-      ] }),
-      aggregates.length > 0 && /* @__PURE__ */ jsx40("tfoot", { children: /* @__PURE__ */ jsx40("tr", { children: columns.map((column, ci) => {
-        const a = aggregates.find((item) => item.column === column.id);
-        if (!a) return /* @__PURE__ */ jsx40("td", {}, column.id);
-        const value = aggregateValue(filtered, a);
-        return /* @__PURE__ */ jsxs37("td", { children: [
-          /* @__PURE__ */ jsx40("span", { className: "hb-table-aggregate-label", children: ci === 0 ? a.label : aggregateLabel(a.op) }),
-          value !== null ? ` ${formatNumber(value)}` : " \u2013"
-        ] }, column.id);
-      }) }) })
-    ] }),
-    (filterable || pages > 1) && /* @__PURE__ */ jsxs37("div", { className: "hb-table-tools", children: [
-      filterable && /* @__PURE__ */ jsx40(
-        "input",
-        {
-          type: "search",
-          value: query,
-          placeholder: "Filter rows",
-          "aria-label": "Filter rows",
-          onChange: (e) => {
-            setQuery(e.target.value);
-            setAt(1);
-          }
-        }
-      ),
-      pages > 1 && /* @__PURE__ */ jsxs37("div", { className: "hb-table-pages", children: [
-        /* @__PURE__ */ jsx40("button", { type: "button", disabled: current === 1, onClick: () => setAt(Math.max(1, current - 1)), "aria-label": "Previous page", children: "\u2039" }),
-        /* @__PURE__ */ jsxs37("span", { children: [
-          "Page ",
-          current,
-          " of ",
-          pages
-        ] }),
-        /* @__PURE__ */ jsx40("button", { type: "button", disabled: current === pages, onClick: () => setAt(Math.min(pages, current + 1)), "aria-label": "Next page", children: "\u203A" })
-      ] })
-    ] })
-  ] });
-}
-
-// src/blocks/table/sort.ts
-var GAP2 = "\u2013";
-function isBlank(cell) {
-  return !cell || cell === GAP2;
-}
-function cellNumber(cell) {
-  const plain2 = cell.replace(/,/g, "").replace(/^−/, "-");
-  const m = /^([-+]?)[^\d\-+]{0,3}([-+]?\d+(?:\.\d+)?)/.exec(plain2);
-  if (!m) return null;
-  const n = Number(m[2]);
-  return m[1] === "-" ? -n : n;
-}
-function sortedOrder(rows, sort) {
-  const order = rows.map((_, i) => i);
-  if (!sort) return order;
-  const sign = sort.direction === "up" ? 1 : -1;
-  return order.sort((a, b) => {
-    const left = rows[a][sort.column] ?? "";
-    const right = rows[b][sort.column] ?? "";
-    if (isBlank(left) || isBlank(right)) return blanksLast(left, right);
-    return sign * compareCells(left, right);
-  });
-}
-function blanksLast(left, right) {
-  const leftBlank = isBlank(left), rightBlank = isBlank(right);
-  if (leftBlank && rightBlank) return 0;
-  if (leftBlank) return 1;
-  return -1;
-}
-function compareCells(left, right) {
-  const a = cellNumber(left);
-  const b = cellNumber(right);
-  if (a !== null && b !== null) return a - b;
-  return left.localeCompare(right, void 0, { numeric: true, sensitivity: "base" });
-}
-function nextSort(sort, column) {
-  if (!sort || sort.column !== column) return { column, direction: "up" };
-  if (sort.direction === "up") return { column, direction: "down" };
-  return null;
-}
-function isNumberColumn(rows, column) {
-  const filled = rows.map((r) => r[column] ?? "").filter((cell) => !isBlank(cell));
-  return filled.length > 0 && filled.every((cell) => cellNumber(cell) !== null);
-}
-
-// src/blocks/table/cells.ts
-function isChangeColumn(rows, column) {
-  if (!isNumberColumn(rows, column) || !rows.some((r) => /^[-+−]/.test(r[column] ?? ""))) return false;
-  const filled = rows.map((r) => (r[column] ?? "").trim()).filter((cell) => !isBlank(cell));
-  const allPercent = filled.every((cell) => cell.endsWith("%"));
-  const allSigned = filled.every((cell) => /^[-+−]/.test(cell) || cellNumber(cell) === 0);
-  return allPercent || allSigned;
-}
-function changeOf(cell) {
-  const n = cellNumber(cell);
-  if (n === null || n === 0) return null;
-  return n > 0 ? "up" : "down";
-}
-function miniBar(value, largest) {
-  const width = largest > 0 ? Math.abs(value) / largest * 50 : 0;
-  return { left: value < 0 ? 50 - width : 50, width };
-}
-var AMOUNT = /^([-+−]?)([$₹€£¥]?)(\d{1,3}(?:,\d{2,3})+|\d+)(\.\d+)?$/;
-function bigNumber(cell) {
-  const m = AMOUNT.exec(cell.trim());
-  if (!m) return null;
-  const [, sign, currency, digits, decimals2 = ""] = m;
-  if (!currency && !digits.includes(",")) return null;
-  const magnitude = Number(digits.replace(/,/g, "") + decimals2);
-  if (magnitude < SHORT_FROM) return null;
-  const v = sign === "-" || sign === "\u2212" ? -magnitude : magnitude;
-  const unit = currency || void 0;
-  const plus = sign === "+" ? "+" : "";
-  return { short: plus + fmt(v, unit), full: plus + fmt(v, unit, { full: true }) };
-}
-
-// src/blocks/table/Table.tsx
-import { jsx as jsx41, jsxs as jsxs38 } from "react/jsx-runtime";
-var MINI_BARS_FROM = 3;
-function Table(props) {
-  if ("structured" in props && props.structured) return /* @__PURE__ */ jsx41(StructuredTable, { ...props });
-  const { columns, rows, highlight, caption: caption2 } = props;
-  const [sort, setSort] = useState22(null);
-  const order = sortedOrder(rows, sort);
-  const bestRow = highlight && "row" in highlight ? highlight.row : -1;
-  const bestColumn = highlight && "column" in highlight ? highlight.column : -1;
-  const numeric = columns.map((_, c) => isNumberColumn(rows, c));
-  const change = columns.map((_, c) => isChangeColumn(rows, c));
-  const largest = columns.map((_, c) => change[c] ? largestChange(rows, c) : 0);
-  const withBars = rows.length >= MINI_BARS_FROM;
-  const cellClass = (c, text, extra = "") => [
-    numeric[c] ? "hb-num" : "",
-    c === 0 ? "hb-first" : "",
-    c === bestColumn ? "hb-best-col" : "",
-    text.length > 28 ? "hb-wrap" : "",
-    extra
-  ].filter(Boolean).join(" ");
-  return /* @__PURE__ */ jsxs38("div", { className: "hb-card hb-table-card", children: [
-    caption2 && /* @__PURE__ */ jsx41("div", { className: "hb-chart-title hb-table-caption", children: /* @__PURE__ */ jsx41(InlineText, { text: caption2 }) }),
-    /* @__PURE__ */ jsx41("div", { className: "hb-table-scroll", children: /* @__PURE__ */ jsxs38("table", { className: columns.length >= 3 ? "hb-table hb-table-wide" : "hb-table", children: [
-      /* @__PURE__ */ jsx41("thead", { children: /* @__PURE__ */ jsx41("tr", { children: columns.map((name, c) => /* @__PURE__ */ jsx41("th", { "aria-sort": ariaSort(sort, c), className: cellClass(c, name, sort?.column === c ? "hb-sorted" : ""), children: /* @__PURE__ */ jsxs38("button", { type: "button", onClick: () => setSort(nextSort(sort, c)), children: [
-        /* @__PURE__ */ jsx41("span", { children: name }),
-        /* @__PURE__ */ jsx41("span", { className: "hb-sort", "aria-hidden": "true", children: sortMark(sort, c) }),
-        c === bestColumn && /* @__PURE__ */ jsx41("span", { className: "hb-chip hb-chip-soft", children: "Best" })
-      ] }) }, c)) }) }),
-      /* @__PURE__ */ jsxs38("tbody", { children: [
-        !rows.length && /* @__PURE__ */ jsx41("tr", { children: /* @__PURE__ */ jsx41("td", { className: "hb-table-empty", colSpan: columns.length, children: "No rows to show." }) }),
-        order.map((r) => /* @__PURE__ */ jsx41("tr", { className: r === bestRow ? "hb-best" : void 0, children: rows[r].map((cell, c) => {
-          const big = bigNumber(cell);
-          const direction = change[c] ? changeOf(cell) : null;
-          const bar = change[c] && withBars ? cellNumber(cell) : null;
-          return /* @__PURE__ */ jsxs38("td", { className: cellClass(c, cell, direction ? `hb-${direction}` : ""), title: big?.full, children: [
-            bar !== null && /* @__PURE__ */ jsx41(MiniBar, { value: bar, largest: largest[c] }),
-            big ? big.short : /* @__PURE__ */ jsx41(InlineText, { text: cell }),
-            c === 0 && r === bestRow && /* @__PURE__ */ jsx41("span", { className: "hb-chip hb-chip-soft", children: "Best" })
-          ] }, c);
-        }) }, r))
-      ] })
-    ] }) })
-  ] });
-}
-function MiniBar({ value, largest }) {
-  const { left, width } = miniBar(value, largest);
-  return /* @__PURE__ */ jsxs38("span", { className: "hb-mini", "aria-hidden": "true", children: [
-    /* @__PURE__ */ jsx41("span", { className: "hb-mini-zero" }),
-    /* @__PURE__ */ jsx41("span", { className: "hb-mini-bar", style: { left: `${left}%`, width: `${width}%` } })
-  ] });
-}
-function largestChange(rows, column) {
-  return Math.max(0, ...rows.map((r) => Math.abs(cellNumber(r[column]) ?? 0)));
-}
-function sortMark(sort, column) {
-  if (!sort || sort.column !== column) return "\u2195";
-  return sort.direction === "up" ? "\u2191" : "\u2193";
-}
-function ariaSort(sort, column) {
-  if (!sort || sort.column !== column) return void 0;
-  return sort.direction === "up" ? "ascending" : "descending";
 }
 
 // src/blocks/tiles/read.ts
@@ -6906,11 +7848,11 @@ function readTile(item) {
 }
 
 // src/blocks/tiles/Tiles.tsx
-import { useContext as useContext8, useState as useState23 } from "react";
-import { Fragment as Fragment11, jsx as jsx42, jsxs as jsxs39 } from "react/jsx-runtime";
+import { useContext as useContext9, useState as useState24 } from "react";
+import { Fragment as Fragment13, jsx as jsx43, jsxs as jsxs40 } from "react/jsx-runtime";
 var WASHES = [1, 4, 8, 3, 6];
 function Tiles({ items }) {
-  return /* @__PURE__ */ jsx42("div", { className: "hb-tiles", children: items.map((tile, i) => /* @__PURE__ */ jsx42(Tile, { tile, wash: WASHES[i % WASHES.length] }, i)) });
+  return /* @__PURE__ */ jsx43("div", { className: "hb-tiles", children: items.map((tile, i) => /* @__PURE__ */ jsx43(Tile, { tile, wash: WASHES[i % WASHES.length] }, i)) });
 }
 function tapOf(tile, send, fill) {
   if (tile.run) return () => send(tile.run);
@@ -6918,20 +7860,20 @@ function tapOf(tile, send, fill) {
   return void 0;
 }
 function Tile({ tile, wash }) {
-  const { send, fill } = useContext8(BlockActions);
-  const [photoFailed, setPhotoFailed] = useState23(false);
+  const { send, fill } = useContext9(BlockActions);
+  const [photoFailed, setPhotoFailed] = useState24(false);
   const tap = tapOf(tile, send, fill);
   const colour = `var(--hb-chart-${wash})`;
-  const content = /* @__PURE__ */ jsxs39(Fragment11, { children: [
-    tile.image && !photoFailed && /* @__PURE__ */ jsx42("img", { src: tile.image, alt: "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => setPhotoFailed(true) }),
-    tile.icon && /* @__PURE__ */ jsx42("span", { className: "hb-tile-icon", children: /* @__PURE__ */ jsx42(Icon, { name: tile.icon, size: 18, stroke: 2.2 }) }),
-    /* @__PURE__ */ jsxs39("span", { className: "hb-tile-text", children: [
-      /* @__PURE__ */ jsx42("span", { className: "hb-tile-title", children: tile.title }),
-      tile.subtitle && /* @__PURE__ */ jsx42("span", { className: "hb-tile-subtitle", children: tile.subtitle })
+  const content = /* @__PURE__ */ jsxs40(Fragment13, { children: [
+    tile.image && !photoFailed && /* @__PURE__ */ jsx43("img", { src: tile.image, alt: "", loading: "lazy", referrerPolicy: "no-referrer", onError: () => setPhotoFailed(true) }),
+    tile.icon && /* @__PURE__ */ jsx43("span", { className: "hb-tile-icon", children: /* @__PURE__ */ jsx43(Icon, { name: tile.icon, size: 18, stroke: 2.2 }) }),
+    /* @__PURE__ */ jsxs40("span", { className: "hb-tile-text", children: [
+      /* @__PURE__ */ jsx43("span", { className: "hb-tile-title", children: tile.title }),
+      tile.subtitle && /* @__PURE__ */ jsx43("span", { className: "hb-tile-subtitle", children: tile.subtitle })
     ] })
   ] });
   const style = { background: `linear-gradient(140deg, ${colour}, color-mix(in srgb, ${colour} 55%, #140c24))` };
-  return tap ? /* @__PURE__ */ jsx42("button", { type: "button", className: "hb-tile", onClick: tap, title: tile.run, style, children: content }) : /* @__PURE__ */ jsx42("div", { className: "hb-tile hb-tile-static", style, children: content });
+  return tap ? /* @__PURE__ */ jsx43("button", { type: "button", className: "hb-tile", onClick: tap, title: tile.run, style, children: content }) : /* @__PURE__ */ jsx43("div", { className: "hb-tile hb-tile-static", style, children: content });
 }
 
 // src/blocks/timeline/read.ts
@@ -6986,31 +7928,31 @@ function readStop(it) {
 }
 
 // src/blocks/briefing/Briefing.tsx
-import { Fragment as Fragment12, jsx as jsx43, jsxs as jsxs40 } from "react/jsx-runtime";
+import { Fragment as Fragment14, jsx as jsx44, jsxs as jsxs41 } from "react/jsx-runtime";
 var deg2 = (v) => `${Math.round(v)}\xB0`;
 function Line({ counts }) {
   const parts2 = [];
   if (counts.need) {
-    if (counts.overdue) parts2.push(/* @__PURE__ */ jsxs40("span", { className: "hb-brief-bad", children: [
+    if (counts.overdue) parts2.push(/* @__PURE__ */ jsxs41("span", { className: "hb-brief-bad", children: [
       counts.overdue,
       " overdue"
     ] }, "o"));
-    parts2.push(/* @__PURE__ */ jsxs40("span", { children: [
+    parts2.push(/* @__PURE__ */ jsxs41("span", { children: [
       counts.need,
       " need you"
     ] }, "n"));
   } else {
-    parts2.push(/* @__PURE__ */ jsx43("span", { children: "Nothing needs you today" }, "n"));
+    parts2.push(/* @__PURE__ */ jsx44("span", { children: "Nothing needs you today" }, "n"));
   }
-  const handled = counts.handled ? /* @__PURE__ */ jsxs40("span", { className: "hb-brief-good", children: [
+  const handled = counts.handled ? /* @__PURE__ */ jsxs41("span", { className: "hb-brief-good", children: [
     "\u2713 ",
     counts.handled,
     " handled"
   ] }) : null;
   const joined = parts2.flatMap((p, i) => i ? [", ", p] : [p]);
-  return /* @__PURE__ */ jsxs40("p", { className: "hb-brief-line", children: [
+  return /* @__PURE__ */ jsxs41("p", { className: "hb-brief-line", children: [
     joined,
-    handled && /* @__PURE__ */ jsxs40(Fragment12, { children: [
+    handled && /* @__PURE__ */ jsxs41(Fragment14, { children: [
       ", and ",
       handled
     ] }),
@@ -7019,18 +7961,18 @@ function Line({ counts }) {
 }
 function Briefing({ greeting, date, place: place2, temp, condition, high, low, sky, counts }) {
   const range = [high !== void 0 ? `H ${deg2(high)}` : null, low !== void 0 ? `L ${deg2(low)}` : null].filter(Boolean).join(" \xB7 ");
-  return /* @__PURE__ */ jsxs40("section", { className: `hb-brief hb-brief-${sky}`, children: [
-    /* @__PURE__ */ jsxs40("div", { className: "hb-brief-top", children: [
-      /* @__PURE__ */ jsxs40("div", { className: "hb-brief-hello", children: [
-        (date || place2) && /* @__PURE__ */ jsx43("span", { className: "hb-brief-date", children: [date, place2].filter(Boolean).join(" \xB7 ") }),
-        /* @__PURE__ */ jsx43("h2", { children: greeting })
+  return /* @__PURE__ */ jsxs41("section", { className: `hb-brief hb-brief-${sky}`, children: [
+    /* @__PURE__ */ jsxs41("div", { className: "hb-brief-top", children: [
+      /* @__PURE__ */ jsxs41("div", { className: "hb-brief-hello", children: [
+        (date || place2) && /* @__PURE__ */ jsx44("span", { className: "hb-brief-date", children: [date, place2].filter(Boolean).join(" \xB7 ") }),
+        /* @__PURE__ */ jsx44("h2", { children: greeting })
       ] }),
-      temp !== void 0 && /* @__PURE__ */ jsxs40("div", { className: "hb-brief-wx", children: [
-        /* @__PURE__ */ jsx43("span", { className: "hb-brief-temp", children: deg2(temp) }),
-        /* @__PURE__ */ jsx43("span", { className: "hb-brief-sky", children: [condition, range].filter(Boolean).join(" \xB7 ") })
+      temp !== void 0 && /* @__PURE__ */ jsxs41("div", { className: "hb-brief-wx", children: [
+        /* @__PURE__ */ jsx44("span", { className: "hb-brief-temp", children: deg2(temp) }),
+        /* @__PURE__ */ jsx44("span", { className: "hb-brief-sky", children: [condition, range].filter(Boolean).join(" \xB7 ") })
       ] })
     ] }),
-    /* @__PURE__ */ jsx43(Line, { counts })
+    /* @__PURE__ */ jsx44(Line, { counts })
   ] });
 }
 
@@ -7059,34 +8001,34 @@ function readBriefing(raw, here) {
 }
 
 // src/blocks/prepared/Prepared.tsx
-import { useContext as useContext9, useState as useState24 } from "react";
-import { jsx as jsx44, jsxs as jsxs41 } from "react/jsx-runtime";
+import { useContext as useContext10, useState as useState25 } from "react";
+import { jsx as jsx45, jsxs as jsxs42 } from "react/jsx-runtime";
 function IdeaCard({ idea, group }) {
-  const { fill } = useContext9(BlockActions);
-  const [broken, setBroken] = useState24(false);
-  return /* @__PURE__ */ jsxs41("button", { type: "button", className: "hb-prep-idea", onClick: () => fill(`Tell me more about ${idea.title} for ${group}`), children: [
-    !broken && /* @__PURE__ */ jsx44("img", { src: idea.photo, alt: "", loading: "lazy", onError: () => setBroken(true) }),
-    /* @__PURE__ */ jsxs41("span", { className: "hb-prep-cap", children: [
+  const { fill } = useContext10(BlockActions);
+  const [broken, setBroken] = useState25(false);
+  return /* @__PURE__ */ jsxs42("button", { type: "button", className: "hb-prep-idea", onClick: () => fill(`Tell me more about ${idea.title} for ${group}`), children: [
+    !broken && /* @__PURE__ */ jsx45("img", { src: idea.photo, alt: "", loading: "lazy", onError: () => setBroken(true) }),
+    /* @__PURE__ */ jsxs42("span", { className: "hb-prep-cap", children: [
       idea.title,
-      idea.note && /* @__PURE__ */ jsx44("small", { children: idea.note })
+      idea.note && /* @__PURE__ */ jsx45("small", { children: idea.note })
     ] })
   ] });
 }
 function GroupView({ group }) {
-  const { fill } = useContext9(BlockActions);
-  return /* @__PURE__ */ jsxs41("article", { className: "hb-prep-group", children: [
-    /* @__PURE__ */ jsxs41("div", { className: "hb-prep-head", children: [
-      /* @__PURE__ */ jsx44("span", { className: "hb-prep-title", children: group.title }),
-      group.date && /* @__PURE__ */ jsx44("span", { className: "hb-prep-date", children: group.date })
+  const { fill } = useContext10(BlockActions);
+  return /* @__PURE__ */ jsxs42("article", { className: "hb-prep-group", children: [
+    /* @__PURE__ */ jsxs42("div", { className: "hb-prep-head", children: [
+      /* @__PURE__ */ jsx45("span", { className: "hb-prep-title", children: group.title }),
+      group.date && /* @__PURE__ */ jsx45("span", { className: "hb-prep-date", children: group.date })
     ] }),
-    /* @__PURE__ */ jsx44("div", { className: "hb-prep-grid", children: group.ideas.map((idea, i) => /* @__PURE__ */ jsx44(IdeaCard, { idea, group: group.title }, i)) }),
-    group.ask && /* @__PURE__ */ jsx44("button", { type: "button", className: "hb-prep-ask", onClick: () => fill(group.ask.text), children: group.ask.label })
+    /* @__PURE__ */ jsx45("div", { className: "hb-prep-grid", children: group.ideas.map((idea, i) => /* @__PURE__ */ jsx45(IdeaCard, { idea, group: group.title }, i)) }),
+    group.ask && /* @__PURE__ */ jsx45("button", { type: "button", className: "hb-prep-ask", onClick: () => fill(group.ask.text), children: group.ask.label })
   ] });
 }
 function Prepared({ groups }) {
-  return /* @__PURE__ */ jsxs41("div", { className: "hb-prep", children: [
-    /* @__PURE__ */ jsx44("span", { className: "hb-prep-label", children: "Prepared for you" }),
-    groups.map((g, i) => /* @__PURE__ */ jsx44(GroupView, { group: g }, i))
+  return /* @__PURE__ */ jsxs42("div", { className: "hb-prep", children: [
+    /* @__PURE__ */ jsx45("span", { className: "hb-prep-label", children: "Prepared for you" }),
+    groups.map((g, i) => /* @__PURE__ */ jsx45(GroupView, { group: g }, i))
   ] });
 }
 
@@ -7178,8 +8120,8 @@ function readTracker(raw, here) {
 }
 
 // src/blocks/tracker/Tracker.tsx
-import { useContext as useContext10, useEffect as useEffect8, useState as useState25 } from "react";
-import { Fragment as Fragment13, jsx as jsx45, jsxs as jsxs42 } from "react/jsx-runtime";
+import { useContext as useContext11, useEffect as useEffect8, useState as useState26 } from "react";
+import { Fragment as Fragment15, jsx as jsx46, jsxs as jsxs43 } from "react/jsx-runtime";
 var VIEW_KEY = "hermes-genui.tracker.view";
 var SEEN_KEY = "hermes-genui.tracker.handled";
 function stored2(key) {
@@ -7197,65 +8139,65 @@ function store(key, value) {
 }
 function More({ d }) {
   if (!d) return null;
-  return /* @__PURE__ */ jsxs42("details", { className: "hb-tr-details", children: [
-    /* @__PURE__ */ jsx45("summary", { children: "Details" }),
-    /* @__PURE__ */ jsxs42("dl", { children: [
-      d.from && /* @__PURE__ */ jsxs42(Fragment13, { children: [
-        /* @__PURE__ */ jsx45("dt", { children: "From" }),
-        /* @__PURE__ */ jsx45("dd", { children: d.from })
+  return /* @__PURE__ */ jsxs43("details", { className: "hb-tr-details", children: [
+    /* @__PURE__ */ jsx46("summary", { children: "Details" }),
+    /* @__PURE__ */ jsxs43("dl", { children: [
+      d.from && /* @__PURE__ */ jsxs43(Fragment15, { children: [
+        /* @__PURE__ */ jsx46("dt", { children: "From" }),
+        /* @__PURE__ */ jsx46("dd", { children: d.from })
       ] }),
-      d.received && /* @__PURE__ */ jsxs42(Fragment13, { children: [
-        /* @__PURE__ */ jsx45("dt", { children: "Received" }),
-        /* @__PURE__ */ jsx45("dd", { children: d.received })
+      d.received && /* @__PURE__ */ jsxs43(Fragment15, { children: [
+        /* @__PURE__ */ jsx46("dt", { children: "Received" }),
+        /* @__PURE__ */ jsx46("dd", { children: d.received })
       ] }),
-      d.about.length > 0 && /* @__PURE__ */ jsxs42(Fragment13, { children: [
-        /* @__PURE__ */ jsx45("dt", { children: "About" }),
-        /* @__PURE__ */ jsx45("dd", { children: d.about.join(" \xB7 ") })
+      d.about.length > 0 && /* @__PURE__ */ jsxs43(Fragment15, { children: [
+        /* @__PURE__ */ jsx46("dt", { children: "About" }),
+        /* @__PURE__ */ jsx46("dd", { children: d.about.join(" \xB7 ") })
       ] }),
-      d.trail.length > 0 && /* @__PURE__ */ jsxs42(Fragment13, { children: [
-        /* @__PURE__ */ jsx45("dt", { children: "So far" }),
-        /* @__PURE__ */ jsx45("dd", { children: d.trail.join(" \u2192 ") })
+      d.trail.length > 0 && /* @__PURE__ */ jsxs43(Fragment15, { children: [
+        /* @__PURE__ */ jsx46("dt", { children: "So far" }),
+        /* @__PURE__ */ jsx46("dd", { children: d.trail.join(" \u2192 ") })
       ] })
     ] })
   ] });
 }
 function CardView({ card }) {
-  const { fill } = useContext10(BlockActions);
-  return /* @__PURE__ */ jsxs42("article", { className: `hb-tr-card hb-tr-${card.state}`, children: [
-    /* @__PURE__ */ jsxs42("div", { className: "hb-tr-top", children: [
-      /* @__PURE__ */ jsx45("span", { className: "hb-tr-title", children: card.title }),
-      card.amount && /* @__PURE__ */ jsx45("span", { className: "hb-tr-amount", children: card.amount })
+  const { fill } = useContext11(BlockActions);
+  return /* @__PURE__ */ jsxs43("article", { className: `hb-tr-card hb-tr-${card.state}`, children: [
+    /* @__PURE__ */ jsxs43("div", { className: "hb-tr-top", children: [
+      /* @__PURE__ */ jsx46("span", { className: "hb-tr-title", children: card.title }),
+      card.amount && /* @__PURE__ */ jsx46("span", { className: "hb-tr-amount", children: card.amount })
     ] }),
-    card.stateText && /* @__PURE__ */ jsx45("span", { className: `hb-tr-pill hb-tr-pill-${card.state}`, children: card.stateText }),
-    (card.link || card.help) && /* @__PURE__ */ jsxs42("div", { className: "hb-tr-acts", children: [
-      card.link && /* @__PURE__ */ jsxs42("a", { className: "hb-tr-go", href: card.link.url, target: "_blank", rel: "noreferrer", children: [
+    card.stateText && /* @__PURE__ */ jsx46("span", { className: `hb-tr-pill hb-tr-pill-${card.state}`, children: card.stateText }),
+    (card.link || card.help) && /* @__PURE__ */ jsxs43("div", { className: "hb-tr-acts", children: [
+      card.link && /* @__PURE__ */ jsxs43("a", { className: "hb-tr-go", href: card.link.url, target: "_blank", rel: "noreferrer", children: [
         card.link.label,
         " \u2197"
       ] }),
-      card.help && /* @__PURE__ */ jsx45("button", { type: "button", className: "hb-tr-help", onClick: () => fill(card.help), children: card.help })
+      card.help && /* @__PURE__ */ jsx46("button", { type: "button", className: "hb-tr-help", onClick: () => fill(card.help), children: card.help })
     ] }),
-    /* @__PURE__ */ jsx45(More, { d: card.details })
+    /* @__PURE__ */ jsx46(More, { d: card.details })
   ] });
 }
 function RowView({ row, onReopen }) {
-  return /* @__PURE__ */ jsxs42("article", { className: `hb-tr-row hb-tr-${row.kind}`, children: [
-    /* @__PURE__ */ jsxs42("div", { className: "hb-tr-top", children: [
-      /* @__PURE__ */ jsxs42("span", { className: "hb-tr-title", children: [
+  return /* @__PURE__ */ jsxs43("article", { className: `hb-tr-row hb-tr-${row.kind}`, children: [
+    /* @__PURE__ */ jsxs43("div", { className: "hb-tr-top", children: [
+      /* @__PURE__ */ jsxs43("span", { className: "hb-tr-title", children: [
         row.title,
         row.amount ? ` \xB7 ${row.amount}` : ""
       ] }),
-      /* @__PURE__ */ jsx45("span", { className: "hb-tr-verb", children: row.kind === "closed" ? `\u2713 ${row.verb}` : row.verb })
+      /* @__PURE__ */ jsx46("span", { className: "hb-tr-verb", children: row.kind === "closed" ? `\u2713 ${row.verb}` : row.verb })
     ] }),
-    row.why && /* @__PURE__ */ jsx45("span", { className: "hb-tr-why", children: row.why }),
-    row.reopen && /* @__PURE__ */ jsx45("button", { type: "button", className: "hb-tr-link", onClick: () => onReopen(row.id), children: "Reopen" }),
-    /* @__PURE__ */ jsx45(More, { d: row.details })
+    row.why && /* @__PURE__ */ jsx46("span", { className: "hb-tr-why", children: row.why }),
+    row.reopen && /* @__PURE__ */ jsx46("button", { type: "button", className: "hb-tr-link", onClick: () => onReopen(row.id), children: "Reopen" }),
+    /* @__PURE__ */ jsx46(More, { d: row.details })
   ] });
 }
 function Tracker({ need, handled }) {
-  const { rest } = useContext10(BlockActions);
-  const [view, setView] = useState25(() => stored2(VIEW_KEY) === "done" ? "done" : "need");
-  const [reopened, setReopened] = useState25([]);
-  const [pulse, setPulse] = useState25(false);
+  const { rest } = useContext11(BlockActions);
+  const [view, setView] = useState26(() => stored2(VIEW_KEY) === "done" ? "done" : "need");
+  const [reopened, setReopened] = useState26([]);
+  const [pulse, setPulse] = useState26(false);
   const rows = handled.filter((r) => !reopened.includes(r.id));
   useEffect8(() => {
     const before = Number(stored2(SEEN_KEY));
@@ -7271,46 +8213,46 @@ function Tracker({ need, handled }) {
     void rest?.(`/assistant/items/${id}`, { method: "POST", body: { status: "suggested" } });
   };
   const red = need.some((c) => c.state === "overdue");
-  return /* @__PURE__ */ jsxs42("div", { className: "hb-tr", children: [
-    /* @__PURE__ */ jsxs42("div", { className: "hb-tr-switch", role: "tablist", "aria-label": "Needs you or handled", children: [
-      /* @__PURE__ */ jsxs42("button", { type: "button", role: "tab", "aria-selected": view === "need", onClick: () => choose("need"), children: [
+  return /* @__PURE__ */ jsxs43("div", { className: "hb-tr", children: [
+    /* @__PURE__ */ jsxs43("div", { className: "hb-tr-switch", role: "tablist", "aria-label": "Needs you or handled", children: [
+      /* @__PURE__ */ jsxs43("button", { type: "button", role: "tab", "aria-selected": view === "need", onClick: () => choose("need"), children: [
         "Needs you ",
-        /* @__PURE__ */ jsx45("span", { className: `hb-tr-badge${red ? " hb-tr-badge-red" : ""}`, children: need.length })
+        /* @__PURE__ */ jsx46("span", { className: `hb-tr-badge${red ? " hb-tr-badge-red" : ""}`, children: need.length })
       ] }),
-      /* @__PURE__ */ jsxs42("button", { type: "button", role: "tab", "aria-selected": view === "done", onClick: () => choose("done"), children: [
+      /* @__PURE__ */ jsxs43("button", { type: "button", role: "tab", "aria-selected": view === "done", onClick: () => choose("done"), children: [
         "Handled ",
-        /* @__PURE__ */ jsxs42("span", { className: `hb-tr-badge hb-tr-badge-green${pulse ? " hb-tr-pulse" : ""}`, children: [
+        /* @__PURE__ */ jsxs43("span", { className: `hb-tr-badge hb-tr-badge-green${pulse ? " hb-tr-pulse" : ""}`, children: [
           "\u2713 ",
           rows.length
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsx45("div", { className: "hb-tr-list", role: "tabpanel", children: view === "need" ? need.length ? need.map((c) => /* @__PURE__ */ jsx45(CardView, { card: c }, c.id)) : /* @__PURE__ */ jsx45("p", { className: "hb-tr-empty", children: "Nothing needs you right now." }) : rows.length ? rows.map((r) => /* @__PURE__ */ jsx45(RowView, { row: r, onReopen: reopen }, r.id)) : /* @__PURE__ */ jsx45("p", { className: "hb-tr-empty", children: "When a payment, renewal or delivery mail arrives, it lands here with the reason." }) })
+    /* @__PURE__ */ jsx46("div", { className: "hb-tr-list", role: "tabpanel", children: view === "need" ? need.length ? need.map((c) => /* @__PURE__ */ jsx46(CardView, { card: c }, c.id)) : /* @__PURE__ */ jsx46("p", { className: "hb-tr-empty", children: "Nothing needs you right now." }) : rows.length ? rows.map((r) => /* @__PURE__ */ jsx46(RowView, { row: r, onReopen: reopen }, r.id)) : /* @__PURE__ */ jsx46("p", { className: "hb-tr-empty", children: "When a payment, renewal or delivery mail arrives, it lands here with the reason." }) })
   ] });
 }
 
 // src/blocks/timeline/Timeline.tsx
-import { jsx as jsx46, jsxs as jsxs43 } from "react/jsx-runtime";
+import { jsx as jsx47, jsxs as jsxs44 } from "react/jsx-runtime";
 function Timeline({ title, groups }) {
-  return /* @__PURE__ */ jsxs43("div", { className: "hb-card hb-timeline", children: [
-    title && /* @__PURE__ */ jsx46("div", { className: "hb-card-title", children: title }),
-    groups.map((g, gi) => /* @__PURE__ */ jsxs43("div", { className: "hb-timeline-group", children: [
-      g.label && /* @__PURE__ */ jsx46("span", { className: "hb-chip hb-chip-soft", children: g.label }),
+  return /* @__PURE__ */ jsxs44("div", { className: "hb-card hb-timeline", children: [
+    title && /* @__PURE__ */ jsx47("div", { className: "hb-card-title", children: title }),
+    groups.map((g, gi) => /* @__PURE__ */ jsxs44("div", { className: "hb-timeline-group", children: [
+      g.label && /* @__PURE__ */ jsx47("span", { className: "hb-chip hb-chip-soft", children: g.label }),
       g.items.map((s, k) => {
         const last = k === g.items.length - 1;
-        return /* @__PURE__ */ jsxs43("div", { className: "hb-stop", children: [
-          /* @__PURE__ */ jsx46("span", { className: "hb-stop-time", children: s.time ?? "" }),
-          /* @__PURE__ */ jsxs43("span", { className: "hb-stop-rail", children: [
-            /* @__PURE__ */ jsx46("span", { className: "hb-stop-dot", children: s.icon ? /* @__PURE__ */ jsx46(Icon, { name: s.icon, size: 12, stroke: 2.4 }) : /* @__PURE__ */ jsx46("span", { className: "hb-stop-pip" }) }),
-            !last && /* @__PURE__ */ jsx46("span", { className: "hb-stop-line" })
+        return /* @__PURE__ */ jsxs44("div", { className: "hb-stop", children: [
+          /* @__PURE__ */ jsx47("span", { className: "hb-stop-time", children: s.time ?? "" }),
+          /* @__PURE__ */ jsxs44("span", { className: "hb-stop-rail", children: [
+            /* @__PURE__ */ jsx47("span", { className: "hb-stop-dot", children: s.icon ? /* @__PURE__ */ jsx47(Icon, { name: s.icon, size: 12, stroke: 2.4 }) : /* @__PURE__ */ jsx47("span", { className: "hb-stop-pip" }) }),
+            !last && /* @__PURE__ */ jsx47("span", { className: "hb-stop-line" })
           ] }),
-          /* @__PURE__ */ jsxs43("div", { className: last ? "hb-stop-body" : "hb-stop-body hb-stop-body-gap", children: [
-            /* @__PURE__ */ jsx46("div", { className: "hb-stop-title", children: s.title }),
-            s.place && /* @__PURE__ */ jsxs43("div", { className: "hb-stop-place", children: [
-              /* @__PURE__ */ jsx46(Icon, { name: "pin", size: 12, stroke: 2.2 }),
+          /* @__PURE__ */ jsxs44("div", { className: last ? "hb-stop-body" : "hb-stop-body hb-stop-body-gap", children: [
+            /* @__PURE__ */ jsx47("div", { className: "hb-stop-title", children: s.title }),
+            s.place && /* @__PURE__ */ jsxs44("div", { className: "hb-stop-place", children: [
+              /* @__PURE__ */ jsx47(Icon, { name: "pin", size: 12, stroke: 2.2 }),
               s.place
             ] }),
-            s.note && /* @__PURE__ */ jsx46("div", { className: "hb-stop-note", children: s.note })
+            s.note && /* @__PURE__ */ jsx47("div", { className: "hb-stop-note", children: s.note })
           ] })
         ] }, k);
       })
@@ -7319,58 +8261,59 @@ function Timeline({ title, groups }) {
 }
 
 // src/registry.tsx
-import { jsx as jsx47 } from "react/jsx-runtime";
+import { jsx as jsx48 } from "react/jsx-runtime";
 var REGISTRY = {
-  chart: { read: readChart, Component: ({ block }) => /* @__PURE__ */ jsx47(Chart, { spec: block.spec }) },
-  kpis: { read: readKpis, Component: ({ block }) => /* @__PURE__ */ jsx47(Kpis, { items: block.items }) },
-  source: { read: readSource, Component: ({ block }) => /* @__PURE__ */ jsx47(Source, { ...block }) },
-  timeline: { read: readTimeline, Component: ({ block }) => /* @__PURE__ */ jsx47(Timeline, { ...block }) },
-  images: { read: readImages, Component: ({ block }) => /* @__PURE__ */ jsx47(Images, { block }) },
-  callout: { read: readCallout, Component: ({ block }) => /* @__PURE__ */ jsx47(Callout, { ...block }) },
-  calendar: { read: readCalendar, Component: ({ block }) => /* @__PURE__ */ jsx47(Calendar, { ...block }) },
-  upnext: { read: readUpNext, Component: ({ block }) => /* @__PURE__ */ jsx47(UpNext, { ...block }) },
-  weather: { read: readWeather, Component: ({ block }) => /* @__PURE__ */ jsx47(Weather, { ...block }) },
-  briefing: { read: readBriefing, Component: ({ block }) => /* @__PURE__ */ jsx47(Briefing, { ...block }) },
-  tracker: { read: readTracker, Component: ({ block }) => /* @__PURE__ */ jsx47(Tracker, { ...block }) },
-  prepared: { read: readPrepared, Component: ({ block }) => /* @__PURE__ */ jsx47(Prepared, { ...block }) },
-  table: { read: readTable, Component: ({ block }) => /* @__PURE__ */ jsx47(Table, { ...block }) },
-  list: { read: readList, Component: ({ block }) => /* @__PURE__ */ jsx47(List, { ...block }) },
-  progress: { read: readProgress, Component: ({ block }) => /* @__PURE__ */ jsx47(Progress, { ...block }) },
-  streak: { read: readStreak, Component: ({ block }) => /* @__PURE__ */ jsx47(Streak, { ...block }) },
-  heatmap: { read: readHeatmap, Component: ({ block }) => /* @__PURE__ */ jsx47(Heatmap, { ...block }) },
-  flip: { read: readFlip, Component: ({ block }) => /* @__PURE__ */ jsx47(Flip, { ...block }) },
-  flow: { read: readFlow, Component: ({ block }) => /* @__PURE__ */ jsx47(Flow, { ...block }) },
-  steps: { read: readSteps, Component: ({ block }) => /* @__PURE__ */ jsx47(Steps, { ...block }) },
-  layers: { read: readLayers, Component: ({ block }) => /* @__PURE__ */ jsx47(Layers, { ...block }) },
-  heading: { read: readHeading, Component: ({ block }) => /* @__PURE__ */ jsx47(Heading, { text: block.text }) },
-  text: { read: readText, Component: ({ block }) => /* @__PURE__ */ jsx47(Text, { text: block.text }) },
-  stat: { read: readStat, Component: ({ block }) => /* @__PURE__ */ jsx47(KpiCard, { item: block }) },
-  divider: { read: readDivider, Component: () => /* @__PURE__ */ jsx47(Divider, {}) },
-  badge: { read: readBadge, Component: ({ block }) => /* @__PURE__ */ jsx47(Badge, { ...block }) },
-  link: { read: readLink, Component: ({ block }) => /* @__PURE__ */ jsx47(LinkLine, { ...block }) },
-  image: { read: readImage, Component: ({ block }) => /* @__PURE__ */ jsx47(Picture, { ...block }) },
-  bar: { read: readBar, Component: ({ block }) => /* @__PURE__ */ jsx47(Bar, { ...block }) },
-  actions: { read: readActions, Component: ({ block }) => /* @__PURE__ */ jsx47(Actions, { items: block.items }) },
-  button: { read: readButton, Component: ({ block }) => /* @__PURE__ */ jsx47(Button, { ...block }) },
-  tiles: { read: readTiles, Component: ({ block }) => /* @__PURE__ */ jsx47(Tiles, { items: block.items }) },
-  checklist: { read: readChecklist, Component: ({ block }) => /* @__PURE__ */ jsx47(Checklist, { ...block }) },
-  calculator: { read: readCalculator, Component: ({ block }) => /* @__PURE__ */ jsx47(Calculator, { ...block }) },
-  simulate: { read: readSimulate, Component: ({ block }) => /* @__PURE__ */ jsx47(Simulate, { ...block }) },
-  form: { read: readForm, Component: ({ block }) => /* @__PURE__ */ jsx47(Form, { ...block }) },
-  row: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx47(Row, { kinds: block.children.map((c) => c.type), children: draw(block.children) }) },
-  section: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx47(Section, { title: block.title, collapsed: block.collapsed, children: draw(block.children) }) },
-  grid: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx47(Grid, { children: draw(block.children) }) },
-  columns: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx47(Columns, { children: draw(block.children) }) },
-  tabs: { read: readTabs, Component: ({ block, draw }) => /* @__PURE__ */ jsx47(Tabs, { labels: block.tabs.map((t) => t.label), badges: block.tabs.map((t) => t.badge), panel: (i) => draw(block.tabs[i].children) }) }
+  chart: { read: readChart, Component: ({ block }) => /* @__PURE__ */ jsx48(Chart, { spec: block.spec }) },
+  kpis: { read: readKpis, Component: ({ block }) => /* @__PURE__ */ jsx48(Kpis, { items: block.items }) },
+  source: { read: readSource, Component: ({ block }) => /* @__PURE__ */ jsx48(Source, { ...block }) },
+  timeline: { read: readTimeline, Component: ({ block }) => /* @__PURE__ */ jsx48(Timeline, { ...block }) },
+  images: { read: readImages, Component: ({ block }) => /* @__PURE__ */ jsx48(Images, { block }) },
+  callout: { read: readCallout, Component: ({ block }) => /* @__PURE__ */ jsx48(Callout, { ...block }) },
+  calendar: { read: readCalendar, Component: ({ block }) => /* @__PURE__ */ jsx48(Calendar, { ...block }) },
+  upnext: { read: readUpNext, Component: ({ block }) => /* @__PURE__ */ jsx48(UpNext, { ...block }) },
+  weather: { read: readWeather, Component: ({ block }) => /* @__PURE__ */ jsx48(Weather, { ...block }) },
+  widget: { read: readWidget, Component: ({ block }) => /* @__PURE__ */ jsx48(Widget, { block }) },
+  briefing: { read: readBriefing, Component: ({ block }) => /* @__PURE__ */ jsx48(Briefing, { ...block }) },
+  tracker: { read: readTracker, Component: ({ block }) => /* @__PURE__ */ jsx48(Tracker, { ...block }) },
+  prepared: { read: readPrepared, Component: ({ block }) => /* @__PURE__ */ jsx48(Prepared, { ...block }) },
+  table: { read: readTable, Component: ({ block }) => /* @__PURE__ */ jsx48(Table, { ...block }) },
+  list: { read: readList, Component: ({ block }) => /* @__PURE__ */ jsx48(List, { ...block }) },
+  progress: { read: readProgress, Component: ({ block }) => /* @__PURE__ */ jsx48(Progress, { ...block }) },
+  streak: { read: readStreak, Component: ({ block }) => /* @__PURE__ */ jsx48(Streak, { ...block }) },
+  heatmap: { read: readHeatmap, Component: ({ block }) => /* @__PURE__ */ jsx48(Heatmap, { ...block }) },
+  flip: { read: readFlip, Component: ({ block }) => /* @__PURE__ */ jsx48(Flip, { ...block }) },
+  flow: { read: readFlow, Component: ({ block }) => /* @__PURE__ */ jsx48(Flow, { ...block }) },
+  steps: { read: readSteps, Component: ({ block }) => /* @__PURE__ */ jsx48(Steps, { ...block }) },
+  layers: { read: readLayers, Component: ({ block }) => /* @__PURE__ */ jsx48(Layers, { ...block }) },
+  heading: { read: readHeading, Component: ({ block }) => /* @__PURE__ */ jsx48(Heading, { text: block.text }) },
+  text: { read: readText, Component: ({ block }) => /* @__PURE__ */ jsx48(Text, { text: block.text }) },
+  stat: { read: readStat, Component: ({ block }) => /* @__PURE__ */ jsx48(KpiCard, { item: block }) },
+  divider: { read: readDivider, Component: () => /* @__PURE__ */ jsx48(Divider, {}) },
+  badge: { read: readBadge, Component: ({ block }) => /* @__PURE__ */ jsx48(Badge, { ...block }) },
+  link: { read: readLink, Component: ({ block }) => /* @__PURE__ */ jsx48(LinkLine, { ...block }) },
+  image: { read: readImage, Component: ({ block }) => /* @__PURE__ */ jsx48(Picture, { ...block }) },
+  bar: { read: readBar, Component: ({ block }) => /* @__PURE__ */ jsx48(Bar, { ...block }) },
+  actions: { read: readActions, Component: ({ block }) => /* @__PURE__ */ jsx48(Actions, { items: block.items }) },
+  button: { read: readButton, Component: ({ block }) => /* @__PURE__ */ jsx48(Button, { ...block }) },
+  tiles: { read: readTiles, Component: ({ block }) => /* @__PURE__ */ jsx48(Tiles, { items: block.items }) },
+  checklist: { read: readChecklist, Component: ({ block }) => /* @__PURE__ */ jsx48(Checklist, { ...block }) },
+  calculator: { read: readCalculator, Component: ({ block }) => /* @__PURE__ */ jsx48(Calculator, { ...block }) },
+  simulate: { read: readSimulate, Component: ({ block }) => /* @__PURE__ */ jsx48(Simulate, { ...block }) },
+  form: { read: readForm, Component: ({ block }) => /* @__PURE__ */ jsx48(Form, { ...block }) },
+  row: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx48(Row2, { kinds: block.children.map((c) => c.type), children: draw(block.children) }) },
+  section: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx48(Section, { title: block.title, collapsed: block.collapsed, children: draw(block.children) }) },
+  grid: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx48(Grid, { children: draw(block.children) }) },
+  columns: { read: readContainer, Component: ({ block, draw }) => /* @__PURE__ */ jsx48(Columns, { children: draw(block.children) }) },
+  tabs: { read: readTabs, Component: ({ block, draw }) => /* @__PURE__ */ jsx48(Tabs, { labels: block.tabs.map((t) => t.label), badges: block.tabs.map((t) => t.badge), panel: (i) => draw(block.tabs[i].children) }) }
 };
 
 // src/core/Blocks.tsx
-import { jsx as jsx48 } from "react/jsx-runtime";
+import { jsx as jsx49 } from "react/jsx-runtime";
 function BlockView({ block }) {
   const entry2 = REGISTRY[block.type];
   if (!entry2) return null;
   const { Component } = entry2;
-  return /* @__PURE__ */ jsx48(Contained, { block, children: /* @__PURE__ */ jsx48(Component, { block, draw: drawAll }) });
+  return /* @__PURE__ */ jsx49(Contained, { block, children: /* @__PURE__ */ jsx49(Component, { block, draw: drawAll }) });
 }
 var Contained = class extends ReactComponent {
   state = { failed: false };
@@ -7382,7 +8325,7 @@ var Contained = class extends ReactComponent {
   }
   render() {
     if (!this.state.failed) return this.props.children;
-    return /* @__PURE__ */ jsx48("p", { className: "hb-block-failed", role: "note", children: "This part couldn't be drawn." });
+    return /* @__PURE__ */ jsx49("p", { className: "hb-block-failed", role: "note", children: "This part couldn't be drawn." });
   }
 };
 function blockKey(b, i, carried2) {
@@ -7400,9 +8343,9 @@ function blockKey(b, i, carried2) {
   return i;
 }
 function Slotted({ block, flat }) {
-  const parent = useContext11(BlockSlot);
+  const parent = useContext12(BlockSlot);
   const slot = parent === null ? flat : `${parent}/${flat}`;
-  return /* @__PURE__ */ jsx48(BlockSlot.Provider, { value: slot, children: /* @__PURE__ */ jsx48(BlockView, { block }) });
+  return /* @__PURE__ */ jsx49(BlockSlot.Provider, { value: slot, children: /* @__PURE__ */ jsx49(BlockView, { block }) });
 }
 function drawAll(blocks) {
   const seen = /* @__PURE__ */ new Map();
@@ -7411,11 +8354,11 @@ function drawAll(blocks) {
     const id = identityOf(b);
     const occ = seen.get(id) ?? 0;
     seen.set(id, occ + 1);
-    return /* @__PURE__ */ jsx48(Slotted, { block: b, flat: `${id}:${occ}` }, blockKey(b, i, carried2));
+    return /* @__PURE__ */ jsx49(Slotted, { block: b, flat: `${id}:${occ}` }, blockKey(b, i, carried2));
   });
 }
 function Blocks({ blocks }) {
-  return /* @__PURE__ */ jsx48("div", { className: "hb-blocks", children: /* @__PURE__ */ jsx48(FlowLightBoard, { children: drawAll(blocks) }) });
+  return /* @__PURE__ */ jsx49("div", { className: "hb-blocks", children: /* @__PURE__ */ jsx49(FlowLightBoard, { children: drawAll(blocks) }) });
 }
 
 // src/core/boardRoster.ts
@@ -7504,7 +8447,7 @@ function subscribe(id, cb) {
 }
 
 // src/core/LivingBoards.tsx
-import { useContext as useContext12, useEffect as useEffect9, useState as useState26 } from "react";
+import { useContext as useContext13, useEffect as useEffect9, useState as useState27 } from "react";
 
 // src/core/readBlocks.ts
 var BLOCK_TYPES = Object.keys(REGISTRY);
@@ -7514,7 +8457,7 @@ function readBlocksNoted(data) {
   let boardUpdatedAt;
   let boardLinks;
   const top = new Trail();
-  if (isObject2(list) && Array.isArray(list.blocks)) {
+  if (isObject4(list) && Array.isArray(list.blocks)) {
     if (typeof list.type !== "string") {
       boardVersion = version(list.version);
       boardUpdatedAt = str(list.updated_at, 40);
@@ -7522,7 +8465,7 @@ function readBlocksNoted(data) {
     }
     list = list.blocks;
   }
-  if (isObject2(list) && typeof list.type === "string") list = [list];
+  if (isObject4(list) && typeof list.type === "string") list = [list];
   const blocks = [];
   if (Array.isArray(list)) {
     list.forEach((raw, i) => {
@@ -7538,7 +8481,7 @@ function readBlocksNoted(data) {
 function readBlocks(data) {
   return readBlocksNoted(data).blocks;
 }
-function isObject2(v) {
+function isObject4(v) {
   return v !== null && typeof v === "object" && !Array.isArray(v);
 }
 function readBoardLinks(value, here) {
@@ -7557,7 +8500,7 @@ function readBoardLinks(value, here) {
   return kept.length ? kept : void 0;
 }
 function readOne(raw, here, depth) {
-  if (!isObject2(raw)) {
+  if (!isObject4(raw)) {
     here.drop("not a block object");
     return [];
   }
@@ -7573,20 +8516,20 @@ function readOne(raw, here, depth) {
 }
 
 // src/core/LivingBoards.tsx
-import { jsx as jsx49, jsxs as jsxs44 } from "react/jsx-runtime";
+import { jsx as jsx50, jsxs as jsxs45 } from "react/jsx-runtime";
 var HISTORY_SHOWN = 4;
 function LiveRow({ id, version: version2, updatedAt, links, viewing, onShow, canReach }) {
   const older = version2 != null ? Array.from({ length: Math.min(version2 - 1, HISTORY_SHOWN) }, (_, i) => version2 - 1 - i) : [];
-  return /* @__PURE__ */ jsxs44("div", { className: "hb-live", "data-board": id, children: [
-    /* @__PURE__ */ jsxs44("div", { className: "hb-live-line", children: [
-      /* @__PURE__ */ jsx49("span", { className: "hb-live-mark", "aria-hidden": "true", children: "\u21BB" }),
-      version2 != null && /* @__PURE__ */ jsx49("span", { className: "hb-live-version", children: viewing === null ? `v${version2}` : `viewing v${viewing}` }),
-      updatedAt && viewing === null && /* @__PURE__ */ jsx49("span", { className: "hb-live-when", children: updatedAt.slice(0, 10) }),
-      /* @__PURE__ */ jsxs44("code", { className: "hb-live-addr", children: [
+  return /* @__PURE__ */ jsxs45("div", { className: "hb-live", "data-board": id, children: [
+    /* @__PURE__ */ jsxs45("div", { className: "hb-live-line", children: [
+      /* @__PURE__ */ jsx50("span", { className: "hb-live-mark", "aria-hidden": "true", children: "\u21BB" }),
+      version2 != null && /* @__PURE__ */ jsx50("span", { className: "hb-live-version", children: viewing === null ? `v${version2}` : `viewing v${viewing}` }),
+      updatedAt && viewing === null && /* @__PURE__ */ jsx50("span", { className: "hb-live-when", children: updatedAt.slice(0, 10) }),
+      /* @__PURE__ */ jsxs45("code", { className: "hb-live-addr", children: [
         "#",
         id
       ] }),
-      canReach && older.map((n) => /* @__PURE__ */ jsxs44(
+      canReach && older.map((n) => /* @__PURE__ */ jsxs45(
         "button",
         {
           type: "button",
@@ -7601,18 +8544,18 @@ function LiveRow({ id, version: version2, updatedAt, links, viewing, onShow, can
         },
         n
       )),
-      viewing !== null && /* @__PURE__ */ jsx49("button", { type: "button", className: "hb-live-back", onClick: () => onShow(null), children: "current" })
+      viewing !== null && /* @__PURE__ */ jsx50("button", { type: "button", className: "hb-live-back", onClick: () => onShow(null), children: "current" })
     ] }),
-    !!links?.length && /* @__PURE__ */ jsxs44("div", { className: "hb-links", children: [
-      /* @__PURE__ */ jsx49("span", { className: "hb-links-label", children: "linked across time \xB7 AI-suggested" }),
-      links.map((l) => /* @__PURE__ */ jsx49(LinkChip, { link: l }, l.id))
+    !!links?.length && /* @__PURE__ */ jsxs45("div", { className: "hb-links", children: [
+      /* @__PURE__ */ jsx50("span", { className: "hb-links-label", children: "linked across time \xB7 AI-suggested" }),
+      links.map((l) => /* @__PURE__ */ jsx50(LinkChip, { link: l }, l.id))
     ] })
   ] });
 }
 function LinkChip({ link }) {
-  const [open, setOpen] = useState26(false);
-  return /* @__PURE__ */ jsxs44("div", { className: "hb-link", children: [
-    /* @__PURE__ */ jsx49(
+  const [open, setOpen] = useState27(false);
+  return /* @__PURE__ */ jsxs45("div", { className: "hb-link", children: [
+    /* @__PURE__ */ jsx50(
       "button",
       {
         type: "button",
@@ -7623,13 +8566,13 @@ function LinkChip({ link }) {
         children: link.note ?? `#${link.id}`
       }
     ),
-    open && /* @__PURE__ */ jsx49(LinkedBoard, { link })
+    open && /* @__PURE__ */ jsx50(LinkedBoard, { link })
   ] });
 }
 function LinkedBoard({ link }) {
-  const actions = useContext12(BlockActions);
+  const actions = useContext13(BlockActions);
   const rest = actions.rest;
-  const [board, setBoard] = useState26("loading");
+  const [board, setBoard] = useState27("loading");
   useEffect9(() => {
     if (!rest) {
       setBoard(null);
@@ -7648,41 +8591,41 @@ function LinkedBoard({ link }) {
     };
   }, [link.id, rest]);
   if (board === "loading") {
-    return /* @__PURE__ */ jsxs44("div", { className: "hb-linked hb-linked-loading", children: [
+    return /* @__PURE__ */ jsxs45("div", { className: "hb-linked hb-linked-loading", children: [
       "Fetching #",
       link.id,
       " from the store\u2026"
     ] });
   }
   if (!board) {
-    return /* @__PURE__ */ jsxs44("div", { className: "hb-linked hb-linked-gone", children: [
+    return /* @__PURE__ */ jsxs45("div", { className: "hb-linked hb-linked-gone", children: [
       "#",
       link.id,
       " is not a board on this machine."
     ] });
   }
-  return /* @__PURE__ */ jsxs44("div", { className: "hb-linked", "data-linked": link.id, children: [
-    /* @__PURE__ */ jsxs44("div", { className: "hb-linked-head", children: [
-      /* @__PURE__ */ jsx49("span", { "aria-hidden": "true", children: "\u25C8" }),
-      /* @__PURE__ */ jsx49("span", { children: link.note ? link.note : "linked board" }),
-      /* @__PURE__ */ jsxs44("code", { children: [
+  return /* @__PURE__ */ jsxs45("div", { className: "hb-linked", "data-linked": link.id, children: [
+    /* @__PURE__ */ jsxs45("div", { className: "hb-linked-head", children: [
+      /* @__PURE__ */ jsx50("span", { "aria-hidden": "true", children: "\u25C8" }),
+      /* @__PURE__ */ jsx50("span", { children: link.note ? link.note : "linked board" }),
+      /* @__PURE__ */ jsxs45("code", { children: [
         "#",
         link.id
       ] })
     ] }),
-    /* @__PURE__ */ jsx49(BlockActions.Provider, { value: { ...actions, blockId: link.id }, children: /* @__PURE__ */ jsx49(Blocks, { blocks: board }) })
+    /* @__PURE__ */ jsx50(BlockActions.Provider, { value: { ...actions, blockId: link.id }, children: /* @__PURE__ */ jsx50(Blocks, { blocks: board }) })
   ] });
 }
 function LivePointer({ id, address }) {
   const meta = getMeta(address);
-  return /* @__PURE__ */ jsxs44("div", { className: "hb-tag hb-live-pointer", "data-pointer": id, children: [
-    /* @__PURE__ */ jsx49("span", { className: "hb-live-mark", "aria-hidden": "true", children: "\u21BB" }),
-    /* @__PURE__ */ jsxs44("span", { children: [
+  return /* @__PURE__ */ jsxs45("div", { className: "hb-tag hb-live-pointer", "data-pointer": id, children: [
+    /* @__PURE__ */ jsx50("span", { className: "hb-live-mark", "aria-hidden": "true", children: "\u21BB" }),
+    /* @__PURE__ */ jsxs45("span", { children: [
       "The same live board",
       meta.version ? ` \xB7 v${meta.version}` : "",
       " \u2014 its live view is where its first tag stands above."
     ] }),
-    /* @__PURE__ */ jsxs44("code", { className: "hb-live-addr", children: [
+    /* @__PURE__ */ jsxs45("code", { className: "hb-live-addr", children: [
       "#",
       id
     ] })
@@ -7690,21 +8633,21 @@ function LivePointer({ id, address }) {
 }
 
 // src/host/BlockTag.tsx
-import { jsx as jsx50, jsxs as jsxs45 } from "react/jsx-runtime";
+import { jsx as jsx51, jsxs as jsxs46 } from "react/jsx-runtime";
 var ID_PATTERN = /^[0-9a-f]{8}$/;
 function BlockTag({ id, streaming, load }) {
   const validId = typeof id === "string" && ID_PATTERN.test(id);
-  const actions = useContext13(BlockActions);
+  const actions = useContext14(BlockActions);
   const address = validId ? `${actions.sessionScope ?? ""}|${id}` : "";
-  const [state, setState] = useState27({ kind: "loading" });
-  const [viewing, setViewing] = useState27(null);
-  const drawn = useRef15(null);
+  const [state, setState] = useState28({ kind: "loading" });
+  const [viewing, setViewing] = useState28(null);
+  const drawn2 = useRef15(null);
   const self = useRef15(null);
   if (self.current === null) self.current = { token: /* @__PURE__ */ Symbol("hb-tag") };
-  const [role, setRole] = useState27("unknown");
-  const [refresh, setRefresh] = useState27(0);
+  const [role, setRole] = useState28("unknown");
+  const [refresh, setRefresh] = useState28(0);
   const [, force] = useReducer((x) => x + 1, 0);
-  const [live, setLive] = useState27({});
+  const [live, setLive] = useState28({});
   useLayoutEffect4(() => {
     if (streaming || !validId) return;
     const token = self.current.token;
@@ -7735,13 +8678,13 @@ function BlockTag({ id, streaming, load }) {
       const { blocks, version: boardVersion, updatedAt: boardUpdatedAt, links: boardLinks } = readBlocksNoted(data);
       if (!alive) return;
       if (blocks.length) {
-        const headless = drawn.current === null && viewing === null && (boardVersion ?? 0) >= 2;
+        const headless = drawn2.current === null && viewing === null && (boardVersion ?? 0) >= 2;
         const commitDraw = () => {
           if (!alive) return;
-          if (drawn.current) carryBlocks(drawn.current, blocks);
-          if (drawn.current && viewing === null) void promoteOnUpdate(actions.rest, id, drawn.current, blocks);
+          if (drawn2.current) carryBlocks(drawn2.current, blocks);
+          if (drawn2.current && viewing === null) void promoteOnUpdate(actions.rest, id, drawn2.current, blocks);
           if (viewing === null && (boardVersion ?? 0) >= 2) markLiving(id);
-          drawn.current = blocks;
+          drawn2.current = blocks;
           setState({ kind: "drawn", blocks });
           if (viewing === null) {
             setLive({ version: boardVersion, updatedAt: boardUpdatedAt, links: boardLinks });
@@ -7779,13 +8722,13 @@ function BlockTag({ id, streaming, load }) {
     };
   }, [address, id, streaming, validId, role, refresh, viewing]);
   if (!validId && !streaming) return null;
-  if (streaming || role === "unknown") return /* @__PURE__ */ jsx50(Note, { text: "drawing\u2026", pulse: true });
-  if (role === "pointer") return /* @__PURE__ */ jsx50(LivePointer, { id, address });
-  if (state.kind === "loading") return /* @__PURE__ */ jsx50(Note, { text: "drawing\u2026", pulse: true });
+  if (streaming || role === "unknown") return /* @__PURE__ */ jsx51(Note, { text: "drawing\u2026", pulse: true });
+  if (role === "pointer") return /* @__PURE__ */ jsx51(LivePointer, { id, address });
+  if (state.kind === "loading") return /* @__PURE__ */ jsx51(Note, { text: "drawing\u2026", pulse: true });
   if (state.kind === "failed") return null;
-  return /* @__PURE__ */ jsxs45(BlockActions.Provider, { value: { ...actions, blockId: id }, children: [
-    /* @__PURE__ */ jsx50(Blocks, { blocks: state.blocks }),
-    (live.version != null || live.links) && /* @__PURE__ */ jsx50(
+  return /* @__PURE__ */ jsxs46(BlockActions.Provider, { value: { ...actions, blockId: id }, children: [
+    /* @__PURE__ */ jsx51(Blocks, { blocks: state.blocks }),
+    (live.version != null || live.links) && /* @__PURE__ */ jsx51(
       LiveRow,
       {
         id,
@@ -7800,14 +8743,14 @@ function BlockTag({ id, streaming, load }) {
   ] });
 }
 function Note({ text, pulse = false }) {
-  return /* @__PURE__ */ jsx50("div", { className: pulse ? "hb-state hb-pulse" : "hb-state", children: text });
+  return /* @__PURE__ */ jsx51("div", { className: pulse ? "hb-state hb-pulse" : "hb-state", children: text });
 }
 
 // src/live/DashboardView.tsx
-import { useCallback as useCallback2, useEffect as useEffect11, useRef as useRef16, useState as useState28 } from "react";
+import { useCallback as useCallback2, useEffect as useEffect11, useRef as useRef16, useState as useState29 } from "react";
 
 // src/live/RefreshBar.tsx
-import { jsx as jsx51, jsxs as jsxs46 } from "react/jsx-runtime";
+import { jsx as jsx52, jsxs as jsxs47 } from "react/jsx-runtime";
 function when(iso, now = /* @__PURE__ */ new Date()) {
   const at2 = new Date(iso);
   const time = at2.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -7815,15 +8758,15 @@ function when(iso, now = /* @__PURE__ */ new Date()) {
   return `${at2.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}, ${time}`;
 }
 function RefreshBar({ label, at: at2, refreshing, error, schedule, onRefresh }) {
-  return /* @__PURE__ */ jsxs46("div", { className: "hb-refresh", role: "status", children: [
-    /* @__PURE__ */ jsx51("span", { className: "hb-refresh-label", children: label }),
-    /* @__PURE__ */ jsx51("span", { className: "hb-refresh-when", children: at2 ? `updated ${when(at2)}` : "not filled yet" }),
-    schedule && /* @__PURE__ */ jsxs46("span", { className: "hb-refresh-when", children: [
+  return /* @__PURE__ */ jsxs47("div", { className: "hb-refresh", role: "status", children: [
+    /* @__PURE__ */ jsx52("span", { className: "hb-refresh-label", children: label }),
+    /* @__PURE__ */ jsx52("span", { className: "hb-refresh-when", children: at2 ? `updated ${when(at2)}` : "not filled yet" }),
+    schedule && /* @__PURE__ */ jsxs47("span", { className: "hb-refresh-when", children: [
       "\xB7 refreshes ",
       schedule
     ] }),
-    error && /* @__PURE__ */ jsx51("span", { className: "hb-refresh-error", children: error }),
-    /* @__PURE__ */ jsxs46(
+    error && /* @__PURE__ */ jsx52("span", { className: "hb-refresh-error", children: error }),
+    /* @__PURE__ */ jsxs47(
       "button",
       {
         type: "button",
@@ -7832,7 +8775,7 @@ function RefreshBar({ label, at: at2, refreshing, error, schedule, onRefresh }) 
         onClick: onRefresh,
         "aria-label": refreshing ? "Refreshing" : `Refresh ${label}`,
         children: [
-          /* @__PURE__ */ jsx51("span", { "aria-hidden": "true", children: "\u21BB" }),
+          /* @__PURE__ */ jsx52("span", { "aria-hidden": "true", children: "\u21BB" }),
           " ",
           refreshing ? "Refreshing\u2026" : "Refresh"
         ]
@@ -7842,7 +8785,7 @@ function RefreshBar({ label, at: at2, refreshing, error, schedule, onRefresh }) 
 }
 
 // src/live/DashboardView.tsx
-import { jsx as jsx52, jsxs as jsxs47 } from "react/jsx-runtime";
+import { jsx as jsx53, jsxs as jsxs48 } from "react/jsx-runtime";
 function snapshotOf(b) {
   if (b.snapshots) return b.snapshots;
   if (b.at !== void 0 || b.refreshing !== void 0) {
@@ -7871,8 +8814,8 @@ function signature(ids) {
   return (h >>> 0).toString(36);
 }
 function DashboardView({ load, fill, saveTicks, post, refreshNow = 0, refresh, refreshLabel = "Snapshot" }) {
-  const [board, setBoard] = useState28(null);
-  const [missing, setMissing] = useState28(false);
+  const [board, setBoard] = useState29(null);
+  const [missing, setMissing] = useState29(false);
   const live = useRef16(false);
   const lastTicks = useRef16({});
   const reload = useCallback2(async () => {
@@ -7911,7 +8854,7 @@ function DashboardView({ load, fill, saveTicks, post, refreshNow = 0, refresh, r
     };
   }, [reload]);
   if (!board) {
-    return /* @__PURE__ */ jsx52("div", { className: "hb-blocks hb-dash", children: /* @__PURE__ */ jsx52("p", { className: "hb-dash-sub", children: missing ? "This page isn't in this profile. Switch back to the profile it was made in, or ask Hermes to make it here." : "Loading\u2026" }) });
+    return /* @__PURE__ */ jsx53("div", { className: "hb-blocks hb-dash", children: /* @__PURE__ */ jsx53("p", { className: "hb-dash-sub", children: missing ? "This page isn't in this profile. Switch back to the profile it was made in, or ask Hermes to make it here." : "Loading\u2026" }) });
   }
   const ids = checklistsByPath(board.blocks);
   const sig = signature(ids);
@@ -7938,12 +8881,12 @@ function DashboardView({ load, fill, saveTicks, post, refreshNow = 0, refresh, r
     if (Object.keys(ticks).length) await saveTicks(ticks);
     return { ok: true };
   };
-  return /* @__PURE__ */ jsxs47("div", { className: "hb-blocks hb-dash", children: [
-    board.blocks[0]?.type !== "briefing" && /* @__PURE__ */ jsxs47("header", { className: "hb-dash-head", children: [
-      /* @__PURE__ */ jsx52("div", { className: "hb-dash-date", children: board.at.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) }),
-      /* @__PURE__ */ jsx52("h1", { children: board.greeting ?? board.title ?? "Today" })
+  return /* @__PURE__ */ jsxs48("div", { className: "hb-blocks hb-dash", children: [
+    board.blocks[0]?.type !== "briefing" && /* @__PURE__ */ jsxs48("header", { className: "hb-dash-head", children: [
+      /* @__PURE__ */ jsx53("div", { className: "hb-dash-date", children: board.at.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) }),
+      /* @__PURE__ */ jsx53("h1", { children: board.greeting ?? board.title ?? "Today" })
     ] }),
-    refresh && board.snapshot && /* @__PURE__ */ jsx52(RefreshBar, { label: refreshLabel, ...board.snapshot, onRefresh: async () => {
+    refresh && board.snapshot && /* @__PURE__ */ jsx53(RefreshBar, { label: refreshLabel, ...board.snapshot, onRefresh: async () => {
       setBoard((b) => b ? { ...b, snapshot: { ...b.snapshot, refreshing: true, error: null } } : b);
       try {
         await refresh();
@@ -7951,7 +8894,7 @@ function DashboardView({ load, fill, saveTicks, post, refreshNow = 0, refresh, r
         void reload();
       }
     } }),
-    /* @__PURE__ */ jsx52(BlockActions.Provider, { value: { send: fill, fill, rest, blockId: `dashboard-${sig}` }, children: /* @__PURE__ */ jsx52(Blocks, { blocks: board.blocks }, sig) })
+    /* @__PURE__ */ jsx53(BlockActions.Provider, { value: { send: fill, fill, rest, blockId: `dashboard-${sig}` }, children: /* @__PURE__ */ jsx53(Blocks, { blocks: board.blocks }, sig) })
   ] });
 }
 
@@ -7983,7 +8926,7 @@ function pageRoutes(register, view) {
 }
 
 // src/live/register.tsx
-import { jsx as jsx53 } from "react/jsx-runtime";
+import { jsx as jsx54 } from "react/jsx-runtime";
 var POLL_MS = 5e3;
 var TODAY_PATH = "/genui-today";
 function registerLive(ctx, fill) {
@@ -7994,7 +8937,7 @@ function registerLive(ctx, fill) {
     area: "routes",
     title: "Today",
     data: { path: TODAY_PATH },
-    render: () => /* @__PURE__ */ jsx53(
+    render: () => /* @__PURE__ */ jsx54(
       DashboardView,
       {
         fill,
@@ -8032,7 +8975,7 @@ function registerLive(ctx, fill) {
       sync();
     }
   };
-  const syncPages = pageRoutes(ctx.register, (slug2) => /* @__PURE__ */ jsx53(
+  const syncPages = pageRoutes(ctx.register, (slug2) => /* @__PURE__ */ jsx54(
     DashboardView,
     {
       fill,
@@ -8523,6 +9466,9 @@ var upnext_default = `/* upnext: Odie's Up Next cards. Each card takes its kind'
 // src/blocks/weather/weather.css
 var weather_default = "/* weather: one wide strip after Odie's Today. Big temperature | sky in place, high and tonight's low. */\n.hb-blocks .hb-weather { display: flex; align-items: center; gap: 22px; padding: 16px 26px; border-radius: 22px;\n  background: linear-gradient(105deg, color-mix(in srgb, #7aa7ff 22%, var(--hb-card)),\n    color-mix(in srgb, #ffd66b 24%, var(--hb-card)) 100%); }\n.hb-weather-temp { font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -0.04em;\n  font-variant-numeric: tabular-nums; }\n.hb-weather-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }\n.hb-weather-where { font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n.hb-weather-range { font-size: 13.5px; color: var(--hb-ink-2); }\n";
 
+// src/blocks/widget/widget.css
+var widget_default = "/* Widget: one authored tree of layout, content, controls, structure and embedded blocks. Everything is drawn with the\n   plugin's own pieces (cards, chips, pills, the chart and table blocks) and the shared tokens; a widget carries no\n   style of its own, so nothing here is written by the model. */\n.hb-widget {\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  min-width: 0;\n  padding: 14px 16px;\n  border: 1px solid var(--hb-line);\n  border-radius: 16px;\n  background: var(--hb-card);\n}\n/* The gap a layout element asked for; xs through lg keep to the spacing the rest of the blocks use. */\n.hb-widget-gap-xs { gap: 4px; }\n.hb-widget-gap-sm { gap: 6px; }\n.hb-widget-gap-md { gap: 10px; }\n.hb-widget-gap-lg { gap: 14px; }\n.hb-widget-stack, .hb-widget-row, .hb-widget-grid, .hb-widget-surface { display: flex; flex-direction: column; min-width: 0; }\n.hb-widget-row { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }\n/* A row shares its width between the parts, as the block rows do; a pill or a chip keeps its own. */\n.hb-widget-row > * { flex: 1 1 140px; min-width: 0; display: flex; flex-direction: column; }\n.hb-widget-row > .hb-widget-button, .hb-widget-row > .hb-widget-badge { flex: 0 0 auto; }\n.hb-widget-grid { display: grid; align-items: start; }\n.hb-widget-grid-1 { grid-template-columns: minmax(0, 1fr); }\n.hb-widget-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }\n.hb-widget-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }\n.hb-widget-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }\n@media (max-width: 560px) {\n  .hb-widget-grid-3, .hb-widget-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }\n}\n.hb-widget-surface {\n  gap: 10px;\n  padding: 14px 16px;\n  border: 1px solid var(--hb-line);\n  border-radius: 16px;\n  background: var(--hb-card);\n}\n/* Content */\n.hb-widget-text { min-width: 0; }\n.hb-widget-tone-muted { color: var(--hb-muted); }\n.hb-widget-tone-good { color: var(--hb-good); }\n.hb-widget-tone-warn { color: var(--hb-warn); }\n.hb-widget-tone-bad { color: var(--hb-bad); }\n.hb-widget-tone-info { color: var(--hb-accent-ink); }\n.hb-widget-figure { min-width: 0; padding: 2px 0; }\n.hb-widget-figure-label { font-size: 12px; line-height: 16px; color: var(--hb-muted); }\n.hb-widget-figure-value {\n  font-size: 24px;\n  line-height: 30px;\n  font-weight: 700;\n  letter-spacing: -0.01em;\n  font-variant-numeric: tabular-nums;\n}\n.hb-widget-badge { display: flex; align-items: center; gap: 6px; }\n.hb-widget-chip-bad { background: color-mix(in srgb, var(--hb-bad) 14%, transparent); color: var(--hb-bad); }\n/* Controls: the shared input and range pieces, with the label and the value now on one line above. */\n.hb-widget-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 6px 0; }\n.hb-widget-field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }\n.hb-widget-label { font-size: 13.5px; line-height: 18px; font-weight: 600; color: var(--hb-ink-2); }\n.hb-widget-value { font-size: 13px; line-height: 18px; color: var(--hb-muted); font-variant-numeric: tabular-nums; }\n.hb-widget-check { flex-direction: row; align-items: center; gap: 8px; }\n.hb-widget-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--hb-accent); }\n.hb-widget-button { display: flex; align-items: center; }\n/* A figure the expression could not produce, or a binding that could not be evaluated: one quiet line. */\n.hb-widget-note { display: block; margin: 0; font-size: 12px; line-height: 16px; color: var(--hb-warn); }\n.hb-widget-repeat { display: flex; flex-direction: column; gap: 6px; min-width: 0; }\n";
+
 // src/live/dashboard.css
 var dashboard_default = "/* The Today page: an assembled dashboard. Only its header is the page's own; everything under it is catalog blocks. */\n.hb-dash { box-sizing: border-box; height: 100%; overflow-y: auto; padding: 28px clamp(16px, 4vw, 40px) 48px;\n  background: var(--hb-surface); color: var(--hb-ink); }\n/* The page takes the whole window: no chat-column cap on it or the board inside it. */\n.hb-blocks.hb-dash, .hb-dash > .hb-blocks { max-width: none; }\n.hb-dash-head { margin-bottom: 18px; }\n.hb-dash-date { font-size: 13px; font-weight: 600; color: var(--hb-muted); }\n.hb-dash-head h1 { margin: 6px 0 0; font-size: clamp(28px, 4vw, 36px); line-height: 1.12; font-weight: 700;\n  letter-spacing: -0.025em; }\n.hb-dash-sub { color: var(--hb-muted); }\n/* On the Today page, a row of numbers spans the page's width; in chat it keeps its compact 200px cards. */\n.hb-dash .hb-kpis { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }\n/* A lone number (one stock's price) stays a card, not a banner. */\n.hb-dash .hb-kpis:has(> :only-child) { grid-template-columns: minmax(150px, 320px); }\n/* A designed page's snapshot line under the header: label \xB7 updated 09:12 \xB7 (why it failed) \xB7 \u21BB Refresh. */\n.hb-refresh { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: -6px 0 16px; font-size: 13px;\n  color: var(--hb-muted); }\n.hb-refresh-label { font-weight: 700; color: var(--hb-ink-2); }\n.hb-refresh-error { color: var(--hb-warn, #b7791f); }\n.hb-refresh-button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; height: 28px;\n  padding: 0 12px; border-radius: 99px; border: 1px solid var(--hb-line); color: var(--hb-ink); font-weight: 600; }\n.hb-refresh-button:disabled { cursor: default; opacity: .6; }\n.hb-refresh-button:focus-visible { outline: 2px solid var(--hb-accent); outline-offset: 2px; }\n";
 
@@ -8560,12 +9506,13 @@ var STYLE_PARTS = [
   calendar_default,
   upnext_default,
   weather_default,
+  widget_default,
   dashboard_default
 ];
 var styles_default = STYLE_PARTS.join("\n");
 
 // src/plugin.tsx
-import { jsx as jsx54 } from "react/jsx-runtime";
+import { jsx as jsx55 } from "react/jsx-runtime";
 var ID4 = "hermes-genui";
 var STYLE_ID = "hermes-genui-css";
 function injectStyles() {
@@ -8591,7 +9538,7 @@ var plugin_default = {
       area: TRANSCRIPT_DIRECTIVE_AREA,
       data: {
         name: "blocks",
-        render: ({ attrs, sessionId, streaming }) => /* @__PURE__ */ jsx54(BlockActions.Provider, { value: { send, fill, rest, blockId: attrs?.id, sessionScope: sessionId }, children: /* @__PURE__ */ jsx54(BlockTag, { id: attrs?.id, streaming: Boolean(streaming), load }) })
+        render: ({ attrs, sessionId, streaming }) => /* @__PURE__ */ jsx55(BlockActions.Provider, { value: { send, fill, rest, blockId: attrs?.id, sessionScope: sessionId }, children: /* @__PURE__ */ jsx55(BlockTag, { id: attrs?.id, streaming: Boolean(streaming), load }) })
       }
     });
     const open = (text) => void openAndFill(text, host ?? {});
