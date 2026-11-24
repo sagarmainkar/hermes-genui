@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit gives every PR a first-pass review. Final calls and merges stay with the maintainer.
+reviews:
+  auto_review:
+    enabled: true
+    # main is always reviewed; also review PRs aimed at the newer-work branches.
+    base_branches: ["^release/.*$", "^next$"]
+  path_filters:
+    - "!desktop/plugin.js"        # generated bundle: maintainers rebuild it from web/src before merging
+    - "!**/*.corpus.json"         # large generated test data
+    - "!web/package-lock.json"
