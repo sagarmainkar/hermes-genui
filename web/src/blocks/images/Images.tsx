@@ -1,6 +1,7 @@
 // A strip of real photos, each with its caption and credit. A photo that fails to load (a dead link, a hotlink
 // block) hides itself; when none load the strip disappears. Clicking one opens it full size.
 import { useEffect, useState } from "react";
+import { isTopLayer, popLayer, pushLayer } from "../../core/overlays";
 import type { ImagesBlock, Photo } from "./read";
 
 const GRID_FROM = 4; // four or more pictures open a compact grid; no layout field for the model to write
@@ -55,12 +56,21 @@ export function Images({ block }: { block: ImagesBlock }) {
 }
 
 /** The photo full size, fixed over the window (plugins get no react-dom, so no portal); a click anywhere
- *  or Escape closes it. */
+ *  or Escape closes it — but only while it is the topmost layer: a chart detail opened under a photo keeps
+ *  its keys for when the photo closes again (core/overlays.ts). */
 function Overlay({ photo, onClose }: { photo: Photo; onClose: () => void }) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const layer = pushLayer();  // the photo is the topmost thing a key can answer while it is up
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || !isTopLayer(layer)) return;  // (core/overlays.ts)
+      e.stopImmediatePropagation();  // one keypress steps down exactly one layer, never two
+      onClose();
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      popLayer(layer);
+    };
   }, [onClose]);
   return (
     <div className="hb-photo-overlay" role="dialog" aria-label={photo.caption ?? "Photo"} onClick={onClose}>

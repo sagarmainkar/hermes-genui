@@ -2,7 +2,8 @@
 // listing each slice's name, value and share, so no label is squeezed onto a slice.
 import { useRef, useState } from "react";
 import { chartLabel, fmt, partColour, seriesName, shareNote, sharePct, type ChartSpec } from "./chartData";
-import { ChartTip, type Tip } from "./ChartTip";
+import { ChartTip, type Tip, type TipRow } from "./ChartTip";
+import { ChartDetail, KIND_WORDS, type Detail } from "./ChartDetail";
 import { pickKeys } from "./pick";
 
 const BOX = 168, C = BOX / 2, OUTER = 80, HOLE = 52;  // the drawing's size and centre, the outer radius, a donut's hole
@@ -44,11 +45,13 @@ function sliceColour(label: string, i: number): string {
  * Pie and donut, from x (the slices) and the first series (their values, all positive: readChart checked that). A
  * donut shows the total in its middle; a pie shows it above. Values in % are shares already, so their total (100%)
  * says nothing: the biggest slice is shown instead, and the legend leaves out the value column. Pointing at a slice
- * or its legend row (or stepping with the arrow keys) fades the others and shows its hover card.
+ * or its legend row (or stepping with the arrow keys) fades the others and shows its hover card. A click (or Enter)
+ * drills into that slice — one detail dialog beside the drawing, which keeps its picked slice through it.
  */
 export function PieChart({ spec }: { spec: ChartSpec }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [tip, setTip] = useState<Tip | null>(null);
+  const [drill, setDrill] = useState<{ at: number; detail: Detail } | null>(null);
   const svg = useRef<SVGSVGElement>(null);
   const box = spec.height ?? BOX;
   const scale = box / BOX;
@@ -71,6 +74,12 @@ export function PieChart({ spec }: { spec: ChartSpec }) {
     ? { value: sharePct(values[biggest] / total), label: String(spec.x[biggest]) }
     : { value: fmt(total, unit), label: "Total" };
 
+  /** One slice, read closely: the same full value and share the hover card says, held still. */
+  function sliceRows(i: number): TipRow[] {
+    const label = String(spec.x[i]);
+    return [{ colour: sliceColour(label, i), name: seriesName(spec.series, 0), value: fmt(values[i], unit, { full: true }) }];
+  }
+
   /** Picks slice i (or none) and points the hover card at the middle of its ring. */
   function pick(i: number | null) {
     setPicked(i);
@@ -80,54 +89,65 @@ export function PieChart({ spec }: { spec: ChartSpec }) {
     const [x, y] = at((slices[i].start + slices[i].end) / 2, donut ? (OUTER + HOLE) / 2 : OUTER * 0.6);
     const drawing = el.getBoundingClientRect();
     const around = body.getBoundingClientRect();
-    const label = String(spec.x[i]);
-    setTip({ x: drawing.left - around.left + x * scale, y: drawing.top - around.top + y * scale, title: label,
-      rows: [{ colour: sliceColour(label, i), name: seriesName(spec.series, 0), value: fmt(values[i], unit, { full: true }) }],
-      note: valuesAreShares ? undefined : shareNote(values, values[i]) });
+    setTip({ x: drawing.left - around.left + x * scale, y: drawing.top - around.top + y * scale, title: String(spec.x[i]),
+      rows: sliceRows(i), note: valuesAreShares ? undefined : shareNote(values, values[i]) });
   }
-  const toggle = (i: number) => pick(picked === i ? null : i);
+  function open(i: number) {
+    pick(i);
+    setDrill({ at: i, detail: { datum: String(spec.x[i]), chartTitle: spec.title, kind: KIND_WORDS[spec.type],
+      rows: sliceRows(i), note: valuesAreShares ? undefined : shareNote(values, values[i]), source: spec.source } });
+  }
+  const close = () => {
+    setDrill(null);
+    svg.current?.focus();  // the dialog hands the keyboard back to the drawing it opened from
+  };
+  // Losing focus to the dialog is not leaving the pie: the picked slice must survive open and close.
+  const pickKeep = (i: number | null) => { if (i !== null || !drill) pick(i); };
   const faded = (i: number) => (picked === null || picked === i ? 1 : 0.5);
-  const mouse = (i: number | null) => (e: { pointerType: string }) => e.pointerType === "mouse" && pick(i);
+  const mouse = (i: number | null) => (e: { pointerType: string }) => e.pointerType === "mouse" && pickKeep(i);
 
   return (
-    <figure className="hb-card hb-chart hb-pie">
-      <figcaption className="hb-chart-title">{spec.title ?? spec.series[0].name ?? "Chart"}</figcaption>
-      {!donut && (
-        <div className="hb-chart-figure">
-          <span className="hb-chart-big">{headline.value}</span>
-          <span className="hb-chart-at">{headline.label}</span>
-        </div>
-      )}
-      <div className="hb-pie-body">
-        <svg ref={svg} width={box} height={box} viewBox={`0 0 ${BOX} ${BOX}`} className="hb-pie-svg" role="img"
-          aria-label={chartLabel(spec)} {...pickKeys(values.length, picked, pick)}>
-          {slices.map((s, i) => (
-            <path key={i} d={slicePath(s.start, s.end, hole)} fill={sliceColour(String(spec.x[i]), i)} opacity={faded(i)}
-              className="hb-slice" onClick={() => toggle(i)} onPointerEnter={mouse(i)} onPointerLeave={mouse(null)} />
-          ))}
-          {donut && (
-            <g textAnchor="middle" pointerEvents="none">
-              <text x={C} y={C - 2} className="hb-pie-total">{headline.value}</text>
-              <text x={C} y={C + 15} className="hb-chart-axis">{shortLabel(headline.label)}</text>
-            </g>
-          )}
-        </svg>
-        <table className="hb-pie-legend">
-          <tbody>
-            {values.map((v, i) => (
-              <tr key={i} onClick={() => toggle(i)} onPointerEnter={mouse(i)} onPointerLeave={mouse(null)} style={{ opacity: faded(i) }}>
-                <td className="hb-pie-swatch"><i style={{ background: sliceColour(String(spec.x[i]), i) }} /></td>
-                <td className="hb-pie-name">{spec.x[i]}</td>
-                {!valuesAreShares && <td className="hb-pie-value">{fmt(v, unit)}</td>}
-                <td className="hb-pie-share">{sharePct(v / total)}</td>
-              </tr>
+    <>
+      <figure className="hb-card hb-chart hb-pie">
+        <figcaption className="hb-chart-title">{spec.title ?? spec.series[0].name ?? "Chart"}</figcaption>
+        {!donut && (
+          <div className="hb-chart-figure">
+            <span className="hb-chart-big">{headline.value}</span>
+            <span className="hb-chart-at">{headline.label}</span>
+          </div>
+        )}
+        <div className="hb-pie-body">
+          <svg ref={svg} width={box} height={box} viewBox={`0 0 ${BOX} ${BOX}`} className="hb-pie-svg" role="img"
+            aria-label={chartLabel(spec)} {...pickKeys(values.length, picked, pickKeep, false, () => picked !== null && open(picked))}>
+            {slices.map((s, i) => (
+              <path key={i} d={slicePath(s.start, s.end, hole)} fill={sliceColour(String(spec.x[i]), i)} opacity={faded(i)}
+                className="hb-slice" onClick={() => open(i)} onPointerEnter={mouse(i)} onPointerLeave={mouse(null)} />
             ))}
-          </tbody>
-        </table>
-        <ChartTip tip={tip} />
-      </div>
-      {spec.caveat && <div className="hb-chart-caveat">{spec.caveat}</div>}
-      {spec.source && <div className="hb-chart-source">{spec.source}</div>}
-    </figure>
+            {donut && (
+              <g textAnchor="middle" pointerEvents="none">
+                <text x={C} y={C - 2} className="hb-pie-total">{headline.value}</text>
+                <text x={C} y={C + 15} className="hb-chart-axis">{shortLabel(headline.label)}</text>
+              </g>
+            )}
+          </svg>
+          <table className="hb-pie-legend">
+            <tbody>
+              {values.map((v, i) => (
+                <tr key={i} onClick={() => open(i)} onPointerEnter={mouse(i)} onPointerLeave={mouse(null)} style={{ opacity: faded(i) }}>
+                  <td className="hb-pie-swatch"><i style={{ background: sliceColour(String(spec.x[i]), i) }} /></td>
+                  <td className="hb-pie-name">{spec.x[i]}</td>
+                  {!valuesAreShares && <td className="hb-pie-value">{fmt(v, unit)}</td>}
+                  <td className="hb-pie-share">{sharePct(v / total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <ChartTip tip={tip} />
+        </div>
+        {spec.caveat && <div className="hb-chart-caveat">{spec.caveat}</div>}
+        {spec.source && <div className="hb-chart-source">{spec.source}</div>}
+      </figure>
+      {drill && <ChartDetail detail={drill.detail} onClose={close} />}
+    </>
   );
 }

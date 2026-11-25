@@ -1,6 +1,7 @@
 // Picking a point, bar or slice from the keyboard: every chart's drawing is focusable, the arrow keys step through
-// what it shows and Escape (or leaving it) hides the hover card. The pointer picks in each drawing's own way.
-import type { KeyboardEvent } from "react";
+// what it shows and Escape (or leaving it) hides the hover card. Enter (or Space) hands the picked datum to the
+// drawing's `activate` — its drill-down — when it has one. The pointer picks in each drawing's own way.
+import type { FocusEvent, KeyboardEvent } from "react";
 
 /**
  * Where a key moves the pick among n items: → the next, ← the one before (starting from the first or the last), held
@@ -17,16 +18,30 @@ export function stepPick(at: number | null, key: string, n: number, rows = false
   return undefined;
 }
 
-/** The props that make a drawing focusable and steerable from the keyboard: spread them on its svg (or grid). */
-export function pickKeys(n: number, at: number | null, pick: (i: number | null) => void, rows = false) {
+/** The props that make a drawing focusable and steerable from the keyboard: spread them on its svg (or grid).
+ *  With an `activate` the drawing also answers Enter and Space — its drill-down — and says, through
+ *  aria-haspopup, that a dialog is what one gets for the asking. */
+export function pickKeys(n: number, at: number | null, pick: (i: number | null) => void, rows = false, activate?: () => void) {
   return {
     tabIndex: 0,
     onKeyDown: (e: KeyboardEvent) => {
+      if (activate && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        activate();
+        return;
+      }
       const next = stepPick(at, e.key, n, rows);
       if (next === undefined) return;
       e.preventDefault();
       pick(next);
     },
-    onBlur: () => pick(null),
+    onBlur: (e: FocusEvent) => {
+      // A blur with nowhere to go is not leaving the drawing. When a drill-down dialog we opened is removed,
+      // real Chrome makes the drawing pass through exactly that event a beat AFTER it has handed the keyboard
+      // back (a delayed stale-focus cleanup for the removed dialog); clearing on it would erase the pick the
+      // return exists to preserve, and the cycle position with it. Leaving for real still clears: Tab hands
+      // focus to the next element (a relatedTarget), the mouse meets pointerleave, and Escape picks nothing.
+      if (e.relatedTarget) pick(null);
+    },
   };
 }

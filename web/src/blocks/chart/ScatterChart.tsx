@@ -7,6 +7,7 @@ import { scatterLayout, scatterTip, TICK_GAP, type Dot, type ScatterLayout } fro
 import { useWidth } from "./useWidth";
 import { pickKeys } from "./pick";
 import { ChartTip } from "./ChartTip";
+import { ChartDetail, KIND_WORDS, type Detail } from "./ChartDetail";
 import { ChartLegend } from "./Legend";
 
 /** How near the pointer has to be to a dot to pick it, in drawing px. */
@@ -17,12 +18,15 @@ export function ScatterChart({ spec }: { spec: ChartSpec }) {
   const svg = useRef<SVGSVGElement>(null);
   const width = useWidth(plot);
   const [hover, setHover] = useState<number | null>(null);
+  const [drill, setDrill] = useState<{ at: number; detail: Detail } | null>(null);
+  const down = useRef<{ x: number; y: number } | null>(null);
   const scales = useMemo(() => chartScales(spec, null), [spec]);
   const layout = useMemo(() => scatterLayout(spec, width, scales), [spec, width, scales]);
   const tip = useMemo(() => (hover === null || !layout.dots[hover] ? null : scatterTip(spec, hover, layout)),
     [spec, hover, layout]);
 
-  /** Picks the dot nearest the pointer, if one is near enough. */
+  /** Picks the dot nearest the pointer, if one is near enough. The pick is a DOT INDEX, so repeated x values
+   *  (and twins drawn at one pixel, where the pointer distance decides) each stay their own datum. */
   function pickAt(e: PointerEvent) {
     const r = svg.current?.getBoundingClientRect();
     if (!r || !r.width) return;
@@ -37,29 +41,52 @@ export function ScatterChart({ spec }: { spec: ChartSpec }) {
     setHover(best < 0 ? null : best);
   }
 
+  /** One point, read closely: where it sits on each axis, and its own place in the reading order. */
+  function detailAt(i: number): Detail {
+    const t = scatterTip(spec, i, layout);
+    return { datum: t.title, chartTitle: spec.title, kind: KIND_WORDS.scatter, rows: t.rows,
+      note: `Point ${i + 1} of ${layout.dots.length}`, source: spec.source };
+  }
+  const open = (i: number | null) => i !== null && setDrill({ at: i, detail: detailAt(i) });
+  const close = () => {
+    setDrill(null);
+    svg.current?.focus();  // the dialog hands the keyboard back to the drawing it opened from
+  };
+  // Losing focus to the dialog is not leaving the dots: the pick must survive open and close.
+  const pick = (i: number | null) => { if (i !== null || !drill) setHover(i); };
+
   return (
-    <figure className="hb-card hb-chart">
-      <figcaption className="hb-chart-head">
-        <span className="hb-chart-title">{spec.title ?? spec.series[0]?.name ?? "Scatter"}</span>
-      </figcaption>
-      <div ref={plot} className="hb-chart-plot">
-        <svg ref={svg} width="100%" height={layout.H} viewBox={`0 0 ${layout.W} ${layout.H}`} className="hb-chart-svg"
-          role="img" aria-label={nameOf(spec, layout)} {...pickKeys(layout.dots.length, hover, setHover)}
-          onPointerDown={pickAt} onPointerMove={(e) => (e.buttons || e.pointerType === "mouse") && pickAt(e)}
-          onPointerLeave={() => setHover(null)}>
-          <Axis spec={spec} layout={layout} />
-          {layout.dots.map((dot, i) => (
-            <circle key={`${dot.series}-${i}`} cx={dot.cx} cy={dot.cy} r="4" fill={partColour(dot.series)}
-              opacity={hover === null || hover === i ? 1 : 0.55} className="hb-chart-dot">
-              <title>{dotText(spec, dot)}</title>
-            </circle>
-          ))}
-        </svg>
-        <ChartTip tip={tip} />
-      </div>
-      {spec.series.length > 1 && <ChartLegend series={spec.series} />}
-      {spec.source && <div className="hb-chart-source">{spec.source}</div>}
-    </figure>
+    <>
+      <figure className="hb-card hb-chart">
+        <figcaption className="hb-chart-head">
+          <span className="hb-chart-title">{spec.title ?? spec.series[0]?.name ?? "Scatter"}</span>
+        </figcaption>
+        <div ref={plot} className="hb-chart-plot">
+          <svg ref={svg} width="100%" height={layout.H} viewBox={`0 0 ${layout.W} ${layout.H}`} className="hb-chart-svg"
+            role="img" aria-label={nameOf(spec, layout)}
+            {...pickKeys(layout.dots.length, hover, pick, false, () => open(hover))}
+            onPointerDown={(e) => { down.current = { x: e.clientX, y: e.clientY }; pickAt(e); }}
+            onPointerMove={(e) => (e.buttons || e.pointerType === "mouse") && pickAt(e)}
+            onPointerLeave={() => pick(null)}
+            onClick={(e) => {
+              const d = down.current;  // a click that never left its dot drills into it; a scrub does not
+              if (d && Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) < 8) open(hover);
+            }}>
+            <Axis spec={spec} layout={layout} />
+            {layout.dots.map((dot, i) => (
+              <circle key={`${dot.series}-${i}`} cx={dot.cx} cy={dot.cy} r="4" fill={partColour(dot.series)}
+                opacity={hover === null || hover === i ? 1 : 0.55} className="hb-chart-dot">
+                <title>{dotText(spec, dot)}</title>
+              </circle>
+            ))}
+          </svg>
+          <ChartTip tip={tip} />
+        </div>
+        {spec.series.length > 1 && <ChartLegend series={spec.series} />}
+        {spec.source && <div className="hb-chart-source">{spec.source}</div>}
+      </figure>
+      {drill && <ChartDetail detail={drill.detail} onClose={close} />}
+    </>
   );
 }
 

@@ -149,3 +149,74 @@
 .hb-hbar-many .hb-hbar-value { font-size: 12px; line-height: 12px; }
 .hb-hbar-up { color: var(--hb-good); }
 .hb-hbar-down { color: var(--hb-warn); }
+
+/* The drill-down detail (ChartDetail.tsx): one datum, focused, over the whole window — the same scrim, the same
+   z and appear as the photo strip's full-size view. It mounts BESIDE the chart figure, never inside the card: a
+   card that transforms or contains its own box — every entrance animation does, and Chrome measures a fixed
+   descendant then resolving to that box, not the window (probed on Chrome 157; the container-type the pie already
+   carries alone does NOT contain fixed) — would shrink an inside-mounted overlay to the card. Out of flow, the
+   sibling mount costs the board's widths nothing — Chrome measures exactly that (tests/test_chart_drilldown_overlay.py). */
+.hb-chart-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: rgba(0, 0, 0, 0.82);
+  animation: hb-appear 0.18s ease-out;
+}
+/* Gate its own entrance AFTER the rule that declares it, so the cascade actually settles it: with reduced
+   motion the scrim rests at the window's true corner (Chrome measures the -4px the animation starts at). */
+@media (prefers-reduced-motion: reduce) {
+  .hb-chart-detail { animation: none; }
+}
+.hb-chart-detail-card {
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 20px 22px 18px;
+  border-radius: 16px;
+  background: var(--hb-surface);
+  box-shadow: var(--hb-shadow);
+  color: var(--hb-ink);
+}
+.hb-chart-detail-where { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--hb-muted); }
+.hb-chart-detail-title { margin-top: 2px; font-size: 24px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.hb-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hb-line);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.hb-detail-row i { flex: none; width: 10px; height: 10px; border-radius: 3px; }
+.hb-detail-name { flex: 1; min-width: 0; color: var(--hb-ink-2); overflow-wrap: anywhere; }
+.hb-detail-value { font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.hb-detail-note { margin-top: 10px; font-size: 12.5px; color: var(--hb-muted); }
+.hb-detail-source { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--hb-line); font-size: 11.5px; text-align: right; color: var(--hb-muted); }
+
+/* The dialog's close control, riding in its corner over the scrim — the same shape the photo strip and the
+   host's own full-size layers use (the class is shared so one rule styles every corner close). */
+.hb-overlay-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  cursor: pointer;
+}
+.hb-overlay-close:hover { background: rgba(0, 0, 0, 0.65); }

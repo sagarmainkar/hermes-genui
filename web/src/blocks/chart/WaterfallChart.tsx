@@ -8,12 +8,15 @@ import { TICK_GAP, waterfallLayout, waterfallTip, waterfallValue, type Waterfall
 import { useWidth } from "./useWidth";
 import { pickKeys } from "./pick";
 import { ChartTip, type Tip } from "./ChartTip";
+import { ChartDetail, KIND_WORDS, type Detail } from "./ChartDetail";
 
 export function WaterfallChart({ spec }: { spec: ChartSpec }) {
   const plot = useRef<HTMLDivElement>(null);
   const svg = useRef<SVGSVGElement>(null);
   const width = useWidth(plot);
   const [hover, setHover] = useState<number | null>(null);
+  const [drill, setDrill] = useState<{ at: number; detail: Detail } | null>(null);
+  const down = useRef<{ x: number; y: number } | null>(null);
   const layout = useMemo(() => waterfallLayout(spec, width), [spec, width]);
   const tip: Tip | null = hover === null || !layout.bars[hover] ? null : waterfallTip(spec, hover, layout);
   const unit = spec.series[0]?.unit ?? spec.unit;
@@ -37,52 +40,78 @@ export function WaterfallChart({ spec }: { spec: ChartSpec }) {
     setHover(best < 0 ? null : best);
   }
 
+  /** One column, read closely: the same move and balance the hover card says, held still, with the chart's source.
+   *  An unknown step (no bar) has nothing to say: keys that land there simply do not open a detail. */
+  function detailAt(i: number): Detail {
+    const t = waterfallTip(spec, i, layout);
+    const kind = layout.bars[i]?.total ? "Total" : KIND_WORDS.waterfall;
+    return { datum: t.title, chartTitle: spec.title, kind, rows: t.rows, note: t.note, source: spec.source };
+  }
+  const open = (i: number | null) => {
+    if (i === null || !layout.bars[i]) return;
+    setDrill({ at: i, detail: detailAt(i) });
+  };
+  const close = () => {
+    setDrill(null);
+    svg.current?.focus();  // the dialog hands the keyboard back to the drawing it opened from
+  };
+  // Losing focus to the dialog is not leaving the bridge: the pick must survive open and close.
+  const pick = (i: number | null) => { if (i !== null || !drill) setHover(i); };
+
   return (
-    <figure className="hb-card hb-chart">
-      <figcaption className="hb-chart-head">
-        <span className="hb-chart-title">{spec.title ?? spec.series[0]?.name ?? "Waterfall"}</span>
-      </figcaption>
-      {spec.figure !== false && bar !== null && (
-        <div className="hb-chart-figure">
-          <span className="hb-chart-big">{fmt(bar.to, unit)}</span>
-          <span className="hb-chart-at">{spec.x[shown as number]}</span>
+    <>
+      <figure className="hb-card hb-chart">
+        <figcaption className="hb-chart-head">
+          <span className="hb-chart-title">{spec.title ?? spec.series[0]?.name ?? "Waterfall"}</span>
+        </figcaption>
+        {spec.figure !== false && bar !== null && (
+          <div className="hb-chart-figure">
+            <span className="hb-chart-big">{fmt(bar.to, unit)}</span>
+            <span className="hb-chart-at">{spec.x[shown as number]}</span>
+          </div>
+        )}
+        <div ref={plot} className="hb-chart-plot">
+          <svg ref={svg} width="100%" height={layout.H} viewBox={`0 0 ${layout.W} ${layout.H}`} className="hb-chart-svg"
+            role="img" aria-label={nameOf(spec, layout)} {...pickKeys(layout.bars.length, hover, pick, false, () => open(hover))}
+            onPointerDown={(e) => { down.current = { x: e.clientX, y: e.clientY }; pickAt(e); }}
+            onPointerMove={(e) => (e.buttons || e.pointerType === "mouse") && pickAt(e)}
+            onPointerLeave={() => pick(null)}
+            onClick={(e) => {
+              const d = down.current;  // a click that never moved off its column drills into it; a scrub does not
+              if (d && Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) < 8) open(hover);
+            }}>
+            <Axis spec={spec} layout={layout} />
+            <g aria-hidden="true">
+              {layout.bars.map((b, i) => {
+                const prev = i ? layout.bars[i - 1] : null;
+                if (!b || !prev) return null;
+                const y = layout.yAt(prev.to);
+                return <line key={i} x1={layout.xAt(i - 1) + layout.bar / 2} x2={layout.xAt(i) - layout.bar / 2}
+                  y1={y} y2={y} className="hb-waterfall-link" />;
+              })}
+            </g>
+            {layout.bars.map((b, i) => (b === null ? null : (
+              <path key={i} d={barPath(layout.xAt(i) - layout.bar / 2, layout.bar, layout.yAt(b.from), layout.yAt(b.to))}
+                fill={colourOf(b)} opacity={hover === null || hover === i ? 1 : 0.55} className="hb-chart-bar">
+                <title>{barText(b, String(spec.x[i]), unit)}</title>
+              </path>
+            )))}
+            {layout.valueLabels && layout.bars.map((b, i) => (b === null ? null : (
+              <text key={i} x={layout.xAt(i)} y={b.to >= b.from ? layout.yAt(b.to) - 6 : layout.yAt(b.to) + 14}
+                textAnchor="middle" className="hb-chart-value">{waterfallValue(b, unit)}</text>
+            )))}
+            <g aria-hidden="true">
+              {layout.labels.map((label, i) => (
+                <text key={i} x={layout.xAt(i)} y={layout.H - 7} textAnchor="middle" className="hb-chart-axis">{label}</text>
+              ))}
+            </g>
+          </svg>
+          <ChartTip tip={tip} />
         </div>
-      )}
-      <div ref={plot} className="hb-chart-plot">
-        <svg ref={svg} width="100%" height={layout.H} viewBox={`0 0 ${layout.W} ${layout.H}`} className="hb-chart-svg"
-          role="img" aria-label={nameOf(spec, layout)} {...pickKeys(layout.bars.length, hover, setHover)}
-          onPointerDown={pickAt} onPointerMove={(e) => (e.buttons || e.pointerType === "mouse") && pickAt(e)}
-          onPointerLeave={() => setHover(null)}>
-          <Axis spec={spec} layout={layout} />
-          <g aria-hidden="true">
-            {layout.bars.map((b, i) => {
-              const prev = i ? layout.bars[i - 1] : null;
-              if (!b || !prev) return null;
-              const y = layout.yAt(prev.to);
-              return <line key={i} x1={layout.xAt(i - 1) + layout.bar / 2} x2={layout.xAt(i) - layout.bar / 2}
-                y1={y} y2={y} className="hb-waterfall-link" />;
-            })}
-          </g>
-          {layout.bars.map((b, i) => (b === null ? null : (
-            <path key={i} d={barPath(layout.xAt(i) - layout.bar / 2, layout.bar, layout.yAt(b.from), layout.yAt(b.to))}
-              fill={colourOf(b)} opacity={hover === null || hover === i ? 1 : 0.55} className="hb-chart-bar">
-              <title>{barText(b, String(spec.x[i]), unit)}</title>
-            </path>
-          )))}
-          {layout.valueLabels && layout.bars.map((b, i) => (b === null ? null : (
-            <text key={i} x={layout.xAt(i)} y={b.to >= b.from ? layout.yAt(b.to) - 6 : layout.yAt(b.to) + 14}
-              textAnchor="middle" className="hb-chart-value">{waterfallValue(b, unit)}</text>
-          )))}
-          <g aria-hidden="true">
-            {layout.labels.map((label, i) => (
-              <text key={i} x={layout.xAt(i)} y={layout.H - 7} textAnchor="middle" className="hb-chart-axis">{label}</text>
-            ))}
-          </g>
-        </svg>
-        <ChartTip tip={tip} />
-      </div>
-      {spec.source && <div className="hb-chart-source">{spec.source}</div>}
-    </figure>
+        {spec.source && <div className="hb-chart-source">{spec.source}</div>}
+      </figure>
+      {drill && <ChartDetail detail={drill.detail} onClose={close} />}
+    </>
   );
 }
 

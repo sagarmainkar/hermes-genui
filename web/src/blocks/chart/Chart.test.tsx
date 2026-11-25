@@ -195,7 +195,7 @@ describe("line charts", () => {
     expect(container.querySelector(".hb-tip-on .hb-tip-title")!.textContent).toBe("c");
     expect(container.querySelector(".hb-tip-on .hb-tip-note")!.textContent).toBe("▲ 2.8% since start");
     expect(container.querySelector(".hb-chart-big")!.textContent).toBe("24,100");
-    fireEvent.blur(svg);
+    fireEvent.blur(svg, { relatedTarget: document.body });  // real leaving: focus hands off somewhere
     expect(container.querySelector(".hb-tip-on")).toBeNull();
   });
 
