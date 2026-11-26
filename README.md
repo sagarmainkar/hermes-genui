@@ -112,7 +112,7 @@ In the Webapp this switch is per browser: see [the note below](#-using-the-webap
 |---|:---:|:---:|---|
 | **Hermes Desktop** (the app) | ✅ | ✅ | Switch **Desktop** on once, in step 2 above. |
 | **Hermes Webapp** (`hermes webapp`) in Chrome, Edge and other Chromium browsers | ✅ | ✅ | Switch **Desktop** on in **each browser, at each address**. See the note below. |
-| **Webapp on iPhone or iPad**, in any browser (Hermes v0.23.3 or newer) | ✅ | Not tested yet | The same switch, in each browser on the phone. See [Phones and tablets](#phones-and-tablets). |
+| **Webapp on iPhone or iPad** (Hermes v0.23.3 or newer) | ✅ tested in Safari and Chrome | Not tested yet | The same switch, in each browser on the phone. See [Phones and tablets](#phones-and-tablets). |
 | **Webapp on an Android phone** | ✅ (reported by a user) | Not tested yet | The same switch, in each browser on the phone. |
 | **Webapp in Safari on a Mac** | ✅ | Not tested yet | The same switch on Hermes v0.23.3 or newer. On older Hermes, use the [workaround](#safari-on-a-mac). |
 | **Webapp in Firefox** | Not tested yet | Not tested yet | Same switch as other browsers. |
@@ -169,9 +169,14 @@ Sidebar pages belong to a profile: after switching profiles, the rows for that p
 ### Phones and tablets
 
 > [!TIP]
-> **On a phone, use the Webapp.** Open it in the phone's browser (for example `http://my-mac.local:9120`, or your
-> Tailscale address when you're away from home), sign in, then switch **Desktop** on in **Capabilities → Plugins →
-> hermes-genui** and reload. Each browser on the phone needs its own switch, as on a computer.
+> **On a phone, use the Webapp.**
+>
+> 1. On the computer that runs Hermes, turn on **Settings → Web Access** in the Desktop app. Without it the Webapp
+>    listens only on that computer, so a phone can't reach it.
+> 2. Open the Webapp in the phone's browser: `http://my-mac.local:9120` on your home Wi-Fi (plain HTTP, so only on a
+>    network you trust), or through Tailscale or another encrypted tunnel when you're away.
+> 3. Sign in, switch **Desktop** on in **Capabilities → Plugins → hermes-genui**, and reload. Each browser on the
+>    phone needs its own switch, as on a computer.
 >
 > - **iPhone and iPad** need Hermes v0.23.3 or newer. On older Hermes every browser there (they all run on Safari's
 >   engine) fails with *"workspace failed to render: Can't find variable: requestIdleCallback"*
