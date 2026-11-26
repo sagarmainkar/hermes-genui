@@ -175,6 +175,11 @@ Sidebar pages belong to a profile: after switching profiles, the rows for that p
 >    runs Hermes. In the Desktop app, **Settings → Web Access** does this; Hermes's guide,
 >    [Open it from your phone or another computer](https://hermes-agent.nousresearch.com/docs/user-guide/desktop#open-it-from-your-phone-or-another-computer),
 >    covers it and other setups, such as an HTTPS address of your own.
+>
+>    ⚠️ **Anyone who reaches the Webapp can use your Hermes:** its chats, tools, files and connected accounts. Never
+>    make it reachable without a sign-in in front of it, and never forward its port from your router to the
+>    internet.
+>
 > 2. Open the address Web Access shows in the phone's browser. A plain `http://` address on your Wi-Fi isn't
 >    encrypted, so use it only on a network you trust; away from home, use an HTTPS address such as Tailscale Serve.
 > 3. Sign in, switch **Desktop** on in **Capabilities → Plugins → hermes-genui**, and reload. Each browser on the
