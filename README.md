@@ -171,10 +171,12 @@ Sidebar pages belong to a profile: after switching profiles, the rows for that p
 > [!TIP]
 > **On a phone, use the Webapp.**
 >
-> 1. On the computer that runs Hermes, turn on **Settings → Web Access** in the Desktop app. Without it the Webapp
->    listens only on that computer, so a phone can't reach it.
-> 2. Open the Webapp in the phone's browser: `http://my-mac.local:9120` on your home Wi-Fi (plain HTTP, so only on a
->    network you trust), or through Tailscale or another encrypted tunnel when you're away.
+> 1. Make the Webapp reachable from the phone, behind sign-in. Out of the box it listens only on the computer that
+>    runs Hermes. In the Desktop app, **Settings → Web Access** does this; Hermes's guide,
+>    [Open it from your phone or another computer](https://hermes-agent.nousresearch.com/docs/user-guide/desktop#open-it-from-your-phone-or-another-computer),
+>    covers it and other setups, such as an HTTPS address of your own.
+> 2. Open the address Web Access shows in the phone's browser. A plain `http://` address on your Wi-Fi isn't
+>    encrypted, so use it only on a network you trust; away from home, use an HTTPS address such as Tailscale Serve.
 > 3. Sign in, switch **Desktop** on in **Capabilities → Plugins → hermes-genui**, and reload. Each browser on the
 >    phone needs its own switch, as on a computer.
 >
