@@ -112,10 +112,12 @@ In the Webapp this switch is per browser: see [the note below](#-using-the-webap
 |---|:---:|:---:|---|
 | **Hermes Desktop** (the app) | ✅ | ✅ | Switch **Desktop** on once, in step 2 above. |
 | **Hermes Webapp** (`hermes webapp`) in Chrome, Edge and other Chromium browsers | ✅ | ✅ | Switch **Desktop** on in **each browser, at each address**. See the note below. |
-| **Webapp in Firefox, or on an Android phone** | Not tested yet | Not tested yet | Same switch as other browsers. |
-| **Webapp in Safari on a Mac** | ✅ | Not tested yet | Hermes's Capabilities page crashes in Safari, so use the [workaround](#safari-on-a-mac). |
-| **Webapp on iPhone or iPad**, in any browser | ❌ | ❌ | Doesn't work yet: the Hermes Webapp itself fails to render there. See [iPhone and iPad](#iphone-and-ipad). |
-| **Hermes dashboard** (`hermes dashboard`) | ❌ shows a raw `::blocks` line | ❌ | Nothing to switch on: it has no block renderer ([#4](https://github.com/sagarmainkar/hermes-genui/issues/4)). Use Desktop or the Webapp. |
+| **Webapp on iPhone or iPad**, in any browser (Hermes v0.23.3 or newer) | ✅ | Not tested yet | The same switch, in each browser on the phone. See [Phones and tablets](#phones-and-tablets). |
+| **Webapp on an Android phone** | ✅ (reported by a user) | Not tested yet | The same switch, in each browser on the phone. |
+| **Webapp in Safari on a Mac** | ✅ | Not tested yet | The same switch on Hermes v0.23.3 or newer. On older Hermes, use the [workaround](#safari-on-a-mac). |
+| **Webapp in Firefox** | Not tested yet | Not tested yet | Same switch as other browsers. |
+| **Hermes dashboard** (`hermes dashboard`) | ❌ shows a raw `::blocks` line | ❌ | Nothing to switch on: it has no block renderer ([#4](https://github.com/sagarmainkar/hermes-genui/issues/4)). **Use the Webapp instead**: it runs in any browser, phones included. |
+| **Phone apps built on the dashboard** (Conduit on iOS, the Android apps) | ❌ shows a raw `::blocks` line | ❌ | Same cause as the dashboard ([#4](https://github.com/sagarmainkar/hermes-genui/issues/4)). Open the Webapp in the phone's browser instead. |
 | **Telegram, the CLI, other apps that use Hermes as a backend** | 📝 text and Markdown tables | ❌ | Nothing to do: the plugin sees the chat can't draw and has the model write text. |
 
 The personal assistant's checks and dashboard refreshes run on the machine that runs Hermes, whichever app you look
@@ -152,9 +154,10 @@ Sidebar pages belong to a profile: after switching profiles, the rows for that p
 ### Safari on a Mac
 
 > [!WARNING]
-> In Safari, Hermes's Capabilities page crashes with *"workspace failed to render: Can't find variable:
-> requestIdleCallback"*, so you can't reach the switch. It's a Hermes bug ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)). Until it's fixed, turn the
-> plugin on from the Console: open the Webapp, press **⌥⌘C** (turn on *Show features for web developers* in Safari's
+> **Only on Hermes before v0.23.3.** There, Safari's Capabilities page crashes with *"workspace failed to render:
+> Can't find variable: requestIdleCallback"*, so you can't reach the switch. It's a Hermes bug
+> ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)), fixed in v0.23.3. Update
+> Hermes, or turn the plugin on from the Console: open the Webapp, press **⌥⌘C** (turn on *Show features for web developers* in Safari's
 > Advanced settings first), paste this line and press Return:
 >
 > ```js
@@ -163,16 +166,19 @@ Sidebar pages belong to a profile: after switching profiles, the rows for that p
 >
 > It saves the same setting the switch saves and leaves your other plugins as they are.
 
-### iPhone and iPad
+### Phones and tablets
 
-> [!CAUTION]
-> **The Hermes Webapp doesn't work on iPhone or iPad yet, in any browser**, so boards, Today and your dashboards
-> can't be drawn there. Every browser on iPhone and iPad (Safari, Chrome, Firefox, Edge) runs on the same engine, and
-> the Webapp's pages fail on it with *"workspace failed to render: Can't find variable: requestIdleCallback"*.
+> [!TIP]
+> **On a phone, use the Webapp.** Open it in the phone's browser (for example `http://my-mac.local:9120`, or your
+> Tailscale address when you're away from home), sign in, then switch **Desktop** on in **Capabilities → Plugins →
+> hermes-genui** and reload. Each browser on the phone needs its own switch, as on a computer.
 >
-> It's the same Hermes bug ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)) and needs a fix in Hermes, not in this plugin. The issue has the details and
-> the workarounds people have tried; none of them is tested with this plugin. Until it's fixed, use Hermes Desktop,
-> or the Webapp on a computer. On a phone, Telegram and other chat apps still get every answer as text.
+> - **iPhone and iPad** need Hermes v0.23.3 or newer. On older Hermes every browser there (they all run on Safari's
+>   engine) fails with *"workspace failed to render: Can't find variable: requestIdleCallback"*
+>   ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)); update Hermes to fix it.
+> - **Phone apps built on the Hermes dashboard** (Conduit on iOS, the Android apps) can't draw blocks and show a raw
+>   `::blocks` line instead ([#4](https://github.com/sagarmainkar/hermes-genui/issues/4)). Use the Webapp there.
+> - Telegram and other chat apps still get every answer as text.
 
 ### Hermes on one machine, Desktop on another
 
@@ -454,8 +460,8 @@ Found a security issue? Please see [SECURITY.md](SECURITY.md).
 | "Couldn't load this block" | Run `hermes gateway restart` after installing or updating. If it's one reply in an otherwise working chat, the model wrote a tag without drawing: ask *"draw it with blocks"*. |
 | Hermes Desktop flickers, or an open page closes by itself after a few seconds | A Hermes bug when the plugin is installed in two or more profiles but not in the default one: Desktop and the gateway each copy the plugin's drawing half from a different profile, so it is replaced and reloaded every few seconds. Install the plugin in the default profile too (`hermes plugins install sagarmainkar/hermes-genui --enable`), then reload Desktop. |
 | A board arrives as text | You're outside Hermes Desktop and the Webapp (Telegram, the CLI), which is by design. In Desktop, check the plugin's **Desktop** switch. |
-| "workspace failed to render: Can't find variable: requestIdleCallback" | A Hermes bug ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)) in Safari and in every browser on iPhone and iPad. On a Mac, use the [Safari workaround](#safari-on-a-mac). On iPhone or iPad the Webapp [doesn't work yet](#iphone-and-ipad). |
-| A literal `::blocks{id="…"}` line, in the Hermes dashboard | The dashboard draws nothing and reports itself as `local`, like Desktop, so the Markdown fallback is skipped too. Open the chat in Hermes Desktop or the Webapp, or ask for a Markdown table. |
+| "workspace failed to render: Can't find variable: requestIdleCallback" | A Hermes bug ([hermes-agent#148538](https://github.com/NousResearch/hermes-agent/issues/148538)) in Safari and in every browser on iPhone and iPad, fixed in Hermes v0.23.3. Update Hermes. On a Mac you can also use the [Safari workaround](#safari-on-a-mac). |
+| A literal `::blocks{id="…"}` line, in the Hermes dashboard or a phone app built on it | The dashboard draws nothing and reports itself as `local`, like Desktop, so the Markdown fallback is skipped too. Open the chat in the Webapp (on a phone too) or Hermes Desktop, or ask for a Markdown table. |
 | Red "Unnamed call" rows, or `tool_call 'calls' is not valid JSON` | Tool search is on. Run `hermes config set tools.tool_search.enabled off` (add `-p <profile>`), then start a new chat. |
 | The model built an HTML widget instead | Start a new chat, or ask "draw it with blocks". Tool search being on can also cause this; see Install. |
 | Few or slow photos | Add a photo key above. A source that fails is skipped automatically and retried after 10 minutes. |
