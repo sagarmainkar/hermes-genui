@@ -170,8 +170,12 @@ def test_a_moved_plugin_gets_its_monitor_rewritten(tmp_path):
     script.write_text('DEMO = "/old/place/demo.py"\n', encoding="utf-8")
     assert assistant.refresh_monitor(home) is True
     # Read the path back as Python reads it: the script stores it as a repr, which doubles backslashes on Windows.
-    written = script.read_text(encoding="utf-8").split("DEMO = Path(", 1)[1].split(")", 1)[0]
-    assert Path(ast.literal_eval(written)).resolve() == Path(assistant.demo.__file__).resolve()
+    # Parse the script rather than cutting at ")", so a folder name with brackets can't break the check.
+    written = next(
+        node.value.args[0].value for node in ast.walk(ast.parse(script.read_text(encoding="utf-8")))
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "DEMO" for t in node.targets)
+    )
+    assert Path(written).resolve() == Path(assistant.demo.__file__).resolve()
     other = tmp_path / "other"
     (other / "plugin-data" / "hermes-genui" / "blocks").mkdir(parents=True)
     assert assistant.refresh_monitor(other) is False and not (other / "scripts").exists()
