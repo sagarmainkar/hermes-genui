@@ -1,3 +1,4 @@
+import ast
 import importlib
 import json
 import subprocess
@@ -168,7 +169,9 @@ def test_a_moved_plugin_gets_its_monitor_rewritten(tmp_path):
     script = home / "scripts" / "hermes-genui-assistant.py"
     script.write_text('DEMO = "/old/place/demo.py"\n', encoding="utf-8")
     assert assistant.refresh_monitor(home) is True
-    assert str(Path(assistant.demo.__file__).resolve()) in script.read_text(encoding="utf-8")
+    # Read the path back as Python reads it: the script stores it as a repr, which doubles backslashes on Windows.
+    written = script.read_text(encoding="utf-8").split("DEMO = Path(", 1)[1].split(")", 1)[0]
+    assert Path(ast.literal_eval(written)).resolve() == Path(assistant.demo.__file__).resolve()
     other = tmp_path / "other"
     (other / "plugin-data" / "hermes-genui" / "blocks").mkdir(parents=True)
     assert assistant.refresh_monitor(other) is False and not (other / "scripts").exists()
