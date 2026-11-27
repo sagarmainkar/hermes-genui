@@ -9853,6 +9853,10 @@ var blockTag_default = `/* The block tag's own states */
   border-radius: 16px;
   background: var(--background, Canvas);
 }
+/* The expanded box caps its height and scrolls, so its blocks keep their own height: as flex items they would
+   otherwise shrink to fit, and a card that clips its overflow (a table) collapses to a thin strip. */
+.hb-board-overlay .hb-blocks > *,
+.hb-board-overlay .hb-blocks > .hb-slot > * { flex-shrink: 0; }  /* a slot draws no box: its block is the item */
 .hb-overlay-close {
   position: absolute;
   top: 14px;

@@ -377,6 +377,17 @@ describe("BlockTag expand width semantics", () => {
     expect(getComputedStyle(board).maxWidth).toBe("1100px");             // closed: the cap returns with the inline view
     expect(getComputedStyle(card).maxWidth).toBe("720px");               // and the cards never moved
   });
+  it("keeps every block its own height in the expanded box, which scrolls instead of squeezing them", async () => {
+    const table = { type: "table", caption: "Sample", columns: ["Item"], rows: [["A"]] };
+    const { container, button } = await drawn([{ type: "heading", text: "Quarterly" }, table, calc]);
+    const card = container.querySelector(".hb-table-card")!;
+    expect(getComputedStyle(card).flexShrink).not.toBe("0");             // inline: the board's own flow, untouched
+    fireEvent.click(button);
+    expect(getComputedStyle(card).flexShrink).toBe("0");                 // expanded: the table may not collapse
+    expect(getComputedStyle(container.querySelector(".hb-calc")!).flexShrink).toBe("0");
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(getComputedStyle(card).flexShrink).not.toBe("0");
+  });
 });
 
 describe("the export chrome is the only control a board grows", () => {
