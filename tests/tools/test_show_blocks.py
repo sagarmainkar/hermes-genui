@@ -445,3 +445,14 @@ def test_including_a_board_takes_its_blocks_and_not_its_follow_ups(store_dir):
     board_id = plugin_store.save({"follow_ups": ups, "blocks": [TIMELINE]}, root=store_dir)
     result = tools.show_blocks({"blocks": [{"type": "include", "id": board_id}]})
     assert plugin_store.load(stored_id(result), root=store_dir) == [TIMELINE]
+
+
+def test_every_object_list_in_the_schema_stays_open_for_grammar_constrained_servers():
+    # Hermes adds an empty "properties" to every object for llama.cpp; without an open door the grammar allows only
+    # {}, and every board arrives as [{}] (#86). Each item list must say its objects take their own fields.
+    props = tools.SHOW_BLOCKS_SCHEMA["parameters"]["properties"]
+    lists = {name: p["items"] for name, p in props.items() if p.get("type") == "array"}
+    assert set(lists) == {"blocks", "links", "follow_ups"}
+    for name, items in lists.items():
+        assert items == {"type": "object", "additionalProperties": True}, name
+    assert lists["blocks"] is not lists["links"]  # one copy each: a caller changing one list cannot change the others

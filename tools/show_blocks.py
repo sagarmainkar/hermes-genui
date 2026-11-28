@@ -315,6 +315,12 @@ def show_blocks(params: dict, **kwargs) -> str:
     return paste_instruction(block_id)
 
 
+# Each item is an object of the block's own fields, which the plugin checks itself. "additionalProperties: true"
+# says so out loud: Hermes adds an empty "properties" to every object for llama.cpp, and a grammar-constrained
+# server reads an object with no properties and no open door as "only {}", so every board arrived empty (#86).
+OPEN_OBJECT = {"type": "object", "additionalProperties": True}
+
+
 def schema(guide: str = "full") -> dict:
     """show_blocks's schema. "full" carries every block's fields and example; "menu" (#42) carries the short menu,
     and the model gets fields from block_guide."""
@@ -337,7 +343,7 @@ def schema(guide: str = "full") -> dict:
             "properties": {
                 "blocks": {
                     "type": "array",
-                    "items": {"type": "object"},
+                    "items": dict(OPEN_OBJECT),
                     "description": "The blocks to draw, in order. Each has a `type`, and may ask for its place "
                     "with `align`: left | center | right (its words with `text_align`).",
                 },
@@ -353,7 +359,7 @@ def schema(guide: str = "full") -> dict:
                 },
                 "links": {
                     "type": "array",
-                    "items": {"type": "object"},
+                    "items": dict(OPEN_OBJECT),
                     "description": "Optional. 1-3 boards this one connects to, each an address (\"7f3a09bc\") or "
                     "{\"id\": \"7f3a09bc\", \"note\": \"last quarter\"}. Use it when reaching back genuinely helps — "
                     "a comparison the user asked for (\"how does this quarter compare to last?\"), or a prior board "
@@ -377,7 +383,7 @@ def schema(guide: str = "full") -> dict:
                 },
                 "follow_ups": {
                     "type": "array",
-                    "items": {"type": "object"},
+                    "items": dict(OPEN_OBJECT),
                     "description": "Optional. One line of quiet tappable prompts (1-4) drawn under the board, each "
                     "{\"label\": \"Plan day 2\", \"run\": \"Plan the second day of my Kyoto itinerary\"}. A tap sends "
                     "the run message to the chat as the reader's own — you choose the prompts; the reader gets no "
