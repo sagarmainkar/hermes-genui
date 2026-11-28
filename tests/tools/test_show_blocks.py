@@ -456,3 +456,14 @@ def test_every_object_list_in_the_schema_stays_open_for_grammar_constrained_serv
     for name, items in lists.items():
         assert items == {"type": "object", "additionalProperties": True}, name
     assert lists["blocks"] is not lists["links"]  # one copy each: a caller changing one list cannot change the others
+
+
+def test_the_new_chart_kinds_are_documented_where_the_model_reads_the_blocks(store_dir):
+    # The model reads the menu and a block's spec: every kind the pack added is named in the menu it is given, and
+    # in the fields the model is shown beside a refusal.
+    prompts = importlib.import_module("hermes_genui.core.catalog_text")
+    menu = prompts.menu()
+    for kind in ("gauge", "bullet", "funnel", "pareto", "radar", "control", "bubble", "box", "treemap"):
+        assert kind in menu, kind
+    for kind in ("gauge", "bullet", "funnel", "pareto", "radar", "control", "bubble", "box", "treemap"):
+        assert kind in prompts.describe(), kind

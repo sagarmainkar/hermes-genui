@@ -97,6 +97,24 @@ export function https(v: unknown): string | undefined {
   return undefined;
 }
 
+// The one loopback exception to the https rule: visible cards link to the consumer's own machine (Mission Control at
+// http://127.0.0.1:8765). Plain http stays refused for every other host — a remote page may not ride a card's link.
+const LOOPBACK_HTTP = /^http:\/\/(?:127\.0\.0\.1|localhost|\[::1\])(?::\d{1,5})?(?:[/?#]|$)/i;
+
+/**
+ * A link a card may open, or undefined. https is accepted anywhere; http only on this machine (127.0.0.1, localhost,
+ * [::1], any port and path). javascript:, data:, http to a remote host and anything else is refused.
+ *   "https://x.org/p" → "https://x.org/p";  "http://127.0.0.1:8765/#/project/PJ-1" → the same string
+ *   "http://evil.example/p" → undefined;  "http://localhost.example/p" → undefined;  "javascript:alert(1)" → undefined
+ */
+export function safeLink(v: unknown): string | undefined {
+  if (typeof v !== "string") return undefined;
+  const url = v.trim();
+  if (/^https:\/\//i.test(url)) return url;
+  if (LOOPBACK_HTTP.test(url)) return url;
+  return undefined;
+}
+
 /** The object without its undefined fields, so a read block holds only what the model gave. */
 export function clean<T extends object>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;

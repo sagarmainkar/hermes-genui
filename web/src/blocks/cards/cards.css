@@ -1,0 +1,185 @@
+/* Cards: a compact wall of project cards. One border, one radius, one padding per card — no nested panels. A 2-up grid
+   on a wide board, a single column when narrow. Colours are tokens only, so light/dark and every theme follow. */
+.hb-cards { display: grid; gap: var(--hb-gap, 10px); }
+/* A board that states columns: 2, and a board that says nothing at all, keep the auto-fit that shipped boards draw. */
+.hb-cards-2,
+.hb-cards-auto { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.hb-cards-1 { grid-template-columns: 1fr; }
+/* Three up needs about 1100px of THE WALL, not of the window: the same board is drawn in a chat column, in the
+   Mission Control pane (~380-700px) and in the webapp, so the wall measures its own frame and collapses to two
+   below ~1100px and to one below ~720px. 1099 (not 1100) because a board stops at a 1100px reading width in chat
+   (tokens.css): that board is exactly the consumer's ask — three 360px cards, six on a screen — and must not
+   collapse. The media queries are the fallback for engines without container queries; the container rules come
+   last, so a narrow pane wins over a wide window. */
+.hb-cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1099px) { .hb-cards-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .hb-cards-3 { grid-template-columns: minmax(0, 1fr); } }
+.hb-cards-frame { container-type: inline-size; }
+@container (max-width: 1099px) { .hb-cards-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 720px) { .hb-cards-3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* A two-up wall that holds a hero: the hero takes the whole row and the cards beside it sit in exactly two tracks.
+   An auto-fit would put three ordinary cards on a 1000px wall, which is not what "2-up beside a hero" means (the spec
+   asks for the hero full width and the rest 2-up). The wall measures itself, so a chat column, a narrow pane and the
+   webapp all collapse to one track below ~620px — about the width where two 300px cards stop fitting. */
+.hb-cards-2.hb-cards-hero,
+.hb-cards-auto.hb-cards-hero { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 620px) { .hb-cards-2.hb-cards-hero, .hb-cards-auto.hb-cards-hero { grid-template-columns: minmax(0, 1fr); } }
+@container (max-width: 620px) { .hb-cards-2.hb-cards-hero, .hb-cards-auto.hb-cards-hero { grid-template-columns: minmax(0, 1fr); } }
+
+/* Shelves: labelled groups of cards inside one block, each group its own wall. */
+.hb-cards-shelves { display: flex; flex-direction: column; gap: 18px; }
+.hb-card-shelf { display: flex; flex-direction: column; gap: 8px; }
+.hb-card-shelf-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hb-muted);
+}
+
+.hb-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: var(--hb-card-pad-y, 14px) var(--hb-card-pad-x, 16px);
+  border: 1px solid var(--hb-line);
+  border-radius: 14px;
+  background: var(--hb-card);
+}
+
+/* A card that asks for the whole row (span 2 on a two-up wall): same anatomy, a slightly larger title. */
+.hb-card-wide { grid-column: 1 / -1; }
+.hb-card-wide .hb-card-title { font-size: 17px; line-height: 22px; }
+
+.hb-card-head { display: flex; align-items: flex-start; gap: 10px; }
+.hb-card-titles { min-width: 0; flex: 1; }
+.hb-card-title { margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 650; letter-spacing: -0.01em; }
+.hb-card-id {
+  margin-top: 2px;
+  font-family: var(--dt-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 10.5px;
+  color: var(--hb-muted);
+}
+
+.hb-card-chip {
+  flex: none;
+  align-self: flex-start;
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+/* Up to three tiny tags beside the status chip: muted and unchanging, never the colour of `needs`. They truncate
+   instead of wrapping, and the row does not exist at all when a card has none. */
+.hb-card-tags { display: flex; flex: none; gap: 4px; margin: 0; padding: 0; list-style: none; max-width: 45%; }
+.hb-card-tag {
+  min-width: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--hb-line);
+  border-radius: 999px;
+  background: var(--hb-well);
+  color: var(--hb-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hb-card-band { display: flex; align-items: center; gap: 14px; }
+.hb-card-ring { flex: none; }
+.hb-card-ring-label { font-size: 7px; font-weight: 600; fill: var(--hb-ink-2); }
+/* A narrow card's ring is 28px instead of 40px; the 12px it gives up stays in the band as a margin, so the metrics
+   column starts where it always did and nothing jumps between the two sizes. The centre word keeps the same 7px the
+   40px ring draws it at (9 viewBox units of the 40-unit box), and the drawing is allowed to overhang its own 28px
+   box into that reserved margin, so a full word ("smooth", "unknown") is never cut. */
+.hb-card-ring-sm { margin-right: 12px; overflow: visible; }
+.hb-card-ring-sm .hb-card-ring-label { font-size: 9px; }
+
+.hb-card-metrics { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.hb-card-metric { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12px; line-height: 16px; }
+.hb-card-metric dt { color: var(--hb-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-card-metric dd { margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hb-card-spark { flex: none; width: 64px; height: 20px; overflow: visible; }
+.hb-card-spark path { fill: none; stroke: var(--hb-accent); stroke-width: 1.5; opacity: 0.75; vector-effect: non-scaling-stroke; }
+
+.hb-card-needs { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 12px; line-height: 16px; }
+.hb-card-dot { flex: none; width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+
+.hb-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.hb-card-fresh { font-size: 10.5px; color: var(--hb-muted); }
+/* A stale card's figures are old: the freshness line dims and a plain word says so (never colour alone). */
+.hb-card-fresh-dim { opacity: 0.65; }
+.hb-card-stale {
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid var(--hb-line);
+  border-radius: 999px;
+  color: var(--hb-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 15px;
+  letter-spacing: 0.02em;
+}
+.hb-card-acts { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: none; }
+.hb-card-action {
+  flex: none;
+  padding: 3px 9px;
+  border: 1px solid var(--hb-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hb-accent-ink);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.hb-card-action:hover { background: var(--hb-accent-soft); }
+.hb-card-action:focus-visible { outline: 2px solid var(--hb-accent); outline-offset: 2px; }
+
+/* A card's second action is the quieter one: a plain text link, no border, no fill. */
+.hb-card-secondary {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hb-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.hb-card-secondary:hover { color: var(--hb-accent-ink); }
+.hb-card-secondary:focus-visible { outline: 2px solid var(--hb-accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Compact boards retighten the card's own rhythm (the padding already follows the density tokens). */
+.hb-blocks[data-density="compact"] .hb-card { gap: 6px; }
+.hb-blocks[data-density="compact"] .hb-card-metrics { gap: 2px; }
+
+.hb-tone-good { color: var(--hb-good); }
+.hb-tone-warn { color: var(--hb-warn); }
+.hb-tone-bad { color: var(--hb-warn); }
+.hb-tone-neutral { color: var(--hb-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-card-action { transition: none; }
+}
+
+
+/* Card facts: owner · milestone · trend · budget · ARR (only the ones set). */
+.hb-card-facts { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 8px 0 0; padding: 8px 0 0; border-top: 1px dashed var(--hb-line); }
+.hb-card-facts > div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hb-card-facts dt { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--hb-muted); }
+.hb-card-facts dd { margin: 0; font-size: 12px; font-weight: 600; color: var(--hb-ink); }

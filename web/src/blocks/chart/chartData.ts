@@ -5,7 +5,8 @@ import { usesLakhCrore } from "../../lib/locale";
 
 /** Every kind the chart block draws. */
 export const CHART_KINDS = ["line", "bar", "area", "stacked", "hbar", "combo", "pie", "donut",
-  "scatter", "waterfall", "histogram", "range"] as const;
+  "scatter", "waterfall", "histogram", "range", "gauge", "bullet", "funnel", "pareto", "radar", "control", "bubble",
+  "box", "treemap"] as const;
 export type ChartKind = (typeof CHART_KINDS)[number];
 
 /** One point of a scatter, or one bar of a waterfall: a scatter reads x and y, a waterfall reads value and total. */
@@ -48,11 +49,19 @@ export type ChartSpec = {
   stepped?: boolean;
   /** height in px, 120-480, for the drawing area. */
   height?: number;
+  /** gauge: the ends of its scale (default 0-100), and the target line to read the value against. */
+  min?: number; max?: number; target?: number;
+  /** gauge and bullet: the range ends behind the track, worst to best; drawn as quiet bands. */
+  bands?: number[];
+  /** pie, donut: the words in the middle (the drawing's own headline when absent), and the slice to emphasise. */
+  center?: { label: string; value: string };
+  highlight?: number;
 };
 
 // Other names models use for the same kinds, written without spaces, dashes or underscores.
 const KIND_ALIASES: Record<string, ChartKind> = { doughnut: "donut", stackedbar: "stacked", horizontalbar: "hbar", barh: "hbar",
-  hist: "histogram", rangebar: "range", floatingbar: "range" };
+  hist: "histogram", rangebar: "range", floatingbar: "range", dial: "gauge", speedometer: "gauge",
+  bulletgraph: "bullet" };
 
 /** The kind to draw for the name the model wrote: a known name (any case) or an alias is that kind, anything else is a
  *  line. "pie" -> pie; "Donut" -> donut; "stacked_bar" -> stacked; "hist" -> histogram; "scatter" -> scatter;
@@ -70,8 +79,9 @@ export function chartKind(name: unknown): ChartKind {
  *  window per x), the rest 3. */
 export function maxSeries(kind: ChartKind): number {
   if (kind === "stacked" || kind === "area") return 6;
-  if (kind === "scatter") return 2;
-  if (kind === "waterfall" || kind === "histogram" || kind === "range") return 1;
+  if (kind === "scatter" || kind === "bullet" || kind === "bubble") return 2;
+  if (kind === "waterfall" || kind === "histogram" || kind === "range" || kind === "funnel" || kind === "pareto"
+    || kind === "control" || kind === "treemap") return 1;
   return 3;
 }
 

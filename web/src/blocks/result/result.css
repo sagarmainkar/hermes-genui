@@ -1,0 +1,7 @@
+/* Result: a delivered result card. */
+.hb-result { margin: 0; padding: 14px 16px 12px; border: 1px solid var(--hb-line); border-radius: 14px; background: var(--hb-card); }
+.hb-result-title { font-size: 14px; font-weight: 650; margin-bottom: 6px; }
+.hb-result-body { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--hb-ink); white-space: pre-wrap; }
+.hb-result-sources { margin: 10px 0 0; padding: 0 0 0 16px; font-size: 11.5px; color: var(--hb-muted); }
+.hb-result-sources a { color: var(--hb-accent-ink); }
+.hb-result-model { margin-top: 8px; font-size: 10.5px; color: var(--hb-muted); }

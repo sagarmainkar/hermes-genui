@@ -42,6 +42,23 @@ def is_https(v: object) -> bool:
 # ignored, and the block sits left (align) or reads left (text_align). Both words share the one reader.
 ALIGN_WORDS = ("left", "center", "right")
 
+# Visible cards may link to the consumer's own machine over plain http (Mission Control at http://127.0.0.1:8765);
+# any other http host stays refused, so a remote page cannot ride a card's link. Same rule as the web's safeLink
+# (core/fields.ts) — one policy, both halves.
+LOOPBACK_HTTP = re.compile(r"^http://(?:127\.0\.0\.1|localhost|\[::1\])(?::\d{1,5})?(?:[/?#]|$)", re.IGNORECASE)
+
+
+def is_safe_link(v: object) -> bool:
+    """An https link anywhere, or http only on this machine (127.0.0.1, localhost, [::1]); anything else is refused.
+
+    "https://x.org/p" → True;  "http://127.0.0.1:8765/#/project/PJ-1" → True
+    "http://x.org/p" → False;  "javascript:alert(1)" → False;  None → False
+    """
+    if not isinstance(v, str):
+        return False
+    url = v.strip()
+    return url.lower().startswith("https://") or bool(LOOPBACK_HTTP.match(url))
+
 
 def align_word(value: object) -> str | None:
     """One of the alignment words, trimmed and caseless the way models write; anything else gives None.

@@ -67,9 +67,12 @@ export function PieChart({ spec }: { spec: ChartSpec }) {
 
   const valuesAreShares = unit === "%";
   const biggest = values.indexOf(Math.max(...values));
-  const headline = valuesAreShares
-    ? { value: sharePct(values[biggest] / total), label: String(spec.x[biggest]) }
-    : { value: fmt(total, unit), label: "Total" };
+  // The words in the middle: the model's own centre words when it gave them, otherwise the drawing's headline.
+  const headline = spec.center && (spec.center.value || spec.center.label)
+    ? { value: spec.center.value, label: spec.center.label }
+    : valuesAreShares
+      ? { value: sharePct(values[biggest] / total), label: String(spec.x[biggest]) }
+      : { value: fmt(total, unit), label: "Total" };
 
   /** Picks slice i (or none) and points the hover card at the middle of its ring. */
   function pick(i: number | null) {
@@ -86,7 +89,13 @@ export function PieChart({ spec }: { spec: ChartSpec }) {
       note: valuesAreShares ? undefined : shareNote(values, values[i]) });
   }
   const toggle = (i: number) => pick(picked === i ? null : i);
-  const faded = (i: number) => (picked === null || picked === i ? 1 : 0.5);
+  // A slice is faded when another is pointed at; without a pointer (or keyboard pick) the model's highlighted slice
+  // is the one that stays lit, so a lifecycle wheel shows its current stage at rest.
+  const faded = (i: number) => {
+    if (picked !== null) return picked === i ? 1 : 0.5;
+    if (spec.highlight !== undefined) return spec.highlight === i ? 1 : 0.55;
+    return 1;
+  };
   const mouse = (i: number | null) => (e: { pointerType: string }) => e.pointerType === "mouse" && pick(i);
 
   return (

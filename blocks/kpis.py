@@ -53,13 +53,14 @@ def _check_figure(item: object, path: str, what: str) -> list[tuple[str, str]]:
         return [(path, f"{what} needs label and value")]
     if "value" not in item or item["value"] == "":
         return [(path, f"{what} needs label and value")]
-    if "trend" in item and not _is_trend(item["trend"]):
+    if "trend" in item and not is_trend(item["trend"]):
         return [(path, "trend must be a list of 2-60 numbers")]
     return []
 
 
-def _is_trend(trend: object) -> bool:
+def is_trend(trend: object) -> bool:
     """A list of 2-60 slots, each a finite number or null (a gap the sparkline breaks at), with 2 numbers at least.
+    Public because the cards pack's metrics use the same rule (blocks/cards.py imports it).
 
     [100, 90.5, 80] → True;  [100, None, 80] → True;  [1] → False;  [1, "2"] → False;  [1, nan] → False;  61 → False
     """

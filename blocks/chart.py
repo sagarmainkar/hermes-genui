@@ -1,13 +1,16 @@
-"""chart: line, bar, area, stacked, hbar, combo, pie, donut, scatter, waterfall, histogram or range."""
+"""chart: line, bar, area, stacked, hbar, combo, pie, donut, scatter, waterfall, histogram, range, gauge, bullet,
+funnel, pareto, radar, control, bubble, box or treemap."""
 
 import re
 
-from .common import change_chip, fmt_num, is_number, safe_text, short_text
+from .common import change_chip, fmt_num, has_text, is_number, safe_text, short_text
 
 CHART_KINDS = ("line", "bar", "area", "stacked", "hbar", "combo", "pie", "donut",
-               "scatter", "waterfall", "histogram", "range")
+               "scatter", "waterfall", "histogram", "range", "gauge", "bullet", "funnel", "pareto",
+               "radar", "control", "bubble", "box", "treemap")
 KIND_ALIASES = {"doughnut": "donut", "stackedbar": "stacked", "horizontalbar": "hbar", "barh": "hbar",
-                "hist": "histogram", "rangebar": "range", "floatingbar": "range"}
+                "hist": "histogram", "rangebar": "range", "floatingbar": "range",
+                "dial": "gauge", "speedometer": "gauge", "bulletgraph": "bullet"}
 SCATTER_POINTS = 200   # a scatter series's cap, the same one the web reader keeps
 MAX_LABEL = 40         # a point's name, as the web reader keeps it
 
@@ -107,6 +110,10 @@ def check_chart(block: dict, path: str) -> list[tuple[str, str]]:
         return _check_scatter(block, path)
     if kind == "waterfall":
         return _check_waterfall(block, path)
+    if kind == "gauge":
+        return _check_gauge(block, path)
+    if kind == "box":
+        return _check_box(block, path)
     if kind == "range":
         x, series, point_problems = _range_points(block, x, series, path)
         if point_problems:
@@ -115,7 +122,8 @@ def check_chart(block: dict, path: str) -> list[tuple[str, str]]:
         return [(path, "chart needs x labels")]
     if not isinstance(series, list) or not series:
         return [(path, "chart needs 1-6 series")]
-    most = 1 if kind in ("histogram", "range") else 6 if kind in ("stacked", "area") else 3
+    most = 1 if kind in ("histogram", "range", "funnel", "pareto", "control", "treemap") \
+        else 6 if kind in ("stacked", "area") else 2 if kind in ("bullet", "bubble") else 3
     if len(series) > most:
         return [(path, _limit(kind, most))]
     problems = []
@@ -146,9 +154,10 @@ def check_chart(block: dict, path: str) -> list[tuple[str, str]]:
             return [(path, "a histogram counts, so no negative values")]
         if not any(v > 0 for v in numbers):
             return [(path, "a histogram needs a count above zero")]
-    if kind in ("pie", "donut") and not any(v > 0 for v in numbers):
+    if kind in ("pie", "donut", "treemap") and not any(v > 0 for v in numbers):
         return [(path, f"a {kind} needs at least one positive value")]
-    return _check_tone(block, kind, len(series), path) + _check_controls(block, kind, path)
+    problems = _check_centre(block, kind, path) + _check_highlight(block, kind, x, path)
+    return problems + _check_tone(block, kind, len(series), path) + _check_controls(block, kind, path)
 
 
 def _check_controls(block: dict, kind: str, path: str) -> list[tuple[str, str]]:
@@ -272,6 +281,36 @@ def _check_window(series: dict, i: int, count: int, path: str) -> list[tuple[str
     return problems
 
 
+def _check_centre(block: dict, kind: str, path: str) -> list[tuple[str, str]]:
+    """A donut's (or pie's) centre words: {label, value}, both short text. Any other kind ignores them silently.
+
+    {"kind": "donut", "center": {"label": "PLAN", "value": "smooth"}, …} → []
+    {"kind": "donut", "center": {"label": "PLAN"}, …} → [("0.center", "center needs a label and a value")]
+    """
+    if kind not in ("pie", "donut") or "center" not in block:
+        return []
+    centre = block["center"]
+    if not (isinstance(centre, dict) and has_text(centre.get("label")) and has_text(centre.get("value"))):
+        return [(f"{path}.center", "center needs a label and a value")]
+    return []
+
+
+def _check_highlight(block: dict, kind: str, x: list, path: str) -> list[tuple[str, str]]:
+    """A donut's (or pie's) emphasised slice: an index into x. Any other kind ignores it silently.
+
+    {"kind": "donut", "highlight": 0, "x": ["PLAN", "TRACK"], …} → []
+    {"kind": "donut", "highlight": 2, "x": ["PLAN", "TRACK"], …}
+        → [("0.highlight", "highlight must be an index into x")]
+    """
+    if kind not in ("pie", "donut") or "highlight" not in block:
+        return []
+    at = block["highlight"]
+    if not (isinstance(at, int) and not isinstance(at, bool) and 0 <= at < len(x)):
+        return [(f"{path}.highlight", "highlight must be an index into x")]
+    return []
+
+
+
 def _check_tone(block: dict, kind: str, series_count: int, path: str) -> list[tuple[str, str]]:
     """The optional tone: only "change" (one line, green above its first value and orange below), only on a line
     chart with one series.
@@ -310,6 +349,25 @@ def _series_line(series: dict, labels: list) -> str:
             named += f" and {len(missing) - len(shown)} more"
         line += f", {len(missing)} gap{'' if len(missing) == 1 else 's'} ({named})"
     return line
+
+
+def _slices_note(block: dict, x: list) -> str:
+    """The words in a donut's middle and the slice it lights, kept for a reader who cannot see the drawing.
+
+    {"center": {"label": "PLAN", "value": "smooth"}} → " · centre PLAN smooth"
+    {"highlight": 1, "x": ["PLAN", "TRACK"]} → " · highlighted TRACK"
+    """
+    note = ""
+    centre = block.get("center")
+    if isinstance(centre, dict):
+        label = safe_text(centre.get("label"), 40)
+        value = safe_text(centre.get("value"), 40)
+        if label and value:
+            note += f" · centre {label} {value}"
+    highlight = block.get("highlight")
+    if isinstance(highlight, int) and not isinstance(highlight, bool) and 0 <= highlight < len(x):
+        note += f" · highlighted {safe_text(x[highlight], 40)}"
+    return note
 
 
 def _slices(x: list, series: dict, top: int = 4) -> str:
@@ -471,6 +529,25 @@ def _windows_line(x: list, series: dict) -> str:
     return "; ".join(parts)
 
 
+def _centre_words(block: dict, x: list) -> str:
+    """A donut's or pie's centre words and its emphasised slice, for the text fallback: fields the drawing shows and
+    a reader of the text would otherwise never hear. Nothing when the block carries neither.
+
+    {"center": {"label": "PLAN", "value": "smooth"}, "highlight": 1, "x": ["PLAN", "TRACK"]}
+      → " · centre PLAN smooth · highlighted TRACK"
+    """
+    parts: list[str] = []
+    centre = block.get("center")
+    if isinstance(centre, dict):
+        words = [w for w in (safe_text(centre.get("label"), 24), safe_text(centre.get("value"), 24)) if w]
+        if words:
+            parts.append("centre " + " ".join(words))
+    at = block.get("highlight")
+    if isinstance(at, int) and not isinstance(at, bool) and 0 <= at < len(x):
+        parts.append(f"highlighted {safe_text(x[at], MAX_LABEL)}")
+    return "".join(f" · {part}" for part in parts)
+
+
 def text_chart(block: dict) -> str:
     """The title (and unit), then each series first → last, a histogram's bins and counts, a range's windows, a
     scatter's ranges and highest point, a bridge's steps, or a pie's top slices. A written caveat becomes a second
@@ -506,7 +583,9 @@ def text_chart(block: dict) -> str:
         if isinstance(ns, list):
             series = [s for s in ns if isinstance(s, dict)]
     if kind in ("pie", "donut"):
-        body = _slices(x, series[0])
+        body = _slices(x, series[0]) + _slices_note(block, x)
+        if body:
+            body += _centre_words(block, x)
     elif kind == "histogram":
         body = _bins_line(x, series[0])
     elif kind == "range":
@@ -515,6 +594,22 @@ def text_chart(block: dict) -> str:
         body = _scatter_line(series, title)
     elif kind == "waterfall":
         body = _waterfall_line(series[0])
+    elif kind == "gauge":
+        body = _gauge_line(block, series[0])
+    elif kind == "bullet":
+        body = _bullet_line(block, series)
+    elif kind in ("funnel", "pareto"):
+        body = _steps_list_line(block, series[0])
+    elif kind == "radar":
+        body = _radar_line(series)
+    elif kind == "control":
+        body = _control_line(series[0])
+    elif kind == "bubble":
+        body = _bubble_line(series)
+    elif kind == "box":
+        body = _box_line(block, series)
+    elif kind == "treemap":
+        body = _treemap_line(block, series[0])
     else:
         body = "; ".join(line for line in (_series_line(s, block.get("x") or []) for s in series[:6]) if line)
     if not body:
@@ -524,3 +619,152 @@ def text_chart(block: dict) -> str:
     line = f"{head}: {body}"
     caveat = safe_text(block.get("caveat"), 120)
     return f"{line}\n_{caveat}_" if caveat else line
+
+
+def _check_gauge(block: dict, path: str) -> list[tuple[str, str]]:
+    """A gauge: one series holding exactly one number, optional numeric min/max/target, and max above min.
+
+    {"series": [{"data": [68]}], "min": 0, "max": 100, "target": 75} → []
+    {"series": [{"data": ["x"]}]} → [(".series.0", "a gauge needs one number")]
+    {"series": [{"data": [68, 90]}]} → [(".series.0", "a gauge needs one number")]   # a second reading would be lost
+    """
+    series = block.get("series")
+    if not isinstance(series, list) or len(series) != 1:
+        return [(path, "a gauge takes one series")]
+    data = series[0].get("data") if isinstance(series[0], dict) else None
+    if not isinstance(data, list) or len(data) != 1 or not is_number(data[0]):
+        return [(f"{path}.series.0", "a gauge needs one number")]
+    problems: list[tuple[str, str]] = []
+    for key in ("min", "max", "target"):
+        if key in block and not is_number(block[key]):
+            problems.append((path, f"{key} must be a number"))
+    mn, mx = block.get("min"), block.get("max")
+    if is_number(mn) and is_number(mx) and mx <= mn:
+        problems.append((path, "max must be greater than min"))
+    return problems
+
+
+def _gauge_line(block: dict, series: dict) -> str:
+    """The one reading, with its unit and its target when one was given:
+    {"data": [68], "target": 75} → "68 (target 75)"."""
+    data = series.get("data") or []
+    value = data[0] if data else None
+    if not is_number(value):
+        return ""
+    unit = safe_text(block.get("unit"), 20)
+    reading = fmt_num(value) + ("%" if unit == "%" else (f" {unit}" if unit else ""))
+    # The scale the reading sits on: the same number read on 0-100 and on 90-100 means different things.
+    lo, hi = block.get("min"), block.get("max")
+    if is_number(lo) and is_number(hi) and hi > lo:
+        reading += f" of {fmt_num(lo)}-{fmt_num(hi)}"
+    target = block.get("target")
+    if is_number(target):
+        reading += f" (target {fmt_num(target)})"
+    return reading
+
+
+def _bullet_line(block: dict, series: list) -> str:
+    """Each row as "label actual/target", or just the actual when no target series was given."""
+    x = block.get("x") if isinstance(block.get("x"), list) else []
+    actual = series[0].get("data") if series and isinstance(series[0], dict) else []
+    targets = series[1].get("data") if len(series) > 1 and isinstance(series[1], dict) else []
+    cells: list[str] = []
+    for i, label in enumerate(x):
+        seg = safe_text(label)
+        v = actual[i] if i < len(actual) else None
+        t = targets[i] if i < len(targets) else None
+        if is_number(v):
+            seg += f" {fmt_num(v)}"
+        if is_number(t):
+            seg += f"/{fmt_num(t)}"
+        if seg:
+            cells.append(seg)
+    return " · ".join(cells)
+
+
+def _check_box(block: dict, path: str) -> list[tuple[str, str]]:
+    """A box plot: 1-8 groups, each a series whose data list holds that group's raw numbers.
+
+    {"series": [{"name": "A", "data": [1, 2, 3]}, {"name": "B", "data": [2, 4]}]} → []
+    {"series": [{"name": "A", "data": ["x"]}]} → [(".series.0", "group data must be numbers")]
+    """
+    series = block.get("series")
+    if not isinstance(series, list) or not 1 <= len(series) <= 8:
+        return [(path, "a box plot takes 1-8 groups")]
+    problems: list[tuple[str, str]] = []
+    for i, s in enumerate(series):
+        data = s.get("data") if isinstance(s, dict) else None
+        if not isinstance(data, list) or not data:
+            problems.append((f"{path}.series.{i}", "group needs a data list"))
+        elif not all(is_number(v) for v in data):
+            problems.append((f"{path}.series.{i}", "group data must be numbers"))
+    return problems
+
+
+def _box_line(block: dict, series: list) -> str:
+    """Each group's median, named by its series (then by its x label): "Alpha median 3 · Beta median 3"."""
+    parts: list[str] = []
+    xs = block.get("x") if isinstance(block.get("x"), list) else []
+    for i, s in enumerate(series[:8]):
+        vals = sorted(v for v in (s.get("data") or []) if is_number(v))
+        if not vals:
+            continue
+        med = vals[len(vals) // 2] if len(vals) % 2 else (vals[len(vals) // 2 - 1] + vals[len(vals) // 2]) / 2
+        label = safe_text(s.get("name")) or (safe_text(xs[i]) if i < len(xs) else "") or "Group"
+        parts.append(f"{label} median {fmt_num(med)}")
+    return " · ".join(parts)
+
+
+def _steps_list_line(block: dict, series: dict) -> str:
+    """A funnel's or a pareto's stages in order: "Visit 1,200 · Signup 300"."""
+    cells: list[str] = []
+    for label, v in zip(block.get("x") or [], series.get("data") or []):
+        if is_number(v):
+            cells.append(f"{safe_text(label)} {fmt_num(v)}")
+    return " · ".join(cells)
+
+
+def _radar_line(series: list) -> str:
+    """Each series by name with its values: "Now 6 / 4; Goal 9 / 8"."""
+    return "; ".join(
+        f"{safe_text(s.get('name')) or 'Series'} "
+        + " / ".join(fmt_num(v) for v in (s.get("data") or []) if is_number(v))
+        for s in series[:3]
+    )
+
+
+def _control_line(series: dict) -> str:
+    """A control chart's centre and count, and how many readings sit outside the 3-sigma limits."""
+    vals = [v for v in (series.get("data") or []) if is_number(v)]
+    if not vals:
+        return ""
+    mean = sum(vals) / len(vals)
+    sd = (sum((v - mean) ** 2 for v in vals) / len(vals)) ** 0.5
+    outside = sum(1 for v in vals if v > mean + 3 * sd or v < mean - 3 * sd)
+    tail = f", {outside} outside the limits" if outside else ", within the limits"
+    return f"mean {fmt_num(mean)}, n {len(vals)}" + tail
+
+
+def _points_line(series: dict) -> str:
+    """One bubble series, spread rather than trend: {"name": "Samples", "data": [10, 14, 12]}
+    → "Samples 3 points, y 10 → 14"."""
+    data = [v for v in series.get("data", []) if is_number(v)]
+    if not data:
+        return ""
+    name = safe_text(series.get("name"))
+    line = f"{name} " if name else ""
+    return f"{line}{len(data)} points, y {fmt_num(min(data))} → {fmt_num(max(data))}"
+
+
+def _bubble_line(series: list) -> str:
+    """The growing series as points and its y range (the second series is each bubble's size, not a reading)."""
+    return "; ".join(line for line in (_points_line(s) for s in series[:1]) if line)
+
+
+def _treemap_line(block: dict, series: dict) -> str:
+    """The parts with an area, largest first, with each one's share: "Rent 30 (100%)"."""
+    data = series.get("data") or []
+    pairs = [(safe_text(label), v) for label, v in zip(block.get("x") or [], data) if is_number(v) and v > 0]
+    total = sum(v for _, v in pairs) or 1
+    pairs.sort(key=lambda p: p[1], reverse=True)
+    return " · ".join(f"{label} {fmt_num(v)} ({round(v / total * 100)}%)" for label, v in pairs[:6])

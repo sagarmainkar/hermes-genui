@@ -46,6 +46,8 @@ const SCATTER_POINTS = 200;
  */
 export function readChart(raw: any, here: Trail): ChartBlock | null {
   const type = chartKind(raw?.kind);
+  if (type === "gauge") return wrap(readGauge(raw, here));
+  if (type === "box") return wrap(readBox(raw, here));
   const points = type === "scatter" || type === "waterfall";
   const spec = points ? readPoints(raw, type, here) : readSpec(raw);
   if (!spec) return points ? null : here.drop("chart needs x labels and at least one series");  // readPoints said why
@@ -95,7 +97,9 @@ function readSpec(d: any): ChartSpec | null {
     x = slices.x;
     series = [{ ...series[0], data: slices.data }];
   }
-  return specOf(d, type, x, series, unit);
+  const spec = specOf(d, type, x, series, unit);
+  if (type === "pie" || type === "donut") readWheel(spec, d, x);
+  return spec;
 }
 
 /**
@@ -123,6 +127,60 @@ function readPoints(d: any, type: "scatter" | "waterfall", here: Trail): ChartSp
   if (waterfallBars(points).every((bar) => bar === null)) return here.drop("waterfall needs a point with a value or a total");
   const x = points.map((p, i) => p.label ?? (p.total ? `Total ${i + 1}` : `Step ${i + 1}`));
   return specOf(d, type, x, series, d.unit);
+}
+
+/**
+ * A gauge: one series holding one number, and optional min, max, target and bands. There is no x axis, so a gauge
+ * without its number is dropped like a chart without a series.
+ *   {type: "chart", kind: "gauge", series: [{data: [68]}], min: 0, max: 100, target: 75}
+ *   → spec {type: "gauge", x: [], series: [{data: [68]}], min: 0, max: 100, target: 75}
+ */
+function readGauge(d: any, here: Trail): ChartSpec | null {
+  const rawSeries = Array.isArray(d.series) ? d.series : [];
+  const first = rawSeries[0] && typeof rawSeries[0] === "object" ? rawSeries[0] : null;
+  const data = first && Array.isArray(first.data) ? first.data : null;
+  const value = data ? data.find((v: unknown) => num(v) !== null) : null;
+  if (value === undefined || value === null) return here.drop("a gauge needs one number");
+  const spec = specOf(d, "gauge", [], [{ data: [num(value)] }], d.unit);
+  readScale(d, spec);
+  return spec;
+}
+
+/**
+ * A box plot: one series per group, each holding that group's raw numbers; x labels name the groups (a series' own
+ * name stands in when it has one). A group with no number is dropped; no groups at all drops the block.
+ *   {type: "chart", kind: "box", x: ["A"], series: [{name: "A", data: [1, 2, 3]}]} → one group, three values
+ */
+function readBox(d: any, here: Trail): ChartSpec | null {
+  const rawSeries = Array.isArray(d.series) ? d.series : [];
+  const labels: string[] = Array.isArray(d.x) ? d.x.map(String) : [];
+  const groups = rawSeries
+    .filter((s: any) => s && Array.isArray(s.data))
+    .map((s: any, k: number) => ({ name: typeof s.name === "string" ? s.name : undefined,
+      data: s.data.map((v: unknown) => num(v)).filter((v: number | null): v is number => v !== null),
+      label: labels[k] }))
+    .filter((g: any) => g.data.length);
+  if (!groups.length) return here.drop("a box plot needs a group with numbers");
+  const spec = specOf(d, "box", groups.map((g: any, k: number) => g.label ?? g.name ?? `Group ${k + 1}`),
+    groups.map((g: any) => ({ name: g.name, data: g.data })), d.unit);
+  readScale(d, spec);
+  return spec;
+}
+
+/** The scale a gauge or a bullet reads against: numeric ends, a numeric target, and the tone bands behind the track. */
+function wrap(spec: ChartSpec | null): ChartBlock | null {
+  return spec ? { type: "chart", spec } : null;
+}
+
+function readScale(d: any, spec: ChartSpec): void {
+  for (const key of ["min", "max", "target"] as const) {
+    const value = num(d[key]);
+    if (value !== null) spec[key] = value;
+  }
+  if (Array.isArray(d.bands)) {
+    const bands = d.bands.map((b: unknown) => num(b)).filter((b: number | null): b is number => b !== null);
+    if (bands.length) spec.bands = bands;
+  }
 }
 
 function specOf(d: any, type: ChartKind, x: (string | number)[], series: ChartSeries[], unit: unknown): ChartSpec {
@@ -165,6 +223,24 @@ function sortByFirstSeries(spec: ChartSpec): void {
 
 /** One series as written → its name, its numbers (anything else a gap), its own unit, and which scale it uses. A
  *  histogram counts, so a negative count is a gap. */
+
+/** A pie's or donut's centre words and its emphasised slice. Both are indices/words about x as the model wrote it,
+ *  so a highlight still points at the right slice after pieSlices dropped the empty ones. Anything else is ignored. */
+function readWheel(spec: ChartSpec, d: any, drawnX: string[]): void {
+  const centre = d.center;
+  if (centre && typeof centre === "object") {
+    const label = typeof centre.label === "string" ? centre.label.trim().slice(0, 24) : "";
+    const value = typeof centre.value === "string" ? centre.value.trim().slice(0, 12)
+      : typeof centre.value === "number" && isFinite(centre.value) ? String(centre.value).slice(0, 12) : "";
+    if (label || value) spec.center = { label, value };
+  }
+  if (!Number.isInteger(d.highlight) || !Array.isArray(d.x)) return;
+  const named = d.x[d.highlight as number];
+  if (typeof named === "undefined") return;
+  const at = drawnX.indexOf(String(named));
+  if (at < 0) return;
+  spec.highlight = at;
+}
 function readSeries(s: any, k: number, type: ChartKind, chartUnit: string | undefined): ChartSeries {
   const name = typeof s.name === "string" ? s.name : undefined;
   const data = s.data.map((v: any) => {

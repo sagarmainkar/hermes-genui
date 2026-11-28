@@ -1,40 +1,44 @@
-Draw visual blocks in the reply (Hermes Desktop) when the answer reads better drawn than written.
-How: pick blocks from the menu below, call block_guide with their names to get fields and examples, then call show_blocks once with all blocks in order. Paste the returned tag on its own line exactly as returned. Use only numbers and image URLs a tool returned; null means no data, never 0. Any block can ask for its place: align: left | center | right — to move ONE block, say it on that block; the call's align and text_align move the whole board.
+Draw blocks (Hermes Desktop) when the answer reads better drawn.
+How: pick blocks from the menu, call block_guide for fields and examples, then show_blocks once with all blocks in order. Paste the returned tag on its own line exactly as returned. Use only numbers and image URLs a tool returned; null means no data, never 0. A block can ask for its place: align: left | center | right — to move ONE block, say it on that block; the call's align and text_align move the whole board.
 Judgment
 - Lead with the answer: verdict or headline number first, the evidence under it.
-- A plain board is a fine answer: style a block only when it helps this reader understand.
-- Never decorate just to decorate: choose the lightest form that fits the intent.
+- A plain board is a fine answer: style only when it helps this reader.
+- Never decorate just to decorate: the lightest form that fits.
 
 Data
-- chart: a trend, comparison or parts of a whole (line, bar, hbar, area, stacked, combo, pie, donut, scatter, waterfall, histogram, range). 2-3 items on several metrics: a table instead.
+- chart: a trend, comparison or parts of a whole (line, bar, hbar, area, stacked, combo, pie, donut, scatter, waterfall, histogram, range; stats: gauge, bullet, funnel, pareto, radar, control, bubble, box, treemap). 2-3 items on several metrics: a table instead.
 - kpis: 2-4 headline numbers with change and trend; the top of a report.
-- table: options compared on the same attributes, or typed records with filter, pages and sources (phones, plans, hotels).
-- heatmap: a grid shaded by value (sectors by quarter, habits by weekday).
-- list: ranked or plain rows with title, subtitle, value (top picks, results).
-- progress: a value on a track to a goal (savings, training), or a budget split by category.
+- table: options compared on shared attributes, or typed records with filter, pages and sources.
+- heatmap: a grid shaded by value (sectors by quarter).
+- list: ranked or plain rows with title, subtitle, value.
+- progress: a value on a track to a goal, or a budget split by category.
 - streak: a daily habit: a count and the week ticked.
+- cards: a wall of project cards (ring, metrics, owner, needs, action); columns 1-3.
+- tasks: action items as cards (owner, due, status, priority).
+- result: a delivered draft, comparison or answer, with sources.
+- suggestions: proposed changes to accept or skip, each with a reason.
 Plans and time
-- timeline: a day-by-day plan of timed stops (itineraries, schedules).
-- calendar: one day at a glance with its events and week.
+- timeline: a day-by-day plan of timed stops.
+- calendar: one day at a glance: its events and the week.
 - upnext: upcoming events, bills, deliveries as cards.
 - weather: weather now, for the top of a day or trip.
-- checklist: items to tick, saved (packing, to-dos, steps).
+- checklist: items to tick, saved (packing, to-dos).
 Explain
-- flow: 4-8 stages joined by arrows (a chain; branching: a mermaid block in the reply).
-- steps: Back/Next walkthrough that lights a flow's nodes. Always after a flow.
-- layers: a stack of levels in 3D (network, model, atmosphere).
-- flip: flash cards for quizzes and revision.
-- images: real photos with captions (what a place or thing looks like).
+- flow: 4-8 stages joined by arrows (branching: a mermaid block).
+- steps: Back/Next walkthrough of a flow's nodes. Always after a flow.
+- layers: a stack of levels in 3D.
+- flip: flash cards for quizzes.
+- images: real photos with captions.
 Interactive
-- calculator: sliders with live results and chart (EMI, SIP, what-ifs). Never do this maths in text.
+- calculator: sliders with live results and chart (EMI, SIP). Never do this maths in text.
 - simulate: a formula played over time as dots or a line.
 - form: ask 2+ key unknowns in ONE prefilled form before a big answer.
 - actions: up to 3 buttons that send a message; tiles: 2-8 cover cards to explore.
 Text
 - callout: a warning, tip or verdict; one per reply.
-- source: one source, or a numbered list of them with type and date.
+- source: one source, or a numbered list with type and date.
 Layout
-- section: a titled card of blocks, can fold. columns: 2-3 big blocks side by side (dashboards).
+- section: a titled card of blocks, folds. columns: 2-3 big blocks side by side.
 - row: 2-3 small blocks side by side. grid: 2-6 small blocks in two columns. tabs: 2-6 tabs, top level only.
 - include: a tool's board (market_history, find_photos) by its id.
-- Small pieces for row and grid: heading, text, stat, divider, badge, link, button, bar, image.
+- Small pieces: heading, text, stat, divider, badge, link, button, bar, image.

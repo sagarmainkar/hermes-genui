@@ -1,0 +1,14 @@
+/* Tasks: work-order / action-item cards. */
+.hb-tasks { margin: 0; padding: 14px 16px 10px; }
+.hb-task-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.hb-task-hit { display: flex; gap: 10px; align-items: flex-start; width: 100%; text-align: left; background: none; border: 0; padding: 6px 8px; border-radius: 10px; font: inherit; color: inherit; }
+button.hb-task-hit { cursor: pointer; }
+button.hb-task-hit:hover { background: var(--hb-well); }
+.hb-task-box { flex: none; width: 18px; text-align: center; font-size: 13px; font-weight: 700; line-height: 20px; }
+.hb-task-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hb-task-title { font-size: 13.5px; font-weight: 600; line-height: 19px; }
+.hb-task-done { text-decoration: line-through; color: var(--hb-muted); }
+.hb-task-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; color: var(--hb-muted); }
+.hb-task-owner { color: var(--hb-ink-2); }
+.hb-task-prio { text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; font-size: 10px; }
+.hb-task-note { font-size: 11.5px; color: var(--hb-ink-2); }
