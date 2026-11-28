@@ -28,6 +28,7 @@ from .atoms import (
 )
 from .briefing import check_briefing, text_briefing
 from .calculator import check_calculator, text_calculator
+from .cards import check_cards, text_cards
 from .calendar import check_calendar, text_calendar
 from .callout import check_callout, text_callout
 from .upnext import check_upnext, text_upnext
@@ -47,10 +48,13 @@ from .list import check_list, text_list
 from .prepared import check_prepared, text_prepared
 from .progress import check_progress, text_progress
 from .simulate import check_simulate, text_simulate
+from .result import check_result, text_result
+from .suggestions import check_suggestions, text_suggestions
 from .source import check_source, text_source
 from .steps import check_steps, text_steps
 from .streak import check_streak, text_streak
 from .table import check_table, text_table
+from .tasks import check_tasks, text_tasks
 from .tiles import check_tiles, text_tiles
 from .timeline import check_timeline, text_timeline
 from .tracker import check_tracker, text_tracker
@@ -70,6 +74,10 @@ TYPES = {
     "flip": (check_flip, text_flip),
     "actions": (check_actions, text_actions),
     "tiles": (check_tiles, text_tiles),
+    "cards": (check_cards, text_cards),
+    "tasks": (check_tasks, text_tasks),
+    "result": (check_result, text_result),
+    "suggestions": (check_suggestions, text_suggestions),
     "checklist": (check_checklist, text_checklist),
     "calendar": (check_calendar, text_calendar),
     "upnext": (check_upnext, text_upnext),

@@ -12,15 +12,34 @@ import { LineMarks, Crosshair, Gridlines } from "./LineMarks";
 import { BarMarks, ComboMarks, HistogramMarks, RangeMarks, StackMarks } from "./ColumnMarks";
 import { AreaMarks } from "./AreaMarks";
 import { HBarChart } from "./HBarChart";
+import { Gauge } from "./Gauge";
+import { Bullet } from "./Bullet";
+import { Funnel } from "./Funnel";
+import { Pareto } from "./Pareto";
+import { Radar } from "./Radar";
+import { Control } from "./Control";
+import { Bubble } from "./Bubble";
+import { Box } from "./Box";
+import { Treemap } from "./Treemap";
 import { PieChart } from "./PieChart";
 import { ScatterChart } from "./ScatterChart";
 import { WaterfallChart } from "./WaterfallChart";
 
 const WIDE_FROM = 60;  // a line with this many points may be drawn wider than the usual cap
 
-/** A chart of any kind: pies and donuts, a scatter, a waterfall, and horizontal bars (asked for, or bars that read
- *  better as rows: see kindToDraw), have drawings of their own; the rest go up and down. */
+/** A chart of any kind: the portfolio pack's own drawings (a gauge, a bullet, a funnel, a pareto, a radar, a
+ *  control, a bubble, a box, a treemap) first, then pies and donuts, a scatter, a waterfall, and horizontal bars
+ *  (asked for, or bars that read better as rows: see kindToDraw); the rest go up and down. */
 export function Chart({ spec }: { spec: ChartSpec }) {
+  if (spec.type === "gauge") return <Gauge spec={spec} />;
+  if (spec.type === "bullet") return <Bullet spec={spec} />;
+  if (spec.type === "funnel") return <Funnel spec={spec} />;
+  if (spec.type === "pareto") return <Pareto spec={spec} />;
+  if (spec.type === "radar") return <Radar spec={spec} />;
+  if (spec.type === "control") return <Control spec={spec} />;
+  if (spec.type === "bubble") return <Bubble spec={spec} />;
+  if (spec.type === "box") return <Box spec={spec} />;
+  if (spec.type === "treemap") return <Treemap spec={spec} />;
   if (spec.type === "pie" || spec.type === "donut") return <PieChart spec={spec} />;
   if (spec.type === "scatter") return <ScatterChart spec={spec} />;
   if (spec.type === "waterfall") return <WaterfallChart spec={spec} />;

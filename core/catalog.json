@@ -37,8 +37,8 @@
   {
    "kind": "chart",
    "for": "A trend, a comparison, or parts of a whole.",
-   "use_when": "line: trends. bar: periods or items; bars turn sideways for long labels or rankings; time stays upright. hbar: rankings, 2-5 named items. donut, pie: parts of a whole, 3-7 parts. stacked: parts of a total over time. area: growth that builds up. combo: two measures. 2-3 items on several metrics: a table, not a chart each. scatter: two measures. waterfall: steps to a total. histogram: a distribution. range: a low-to-high band with a dot for now.",
-   "fields": "kind. title. x: labels. series: [{name, data: numbers, null=gap}], 1-3 (stacked/area 6; pie/donut 1; histogram/range 1). combo: first bars, rest lines; another unit gets a right axis. stepped holds the line at each value. sortDesc ranks bars by the first series. height 120-480. unit: \"%\", \"₹Cr\", \"$M\" or word. tone: \"change\" colours a line. caveat ≤120: a data limit. xLabel/yLabel ≤40: name axes. source: site. scatter: points [{x, y, label}], ≤2 series, ≤200 points. waterfall: points [{label, value, total: true}], null breaks. histogram: bins in x, counts in data, null draws no column. range: points [{label, low, high, now}], one series.",
+   "use_when": "line: trends. bar: periods or items; bars turn sideways for long labels or rankings; time stays upright. hbar: rankings, 2-5 named items. donut, pie: parts of a whole, 3-7 parts. stacked: parts of a total over time. area: growth that builds up. combo: two measures. 2-3 items on several metrics: a table, not a chart each. scatter: two measures. waterfall: steps to a total, signed. histogram: a distribution. range: a low-to-high band with a dot for now. gauge: one value against a target. bullet: rows against targets. funnel: stage drop-off. pareto: the vital few. radar: several measures for one or two items. control: a process over time with its mean and 3-sigma limits. bubble: a scatter with a size. box: spread per group. treemap: parts of a whole as nested rectangles.",
+   "fields": "kind (as above). title. x: labels. series: [{name, data: numbers, null for a gap}], 1-3 (stacked, area: up to 6; pie, donut: 1; histogram/range 1). combo: first series bars, the rest lines (another unit gets its own axis). stepped holds the line at each value. sortDesc ranks bars by the first series. height 120-480. unit: \"%\", \"₹Cr\", \"$M\" or a word. tone: \"change\" colours one line by gain or loss. caveat ≤120: a data limit. xLabel/yLabel ≤40: name axes. source: site name. scatter: points [{x, y, label}], ≤2 series, ≤200 points. waterfall: points [{label, value, total: true}], null breaks. histogram: bins in x, counts in data, null draws no column. range: points [{label, low, high, now}], one series. box: one series per group, each series.data holds that group's raw numbers (x labels optional). bubble: series[1].data is the bubble size. control: one series, in time order.",
    "example": {
     "type": "chart",
     "kind": "bar",
@@ -505,6 +505,111 @@
       "run": "Add a Gion walk"
      }
     ]
+   }
+  },
+  {
+   "kind": "cards",
+   "group": "block",
+   "for": "A compact wall of project cards, one card per project.",
+   "use_when": "A portfolio of 2-14 projects: title, lifecycle ring, up to three numbers, what needs the owner, one action.",
+   "fields": "items (1-14): title, id, status (active|parked|done|archived), ring {stages[4], at 0-3, label, tone}, metrics (0-3: label, value, tone), needs {text, tone}, freshness, action {label, run|url}. owner, milestone, trend, budget, arr (short facts). columns 1|2.",
+   "example": {
+    "type": "cards",
+    "items": [
+     {
+      "title": "Mission Control",
+      "status": "active",
+      "ring": {
+       "stages": [
+        "PLAN",
+        "TRACK",
+        "IMPLEMENT",
+        "METRIC"
+       ],
+       "at": 0,
+       "label": "smooth",
+       "tone": "good"
+      },
+      "metrics": [
+       {
+        "label": "velocity",
+        "value": "0.75/wk"
+       }
+      ],
+      "needs": {
+       "text": "2 plans await your yes",
+       "tone": "warn"
+      },
+      "action": {
+       "label": "Open project chat",
+       "run": "Open the project chat"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "kind": "tasks",
+   "group": "block",
+   "for": "Work-order / action-item cards.",
+   "use_when": "A queue of tasks or work orders: what to do, who owns it, when it is due, its status and priority.",
+   "fields": "items (1-40): title, owner, due, status (todo|doing|blocked|done), priority (low|med|high), note, run.",
+   "example": {
+    "type": "tasks",
+    "title": "This week",
+    "items": [
+     {
+      "title": "Fix the roof leak",
+      "owner": "Leo",
+      "due": "Fri",
+      "status": "doing",
+      "priority": "high"
+     },
+     {
+      "title": "Order shingles",
+      "owner": "Sam",
+      "due": "Thu",
+      "status": "todo",
+      "priority": "med"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "suggestions",
+   "group": "block",
+   "for": "Proposed changes to accept or skip, each with a reason.",
+   "use_when": "Hermes proposes, the reader disposes: a short list of suggested changes, each with a reason, accepting or skipping in one tap.",
+   "fields": "items (1-20): text, reason, accept (message sent on tap), skip (message sent on tap).",
+   "example": {
+    "type": "suggestions",
+    "title": "Suggested",
+    "items": [
+     {
+      "text": "Move the deadline to Friday",
+      "reason": "two plans slipped",
+      "accept": "Accept: move the deadline to Friday",
+      "skip": "Skip that"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "result",
+   "group": "block",
+   "for": "A delivered result card: a draft, a comparison, or an answer.",
+   "use_when": "When an agent has produced a finished output to show beside the work: the draft itself, the comparison itself, the answer with its sources.",
+   "fields": "body (required), title, sources (≤6: {label, url}), model.",
+   "example": {
+    "type": "result",
+    "title": "Draft reply",
+    "body": "Here is the reply I would send…",
+    "sources": [
+     {
+      "label": "IRS Notice 2026-1"
+     }
+    ],
+    "model": "Hermes"
    }
   },
   {

@@ -8,6 +8,10 @@ import atoms from "../blocks/atoms/atoms.css";
 import source from "../blocks/source/source.css";
 import callout from "../blocks/callout/callout.css";
 import kpis from "../blocks/kpis/kpis.css";
+import cards from "../blocks/cards/cards.css";
+import tasks from "../blocks/tasks/tasks.css";
+import result from "../blocks/result/result.css";
+import suggestions from "../blocks/suggestions/suggestions.css";
 import timeline from "../blocks/timeline/timeline.css";
 import layout from "../blocks/layout/layout.css";
 import chart from "../blocks/chart/chart.css";
@@ -36,9 +40,9 @@ import weather from "../blocks/weather/weather.css";
 import dashboard from "../live/dashboard.css";
 
 export const STYLE_PARTS = [
-  tokens, shared, blockTag, atoms, source, callout, kpis, timeline, layout, chart, images, table, list, heatmap, flip,
-  flow, steps, layers, progress, streak, actions, tiles, checklist, calculator, simulate, form, briefing, tracker,
-  prepared, calendar, upnext, weather, dashboard,
+  tokens, shared, blockTag, atoms, source, callout, kpis, cards, tasks, result, suggestions, timeline, layout, chart,
+  images, table, list, heatmap, flip, flow, steps, layers, progress, streak, actions, tiles, checklist, calculator,
+  simulate, form, briefing, tracker, prepared, calendar, upnext, weather, dashboard,
 ];
 
 export default STYLE_PARTS.join("\n");
