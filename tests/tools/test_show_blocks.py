@@ -388,6 +388,25 @@ def test_a_follow_up_that_sends_a_command_is_refused(store_dir):
     assert list(store_dir.glob("*.json")) == []
 
 
+@pytest.mark.parametrize("hidden", ["\u200b", "\u200d", "\u2060", "\ufeff", "\u202e", "\u200b \u200c"])
+def test_a_command_behind_an_invisible_mark_is_still_refused(store_dir, hidden):
+    # Cleaning drops these marks before the message is stored or sent, so "\u200b/reset" would become "/reset".
+    for blocks, follow_ups in (([TIMELINE], [{"label": "Reset", "run": hidden + "/reset"}]),
+                               ([{"type": "tiles", "items": [{"title": "Go", "ask": hidden + "!ls"},
+                                                         {"title": "Stay", "ask": "Stay put"}]}], None)):
+        call = {"blocks": blocks} | ({"follow_ups": follow_ups} if follow_ups else {})
+        result = tools.show_blocks(call)
+        assert result.startswith("Not drawn."), (repr(hidden), result)
+        assert "can't start with / @ or !" in result
+    assert list(store_dir.glob("*.json")) == []
+
+
+def test_an_ordinary_message_with_a_joiner_still_draws(store_dir):
+    run = "Plan a trip for the \U0001F468\u200d\U0001F469\u200d\U0001F467 family"   # an emoji family keeps its joiners
+    result = tools.show_blocks({"blocks": [TIMELINE], "follow_ups": [{"label": "Family", "run": run}]})
+    assert not result.startswith("Not drawn."), result
+
+
 def test_a_follow_up_that_pulls_a_file_is_refused(store_dir):
     result = tools.show_blocks({"blocks": [TIMELINE],
                                 "follow_ups": [{"label": "Notes", "run": "Summarise @file:notes.md"}]})

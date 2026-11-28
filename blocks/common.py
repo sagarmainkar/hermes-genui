@@ -8,6 +8,7 @@ characters are stripped, every string is capped, Markdown's link, image and HTML
 
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 # --- checking ---------------------------------------------------------------------------------------------------
@@ -68,10 +69,13 @@ def acts_before_the_model(message: object) -> bool:
 
     "/reset" → True;  "  @file:notes.txt" → True;  "!ls" → True;  "Summarise @url:https://x.org" → True
     "Email name@example.com" → False;  "Meet @ 5pm" → False;  "Plan day 2" → False;  None → False
+    "\u200b/reset" → True;  "\u200d!ls" → True;  "\ufeff@file:x" → True   (hidden marks don't hide a command)
     """
     if not isinstance(message, str):
         return False
-    text = message.strip()
+    # Judge the message as it will be read: invisible format and control characters ("\u200b/reset", a joiner, a
+    # word joiner) can't hide a command, since cleaning drops them before the message is sent or stored.
+    text = "".join(c for c in message if unicodedata.category(c) not in ("Cf", "Cc") or c in "\n\t").strip()
     return text[:1] in ("/", "@", "!") or AT_REFERENCE.search(text) is not None
 
 
