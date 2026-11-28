@@ -134,7 +134,7 @@ var AT_REFERENCE = /@\w[\w-]*:|@(?:diff|staged)\b/;
 var NO_SEND = "a button's message can't start with / @ or ! or carry @-references";
 function actsBeforeTheModel(message) {
   if (typeof message !== "string") return false;
-  const text = message.trim();
+  const text = message.replace(/[\p{Cf}\p{Cc}]/gu, (c) => c === "\n" || c === "	" ? c : "").trim();
   return /^[/@!]/.test(text) || AT_REFERENCE.test(text);
 }
 

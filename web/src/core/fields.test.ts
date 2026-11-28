@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { align, cutAtWord, firstWords } from "./fields";
+import { actsBeforeTheModel, align, cutAtWord, firstWords } from "./fields";
 
 describe("cutAtWord", () => {
   it("leaves text that fits alone", () => {
@@ -42,5 +42,25 @@ describe("align", () => {
     expect(align(undefined)).toBeUndefined();
     expect(align(null)).toBeUndefined();
     expect(align(["center"])).toBeUndefined();
+  });
+});
+
+describe("actsBeforeTheModel", () => {
+  it("refuses a command, a shell line or an @-reference", () => {
+    for (const m of ["/reset", "  @file:notes.txt", "!ls", "Summarise @url:https://x.org"]) {
+      expect(actsBeforeTheModel(m)).toBe(true);
+    }
+  });
+  it("is not fooled by an invisible mark in front (cleaning would drop it before sending)", () => {
+    for (const hidden of ["\u200b", "\u200d", "\u2060", "\ufeff", "\u202e", "\u200b \u200c"]) {
+      expect(actsBeforeTheModel(`${hidden}/reset`)).toBe(true);
+      expect(actsBeforeTheModel(`${hidden}!ls`)).toBe(true);
+      expect(actsBeforeTheModel(`${hidden}@file:x`)).toBe(true);
+    }
+  });
+  it("leaves ordinary messages alone, joiners and all", () => {
+    for (const m of ["Plan day 2", "Email name@example.com", "Meet @ 5pm", "Trip for the \u{1F468}\u200d\u{1F469}\u200d\u{1F467} family", undefined]) {
+      expect(actsBeforeTheModel(m)).toBe(false);
+    }
   });
 });

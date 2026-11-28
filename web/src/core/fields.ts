@@ -160,9 +160,12 @@ export const NO_SEND = "a button's message can't start with / @ or ! or carry @-
  * Whether Hermes would act on a message itself (a command, a shell line or an @-reference) if a button sent it.
  *   "/reset" → true;  "  @file:notes.txt" → true;  "!ls" → true;  "Summarise @url:https://x.org" → true
  *   "Email name@example.com" → false;  "Meet @ 5pm" → false;  "Plan day 2" → false;  undefined → false
+ *   "\u200b/reset" → true;  "\u200d!ls" → true;  "\ufeff@file:x" → true   (hidden marks don't hide a command)
  */
 export function actsBeforeTheModel(message: string | undefined): boolean {
   if (typeof message !== "string") return false;
-  const text = message.trim();
+  // Judge the message as it will be read: invisible format and control characters ("\u200b/reset", a joiner, a
+  // word joiner) can't hide a command (the Python checker does the same: blocks/common.py).
+  const text = message.replace(/[\p{Cf}\p{Cc}]/gu, (c) => (c === "\n" || c === "\t" ? c : "")).trim();
   return /^[/@!]/.test(text) || AT_REFERENCE.test(text);
 }
